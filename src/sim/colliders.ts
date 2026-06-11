@@ -1,5 +1,6 @@
 import { generateDecorations } from './world';
 import { DUNGEON_X_THRESHOLD, INSTANCE_SLOT_COUNT, PROPS, dungeonAt, instanceOrigin } from './data';
+import { CRYPT_LAYOUT, SANCTUM_LAYOUT, layoutColliders } from './dungeon_layout';
 
 // Static world collision. Prop placement comes from the per-zone content
 // modules (merged into PROPS by sim/data.ts): the renderer builds its meshes
@@ -78,43 +79,12 @@ function staticWorldColliders(seed: number): Collider[] {
   return out;
 }
 
-// The Hollow Crypt interior, in instance-local coordinates.
-// Mirrors Renderer.buildCrypt geometry.
-const CRYPT_COLLIDERS: Collider[] = (() => {
-  const out: Collider[] = [];
-  out.push({ type: 'obb', x: -23, z: 47, hw: 1, hd: 66, rot: 0 }); // side walls
-  out.push({ type: 'obb', x: 23, z: 47, hw: 1, hd: 66, rot: 0 });
-  out.push({ type: 'obb', x: 0, z: 112, hw: 24, hd: 1, rot: 0 }); // back wall
-  out.push({ type: 'obb', x: 0, z: -19, hw: 24, hd: 1, rot: 0 }); // front wall (entrance porch: chase cam fits inside)
-  for (let z = 10; z <= 100; z += 15) {
-    for (const sx of [-14, 14]) out.push({ type: 'circle', x: sx, z, r: 1.0 });
-  }
-  for (let z = 16; z <= 92; z += 19) {
-    for (const sx of [-19, 19]) out.push({ type: 'obb', x: sx, z, hw: 1.1, hd: 2.1, rot: 0 });
-  }
-  return out;
-})();
-
-// Gravewyrm Sanctum interior — a stretched three-chamber crypt (z 0..158)
-// with narrowed waists between chambers. Mirrors Renderer.buildSanctum
-// geometry; the boss dais is walkable and deliberately has no collider.
-const SANCTUM_COLLIDERS: Collider[] = (() => {
-  const out: Collider[] = [];
-  out.push({ type: 'obb', x: -23, z: 69.5, hw: 1, hd: 89, rot: 0 }); // side walls
-  out.push({ type: 'obb', x: 23, z: 69.5, hw: 1, hd: 89, rot: 0 });
-  out.push({ type: 'obb', x: 0, z: 158, hw: 24, hd: 1, rot: 0 }); // back wall
-  out.push({ type: 'obb', x: 0, z: -19, hw: 24, hd: 1, rot: 0 }); // front wall (entrance porch: chase cam fits inside)
-  // chamber waists: wall stubs leaving a ~10yd centre passage at x in [-5,5]
-  for (const sx of [-14, 14]) {
-    out.push({ type: 'obb', x: sx, z: 67, hw: 9, hd: 5, rot: 0 }); // Boneworks -> Korgath's Hall
-    out.push({ type: 'obb', x: sx, z: 115, hw: 9, hd: 3, rot: 0 }); // Ritual Vault -> Wyrm's Hollow
-  }
-  // pillars (waist bands skipped)
-  for (const z of [10, 25, 40, 55, 85, 100, 125, 140]) {
-    for (const sx of [-14, 14]) out.push({ type: 'circle', x: sx, z, r: 1.0 });
-  }
-  return out;
-})();
+// Interior collision sets, in instance-local coordinates. Derived from the
+// SAME plain-data layouts the renderer builds the KayKit modules from
+// (sim/dungeon_layout.ts), so render geometry and collision can no longer
+// drift apart. The boss dais is walkable and deliberately has no collider.
+const CRYPT_COLLIDERS: Collider[] = layoutColliders(CRYPT_LAYOUT);
+const SANCTUM_COLLIDERS: Collider[] = layoutColliders(SANCTUM_LAYOUT);
 
 // Interior collider sets keyed by DungeonDef.interior.
 const INTERIOR_COLLIDERS: Record<string, Collider[]> = {
