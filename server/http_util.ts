@@ -1,8 +1,8 @@
 import * as http from 'node:http';
 
-export function json(res: http.ServerResponse, status: number, body: unknown): void {
+export function json(res: http.ServerResponse, status: number, body: unknown, headers: Record<string, string> = {}): void {
   const data = JSON.stringify(body);
-  res.writeHead(status, { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) });
+  res.writeHead(status, { ...headers, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) });
   res.end(data);
 }
 

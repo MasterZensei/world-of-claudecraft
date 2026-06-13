@@ -7,6 +7,7 @@ import {
   emptyMoveInput,
 } from '../sim/types';
 import type { DuelInfo, IWorld, PartyInfo, TradeInfo } from '../world_api';
+import { apiUrl, onlineServerOrigin, webSocketUrl } from '../runtime';
 
 // ---------------------------------------------------------------------------
 // REST
@@ -21,8 +22,7 @@ export interface CharacterSummary {
 }
 
 export function buildWebSocketUrl(protocol: string, host: string): string {
-  const proto = protocol === 'https:' ? 'wss' : 'ws';
-  return `${proto}://${host}/ws`;
+  return webSocketUrl(protocol, host);
 }
 
 export function buildWebSocketAuthMessage(token: string, characterId: number): { t: 'auth'; token: string; character: number } {
@@ -33,8 +33,10 @@ export class Api {
   token: string | null = null;
   username: string | null = null;
 
+  constructor(private readonly serverOrigin: string | null = onlineServerOrigin()) {}
+
   private async post(path: string, body: unknown): Promise<any> {
-    const res = await fetch(path, {
+    const res = await fetch(apiUrl(path, this.serverOrigin), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -48,7 +50,7 @@ export class Api {
   }
 
   private async get(path: string): Promise<any> {
-    const res = await fetch(path, {
+    const res = await fetch(apiUrl(path, this.serverOrigin), {
       headers: this.token ? { Authorization: `Bearer ${this.token}` } : {},
     });
     const data = await res.json().catch(() => ({}));
@@ -144,9 +146,9 @@ export class ClientWorld implements IWorld {
   private mouselookFacing: number | null = null;
   private sendTimer: number | undefined;
 
-  constructor(token: string, characterId: number, cls: PlayerClass) {
+  constructor(token: string, characterId: number, cls: PlayerClass, serverOrigin: string | null = onlineServerOrigin()) {
     this.cfg = { seed: 20061, playerClass: cls };
-    this.ws = new WebSocket(buildWebSocketUrl(location.protocol, location.host));
+    this.ws = new WebSocket(webSocketUrl(location.protocol, location.host, serverOrigin));
     this.ws.onopen = () => {
       this.ws.send(JSON.stringify(buildWebSocketAuthMessage(token, characterId)));
     };

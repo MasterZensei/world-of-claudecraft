@@ -2,13 +2,14 @@ import { spawn } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const viteUrl = process.env.VITE_DEV_SERVER_URL ?? 'http://127.0.0.1:5173';
+const onlineOrigin = process.env.VITE_ONLINE_ORIGIN ?? 'https://dev.worldofclaudecraft.com';
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const electronCommand = process.platform === 'win32' ? 'electron.cmd' : 'electron';
 
 let shuttingDown = false;
 
 const vite = spawn(npmCommand, ['run', 'dev', '--', '--host', '127.0.0.1', '--strictPort'], {
-  env: { ...process.env, BROWSER: 'none' },
+  env: { ...process.env, BROWSER: 'none', VITE_ONLINE_ORIGIN: onlineOrigin },
   stdio: 'inherit',
 });
 

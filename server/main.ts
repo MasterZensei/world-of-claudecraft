@@ -13,6 +13,7 @@ import { rateLimited } from './ratelimit';
 import { handleAdminApi } from './admin';
 import { GameServer } from './game';
 import { cacheControlFor, etagFor, isNotModified } from './static_cache';
+import { apiCorsHeaders } from './cors';
 
 const PORT = Number(process.env.PORT ?? 8787);
 const STATIC_DIR = path.join(__dirname, '..', 'dist');
@@ -104,38 +105,50 @@ function serveStatic(req: http.IncomingMessage, res: http.ServerResponse): void 
 
 async function handleApi(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
   const url = (req.url ?? '').split('?')[0];
+  const cors = apiCorsHeaders(typeof req.headers.origin === 'string' ? req.headers.origin : undefined);
+  const apiJson = (status: number, body: unknown) => json(res, status, body, cors);
+  if (req.method === 'OPTIONS') {
+    if (Object.keys(cors).length === 0) {
+      res.writeHead(403);
+      res.end();
+      return;
+    }
+    res.writeHead(204, cors);
+    res.end();
+    return;
+  }
   try {
     if (req.method === 'POST' && (url === '/api/register' || url === '/api/login') && rateLimited(req)) {
-      return json(res, 429, { error: 'too many attempts — wait a minute and try again' });
+      return apiJson(429, { error: 'too many attempts — wait a minute and try again' });
     }
     if (req.method === 'POST' && url === '/api/register') {
       const body = await readBody(req);
-      if (!validUsername(body.username)) return json(res, 400, { error: 'username must be 3-24 chars (letters, digits, _)' });
-      if (!validPassword(body.password)) return json(res, 400, { error: 'password must be at least 6 chars' });
+      if (!validUsername(body.username)) return apiJson(400, { error: 'username must be 3-24 chars (letters, digits, _)' });
+      if (!validPassword(body.password)) return apiJson(400, { error: 'password must be at least 6 chars' });
       const existing = await findAccount(body.username);
-      if (existing) return json(res, 409, { error: 'username already taken' });
+      if (existing) return apiJson(409, { error: 'username already taken' });
       const account = await createAccount(body.username, await hashPassword(body.password));
       const token = newToken();
       await saveToken(token, account.id);
-      return json(res, 200, { token, username: account.username });
+      return apiJson(200, { token, username: account.username });
     }
     if (req.method === 'POST' && url === '/api/login') {
       const body = await readBody(req);
       const account = typeof body.username === 'string' ? await findAccount(body.username) : null;
       if (!account || !(await verifyPassword(String(body.password ?? ''), account.password_hash))) {
-        return json(res, 401, { error: 'invalid username or password' });
+        return apiJson(401, { error: 'invalid username or password' });
       }
       await touchLogin(account.id);
       const token = newToken();
       await saveToken(token, account.id);
-      return json(res, 200, { token, username: account.username });
+      return apiJson(200, { token, username: account.username });
     }
     if (url === '/api/characters') {
       const accountId = await bearerAccount(req);
-      if (accountId === null) return json(res, 401, { error: 'not authenticated' });
+      if (accountId === null) return apiJson(401, { error: 'not authenticated' });
       if (req.method === 'GET') {
         const chars = await listCharacters(accountId);
-        return json(res, 200, {
+        return apiJson(200, {
           characters: chars.map((c) => ({
             id: c.id, name: c.name, class: c.class, level: c.level,
             online: [...game.clients.values()].some((s) => s.characterId === c.id),
@@ -144,17 +157,17 @@ async function handleApi(req: http.IncomingMessage, res: http.ServerResponse): P
       }
       if (req.method === 'POST') {
         const body = await readBody(req);
-        if (!validCharName(body.name)) return json(res, 400, { error: 'invalid character name (2-16 letters)' });
+        if (!validCharName(body.name)) return apiJson(400, { error: 'invalid character name (2-16 letters)' });
         const validClasses = ['warrior', 'paladin', 'hunter', 'rogue', 'priest', 'shaman', 'mage', 'warlock', 'druid'];
-        if (!validClasses.includes(body.class)) return json(res, 400, { error: 'invalid class' });
+        if (!validClasses.includes(body.class)) return apiJson(400, { error: 'invalid class' });
         const chars = await listCharacters(accountId);
-        if (chars.length >= 10) return json(res, 400, { error: 'character limit reached' });
+        if (chars.length >= 10) return apiJson(400, { error: 'character limit reached' });
         try {
           const c = await createCharacter(accountId, body.name, body.class);
-          return json(res, 200, { id: c.id, name: c.name, class: c.class, level: c.level });
+          return apiJson(200, { id: c.id, name: c.name, class: c.class, level: c.level });
         } catch (err: any) {
           if (String(err?.message).includes('unique') || err?.code === '23505') {
-            return json(res, 409, { error: 'that name is taken' });
+            return apiJson(409, { error: 'that name is taken' });
           }
           throw err;
         }
@@ -163,21 +176,21 @@ async function handleApi(req: http.IncomingMessage, res: http.ServerResponse): P
     const delMatch = /^\/api\/characters\/(\d+)$/.exec(url);
     if (req.method === 'DELETE' && delMatch) {
       const accountId = await bearerAccount(req);
-      if (accountId === null) return json(res, 401, { error: 'not authenticated' });
+      if (accountId === null) return apiJson(401, { error: 'not authenticated' });
       const ok = await deleteCharacter(accountId, Number(delMatch[1]));
-      return json(res, ok ? 200 : 404, ok ? { ok: true } : { error: 'not found' });
+      return apiJson(ok ? 200 : 404, ok ? { ok: true } : { error: 'not found' });
     }
     if (req.method === 'GET' && url === '/api/status') {
-      return json(res, 200, {
+      return apiJson(200, {
         ok: true,
         players_online: game.clients.size,
         names: [...game.clients.values()].map((s) => s.name),
       });
     }
-    json(res, 404, { error: 'unknown endpoint' });
+    apiJson(404, { error: 'unknown endpoint' });
   } catch (err: any) {
     console.error('api error:', err);
-    json(res, 500, { error: 'internal error' });
+    apiJson(500, { error: 'internal error' });
   }
 }
 

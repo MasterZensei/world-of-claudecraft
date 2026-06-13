@@ -135,14 +135,16 @@ npm run dev        # open http://localhost:5173 -> Play Offline
 
 ```bash
 npm install
-npm run electron:dev     # Vite + Electron during development
-npm run electron:pack    # build an unpacked desktop app in release/
-npm run electron:build   # build platform installers/packages in release/
+npm run electron:dev     # Vite + Electron, online mode targets dev.worldofclaudecraft.com
+npm run electron:pack    # unpacked desktop app in release/, online mode targets dev.worldofclaudecraft.com
+npm run electron:build   # installers/packages in release/, online mode targets worldofclaudecraft.com
 ```
 
-The Electron app packages the browser client and is ready for offline play.
-Online play still needs the authoritative game server and database running
-separately, just like the web build.
+The Electron app packages the browser client for offline play and can also
+connect to the hosted online realm. It uses the same username/password login,
+bearer-token REST auth, and authenticated WebSocket handshake as the browser
+client; no secrets are embedded in the app. Override `VITE_ONLINE_ORIGIN` when
+you need to point a local Electron build at another realm.
 
 Name your character, pick any of the nine classes, and you're in **Eastbrook
 Vale** (levels 1-7): a market town ringed by six hubs — wolf runs north, boar
