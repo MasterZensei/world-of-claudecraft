@@ -6,7 +6,7 @@ import { Settings, GameSettings } from './game/settings';
 import { Hud } from './ui/hud';
 import { audio } from './game/audio';
 import { music } from './game/music';
-import { handlePickedEntity } from './game/interactions';
+import { handlePickedEntity, hoverCursorKind } from './game/interactions';
 import { Api, ClientWorld, CharacterSummary } from './net/online';
 import type { IWorld } from './world_api';
 import { assetsReady } from './render/assets/preload';
@@ -133,6 +133,7 @@ async function startGame(world: IWorld, offlineSim: Sim | null, online: ClientWo
     // slot 0 (key 1) is Attack for every class — auto-attack without needing
     // right-click; keys and clicks share the Hud's remappable slot layout
     onAbility: (slot) => hud.castSlot(slot),
+    canUseGameKeys: () => !hud.isModalOpen() && chatInput.style.display !== 'block',
     onUiKey: (key) => {
       switch (key) {
         case 'interact': interactKey(); break;
@@ -156,8 +157,13 @@ async function startGame(world: IWorld, offlineSim: Sim | null, online: ClientWo
   input.camYaw = world.player.facing;
 
   // apply a setting to its live subsystem (also used to apply all on startup)
-  function applySetting(key: keyof GameSettings, value: number): void {
-    const v = settings.set(key, value);
+  function applySetting(key: keyof GameSettings, value: number | boolean): void {
+    if (key === 'mouseCamera') {
+      const v = settings.set('mouseCamera', !!value);
+      input.setMouseCameraEnabled(v);
+      return;
+    }
+    const v = settings.set(key, value as number);
     switch (key) {
       case 'cameraSpeed': input.setCameraSpeed(v); break;
       case 'sfxVolume': audio.setVolume(v); break;
@@ -220,10 +226,60 @@ async function startGame(world: IWorld, offlineSim: Sim | null, online: ClientWo
   let last = performance.now();
   let acc = 0;
 
-  /** Face the camera direction while moving so WASD is camera-relative. */
+  // Classic camera: keyboard turning advances facing in 20Hz sim steps, so the
+  // camera tracks the player's render-interpolated facing per frame. While
+  // running, the orbit offset eases back behind the character.
+  let lastInterpFacing: number | null = null;
+  const CAM_SETTLE_RATE = 3; // 1/s exponential ease
+
+  function wrapAngle(d: number): number {
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d < -Math.PI) d += 2 * Math.PI;
+    return d;
+  }
+
+  function updateCamera(frameDt: number, interpFacing: number): void {
+    if (input.isMouseCameraMode()) return;
+    if (!input.rightDown) {
+      if (lastInterpFacing !== null) input.camYaw += wrapAngle(interpFacing - lastInterpFacing);
+      const mi = input.readMoveInput();
+      if ((mi.forward || mi.strafeLeft || mi.strafeRight) && !input.leftDown) {
+        input.camYaw += wrapAngle(interpFacing - input.camYaw) * (1 - Math.exp(-frameDt * CAM_SETTLE_RATE));
+      }
+    }
+    lastInterpFacing = interpFacing;
+  }
+
+  /** OSRS mode: face the camera direction while moving so WASD is camera-relative. */
   function applyCameraFacing(): boolean {
+    if (!input.isMouseCameraMode()) return false;
     const mi = input.readMoveInput();
     return !!(mi.forward || mi.back || mi.strafeLeft || mi.strafeRight) && !world.player.dead;
+  }
+
+  function renderFacingOverride(): number | null {
+    if (input.isMouseCameraMode()) {
+      return applyCameraFacing() ? input.camYaw : null;
+    }
+    return input.rightDown && !world.player.dead ? input.camYaw : null;
+  }
+
+  function partyMemberIds(): Set<number> {
+    const ids = new Set<number>();
+    for (const m of world.partyInfo?.members ?? []) {
+      if (m.pid !== world.playerId) ids.add(m.pid);
+    }
+    return ids;
+  }
+
+  function updateHoverCursor(): void {
+    if (!input.hoverActive || input.isDragging() || hud.isModalOpen()) {
+      input.setHoverCursor('default');
+      return;
+    }
+    const id = renderer.pick(input.hoverX, input.hoverY);
+    const entity = id !== null ? world.entities.get(id) : undefined;
+    input.setHoverCursor(hoverCursorKind(entity, world.playerId, partyMemberIds()));
   }
 
   function frame(now: number): void {
@@ -236,19 +292,23 @@ async function startGame(world: IWorld, offlineSim: Sim | null, online: ClientWo
     // character behind it (other windows stay non-modal, as before)
     input.suspendMovement = hud.isModalOpen();
 
-    const cameraMove = applyCameraFacing();
-    const renderFacing = cameraMove ? input.camYaw : null;
+    updateHoverCursor();
+
+    const renderFacing = renderFacingOverride();
+    const faceFromCamera = renderFacing !== null;
 
     if (offlineSim) {
       acc += frameDt;
       while (acc >= DT) {
         const mi = input.readMoveInput();
         Object.assign(offlineSim.moveInput, mi);
-        if (cameraMove) offlineSim.player.facing = input.camYaw;
+        if (faceFromCamera) offlineSim.player.facing = input.camYaw;
         const events = offlineSim.tick();
         hud.handleEvents(events);
         acc -= DT;
       }
+      const pp = offlineSim.player;
+      updateCamera(frameDt, pp.prevFacing + wrapAngle(pp.facing - pp.prevFacing) * (acc / DT));
       renderer.camYaw = input.camYaw;
       renderer.camPitch = input.camPitch;
       renderer.camDist = input.camDist;
@@ -260,13 +320,15 @@ async function startGame(world: IWorld, offlineSim: Sim | null, online: ClientWo
     // online: inputs stream on a timer inside ClientWorld; here we mirror state
     const net = online!;
     Object.assign(net.moveInput, input.readMoveInput());
-    net.setMouselookFacing(cameraMove ? input.camYaw : null);
+    net.setMouselookFacing(renderFacing);
     net.pendingFacingDelta = 0;
     hud.handleEvents(net.drainEvents());
     if (net.consumeInventoryChanged()) hud.onInventoryChanged();
     const alpha = net.lastSnapAt > 0
       ? Math.min(1.25, (performance.now() - net.lastSnapAt) / Math.max(20, net.snapInterval))
       : 1;
+    const pe = world.player;
+    updateCamera(frameDt, pe.prevFacing + wrapAngle(pe.facing - pe.prevFacing) * Math.min(1, alpha));
     renderer.camYaw = input.camYaw;
     renderer.camPitch = input.camPitch;
     renderer.camDist = input.camDist;

@@ -14,7 +14,7 @@ import { audio } from '../game/audio';
 import { music } from '../game/music';
 import { iconDataUrl, QUALITY_COLOR } from './icons';
 import { Keybinds, BIND_ACTIONS, BIND_CATEGORIES, isReservedCode, keyLabel } from '../game/keybinds';
-import { Settings, GameSettings, SETTING_RANGES } from '../game/settings';
+import { Settings, GameSettings, BoolSettingKey, SETTING_RANGES } from '../game/settings';
 import { chatPlayerContextActions } from './player_context_menu';
 
 // hooks main wires after Input exists (the options menu drives input, audio,
@@ -23,7 +23,7 @@ export interface OptionsHooks {
   logout(): void;
   captureKey(cb: (code: string | null) => void): void;
   settings: Settings;
-  onSettingChange(key: keyof GameSettings, value: number): void;
+  onSettingChange(key: keyof GameSettings, value: number | boolean): void;
 }
 
 export interface ReportHooks {
@@ -2355,12 +2355,69 @@ export class Hud {
     return known ? known.def.name : fallback;
   }
 
+  private settingBoolToggle(parent: HTMLElement, label: string, key: BoolSettingKey): void {
+    const hooks = this.optionsHooks;
+    if (!hooks) return;
+    const row = document.createElement('div');
+    row.className = 'set-row';
+    const name = document.createElement('span');
+    name.className = 'set-name';
+    name.textContent = label;
+    const toggle = document.createElement('button');
+    toggle.className = 'btn set-toggle';
+    const sync = () => {
+      const on = hooks.settings.get(key);
+      toggle.textContent = on ? 'On' : 'Off';
+      toggle.classList.toggle('off', !on);
+    };
+    sync();
+    toggle.addEventListener('click', () => {
+      audio.click();
+      const next = !hooks.settings.get(key);
+      hooks.onSettingChange(key, hooks.settings.set(key, next));
+      sync();
+    });
+    row.append(name, toggle);
+    parent.appendChild(row);
+  }
+
+  /** Bool toggle aligned with key-bind rows (label + 78px slot). */
+  private settingBoolToggleKeybind(parent: HTMLElement, label: string, key: BoolSettingKey): void {
+    const hooks = this.optionsHooks;
+    if (!hooks) return;
+    const row = document.createElement('div');
+    row.className = 'kb-row kb-toggle-row';
+    const name = document.createElement('span');
+    name.className = 'kb-name';
+    name.textContent = label;
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'btn kb-key kb-toggle';
+    const sync = () => {
+      const on = hooks.settings.get(key);
+      toggle.textContent = on ? 'On' : 'Off';
+      toggle.classList.toggle('off', !on);
+      toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+    };
+    sync();
+    toggle.addEventListener('click', () => {
+      audio.click();
+      const next = !hooks.settings.get(key);
+      hooks.onSettingChange(key, hooks.settings.set(key, next));
+      sync();
+    });
+    row.append(name, toggle);
+    parent.appendChild(row);
+  }
+
   private renderKeybinds(): void {
     const el = $('#options-menu');
     el.innerHTML = `<div class="panel-title"><span>Key Bindings</span><span class="x-btn" data-close>✕</span></div>`;
+    this.settingBoolToggleKeybind(el, 'Mouse Camera', 'mouseCamera');
     const note = document.createElement('div');
     note.className = 'kb-note';
-    note.textContent = this.keybindNote || 'Click a key cell, then press a key to bind it. Esc cancels. Each action has a primary and an alternate key.';
+    note.textContent = this.keybindNote
+      || 'Mouse Camera off: A/D turns, drag to orbit (classic). On: camera-relative WASD, A/D strafes. Click a key cell to rebind; Esc cancels.';
     el.appendChild(note);
     const rows = document.createElement('div');
     rows.className = 'kb-rows';

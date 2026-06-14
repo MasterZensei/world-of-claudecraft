@@ -10,6 +10,8 @@
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 <link rel="preload" as="image" href="/loading-screen.jpg" />
+<link rel="preload" as="image" href="./ui/cursors/hand-default.png" />
+<link rel="preload" as="image" href="./ui/cursors/attack-sword.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Inter:wght@300..700&display=swap" rel="stylesheet">
@@ -119,10 +121,33 @@
     background: transparent;
   }
 
+  /* Shared with src/game/cursors.ts — keep hotspots in sync. */
+  :root {
+    --cursor-hand: url('./ui/cursors/hand-default.png') 12 2, default;
+    --cursor-sword: url('./ui/cursors/attack-sword.png') 4 4, pointer;
+    --cursor-shield: url('./ui/cursors/friendly-shield.png') 13 30, default;
+    --cursor-grab: url('./ui/cursors/hand-grab.png') 11 16, grabbing;
+  }
+
   [hidden] { display: none !important; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: var(--ui-font); }
-  #game-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; }
-  #game-canvas.cam-drag { cursor: grabbing; }
+  #game-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* Pre-game screens use the same hand / sword cursors as in-world (--cursor-* from cursors.ts). */
+  #start-screen,
+  #loading-screen.visible {
+    cursor: var(--cursor-hand);
+  }
+  #start-screen :is(
+    .btn, .mode-card, .social-link, .realm-row, .char-row, .class-card,
+    .password-toggle, #btn-toggle-controls, .btn-close-drawer
+  ) {
+    cursor: var(--cursor-sword);
+  }
+  #start-screen :is(input, textarea) {
+    cursor: text;
+  }
+
   #nameplates { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
   #ui { position: absolute; inset: 0; pointer-events: none; }
   #ui > * { pointer-events: auto; }
@@ -491,6 +516,22 @@
     background: linear-gradient(#2c2c3a, #15151f); color: #ffd9a0; border-color: #4a3d1d; }
   .kb-key.capturing { border-color: var(--gold); color: #fff; box-shadow: 0 0 8px #ffd100aa; }
   .kb-note { font-size: 11px; color: #b9ac82; margin: 2px 0 6px; min-height: 14px; line-height: 1.4; }
+  .kb-toggle-row { margin-bottom: 6px; background: #ffffff0a; border-radius: 4px; }
+  .kb-toggle-row .kb-toggle {
+    grid-column: 2;
+    width: 78px;
+    min-width: 78px;
+    max-width: 78px;
+    margin: 0;
+    padding: 3px 6px;
+    text-align: center;
+    font-size: 12px;
+    font-family: var(--ui-font);
+    line-height: 1.2;
+    justify-self: start;
+    box-sizing: border-box;
+  }
+  .kb-toggle.off { filter: grayscale(0.6) brightness(0.8); color: #b9ac82; }
   .set-rows { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
   .set-row { display: grid; grid-template-columns: 120px 1fr 48px; align-items: center; gap: 10px; padding: 3px 6px; }
   .set-name { font-size: 12.5px; color: #e8e0c8; }
