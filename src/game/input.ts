@@ -1,14 +1,12 @@
-// WoW-style input: WASD + A/D keyboard turn, Q/E strafe, space jump,
-// left-drag orbits the camera, right-drag mouselooks (turns the character),
-// both buttons run forward, wheel zooms, Tab targets, action-bar keys cast
-// (player-rebindable, see Keybinds), C/P/L/M/B windows, V nameplates,
-// F interacts, R autorun.
+// Default (Mouse Camera off): WoW-style — WASD + A/D keyboard turn, Q/E strafe,
+// left-drag orbits, right-drag mouselooks, both buttons run forward.
+// Optional Mouse Camera (on): OSRS-style — WASD is camera-relative, A/D strafe,
+// mouse drag rotates the orbit (no pointer lock), no keyboard turn.
+// Shared: space jump, wheel zoom, Tab target, rebindable action bar, R autorun.
 
 import { Keybinds, actionKind } from './keybinds';
 import { cursorForHover, type HoverCursorKind } from './cursors';
 
-// the camera sensitivity that used to be hard-coded in onMouseMove; the
-// settings slider scales this (cameraSpeed 1.0 reproduces the old feel)
 const BASE_LOOK_SENS = 0.0045;
 const TOUCH_LOOK_YAW_RATE = 3.2;
 const TOUCH_LOOK_PITCH_RATE = 2.2;
@@ -18,6 +16,8 @@ export interface InputCallbacks {
   onAbility(slot: number): void;
   onUiKey(key: 'interact' | 'bags' | 'char' | 'spellbook' | 'questlog' | 'map' | 'nameplates' | 'escape' | 'chat' | 'meters' | 'social' | 'arena'): void;
   onClickPick(x: number, y: number, button: number): void;
+  /** When false, edge actions (spells, UI keys) are ignored. */
+  canUseGameKeys?: () => boolean;
 }
 
 export interface TouchMoveInput {
@@ -35,21 +35,16 @@ export class Input {
   camPitch = 0.32;
   camDist = 12;
   autorun = false;
-  // while true, readMoveInput reports neutral — set when a modal (the options
-  // menu) is open so held WASD doesn't drive the character behind it
   suspendMovement = false;
   /** Latest pointer position while over the canvas (for hover pick). */
   hoverX = 0;
   hoverY = 0;
   hoverActive = false;
   private hoverKind: HoverCursorKind = 'default';
+  private mouseCameraEnabled = false;
   private dragDistance = 0;
   private downButton = -1;
-  // one-shot key capture for the rebind UI: the next keydown is delivered here
-  // (Escape cancels with null) instead of being dispatched as an action
   private captureCb: ((code: string | null) => void) | null = null;
-  // mouse-look sensitivity, in radians per pixel of drag; the old fixed value
-  // was BASE_LOOK_SENS — setCameraSpeed scales it from the settings menu
   private lookSensitivity = BASE_LOOK_SENS;
   private touchMove: TouchMoveInput = { forward: false, back: false, strafeLeft: false, strafeRight: false };
   private touchLookActive = false;
@@ -58,7 +53,15 @@ export class Input {
   constructor(private canvas: HTMLCanvasElement, private cb: InputCallbacks, private keybinds: Keybinds) {
     window.addEventListener('keydown', (e) => this.onKeyDown(e));
     window.addEventListener('keyup', (e) => { this.keys.delete(e.code); });
-    window.addEventListener('blur', () => { this.keys.clear(); this.leftDown = false; this.rightDown = false; });
+    window.addEventListener('blur', () => this.releaseCapture('blur'));
+    window.addEventListener('pointerup', (e) => this.onMouseUp(e));
+    window.addEventListener('pointercancel', (e) => this.onMouseUp(e));
+    document.addEventListener('pointerlockchange', () => {
+      if (!document.pointerLockElement) this.releaseCapture('pointerlock');
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) this.releaseCapture('hidden');
+    });
     canvas.addEventListener('mousedown', (e) => this.onMouseDown(e));
     window.addEventListener('mouseup', (e) => this.onMouseUp(e));
     window.addEventListener('mousemove', (e) => this.onMouseMove(e));
@@ -75,24 +78,32 @@ export class Input {
     this.updateCursor();
   }
 
-  /** True while a mouse button is held for camera drag. */
   isDragging(): boolean {
     return this.leftDown || this.rightDown;
   }
 
-  /** Update hand / sword / shield cursor from a hover pick (called once per frame). */
+  isMouseCameraMode(): boolean {
+    return this.mouseCameraEnabled;
+  }
+
   setHoverCursor(kind: HoverCursorKind): void {
     if (this.hoverKind === kind) return;
     this.hoverKind = kind;
     this.updateCursor();
   }
 
-  /** Capture the next keypress (for the rebind UI) instead of acting on it. */
+  setMouseCameraEnabled(on: boolean): void {
+    this.mouseCameraEnabled = on;
+    if (on && document.pointerLockElement === this.canvas) {
+      document.exitPointerLock?.();
+    }
+    this.updateCursor();
+  }
+
   captureNextKey(cb: (code: string | null) => void): void {
     this.captureCb = cb;
   }
 
-  /** Scale mouse-look sensitivity. 1.0 = the original fixed speed. */
   setCameraSpeed(mult: number): void {
     this.lookSensitivity = BASE_LOOK_SENS * mult;
   }
@@ -126,17 +137,26 @@ export class Input {
   }
 
   isMouselookActive(): boolean {
+    if (this.mouseCameraEnabled) return this.touchLookActive;
     return this.rightDown || this.touchLookActive;
   }
 
+  private releaseCapture(_reason: string): void {
+    this.keys.clear();
+    this.leftDown = false;
+    this.rightDown = false;
+    this.downButton = -1;
+    this.updateCursor();
+  }
+
   private updateCursor(): void {
-    if (this.isDragging() || document.pointerLockElement === this.canvas) return;
-    this.canvas.style.cursor = cursorForHover(this.hoverKind, false);
+    if (document.pointerLockElement === this.canvas) return;
+    const draggingCamera = this.isDragging() && this.mouseCameraEnabled;
+    this.canvas.style.cursor = cursorForHover(this.hoverKind, draggingCamera);
   }
 
   private onKeyDown(e: KeyboardEvent): void {
     if (e.repeat) return;
-    // rebind capture intercepts everything (incl. action/UI keys); Escape cancels
     if (this.captureCb) {
       e.preventDefault();
       const cb = this.captureCb;
@@ -146,13 +166,12 @@ export class Input {
     }
     const tag = (document.activeElement?.tagName ?? '').toLowerCase();
     if (tag === 'input' || tag === 'textarea') return;
-    // Escape always opens/closes the game menu — never rebindable
+    if (this.cb.canUseGameKeys && !this.cb.canUseGameKeys()) return;
     if (e.code === 'Escape') { this.cb.onUiKey('escape'); return; }
-    if (e.code === 'Tab') e.preventDefault(); // keep Tab from moving DOM focus in-game
+    if (e.code === 'Tab') e.preventDefault();
     const action = this.keybinds.actionForCode(e.code);
     if (action === null) return;
     if (actionKind(action) === 'held') {
-      // movement: just record the key; readMoveInput polls it each frame
       this.keys.add(e.code);
       if (action === 'forward' || action === 'back') this.autorun = false;
       return;
@@ -160,8 +179,6 @@ export class Input {
     this.dispatchEdge(action);
   }
 
-  // Fire a one-shot (edge) action by id. Action-bar slots route to onAbility;
-  // the rest map to the targeting/interface callbacks; autorun is internal.
   private dispatchEdge(action: string): void {
     if (action.startsWith('slot')) { this.cb.onAbility(Number(action.slice(4))); return; }
     switch (action) {
@@ -186,17 +203,22 @@ export class Input {
     if (e.button === 2) this.rightDown = true;
     this.downButton = e.button;
     this.dragDistance = 0;
-    this.canvas.requestPointerLock?.();
+    if (!this.mouseCameraEnabled) {
+      this.canvas.requestPointerLock?.();
+    } else {
+      this.updateCursor();
+    }
   }
 
   private onMouseUp(e: MouseEvent): void {
     const wasDrag = this.dragDistance > 5;
     if (e.button === 0) this.leftDown = false;
     if (e.button === 2) this.rightDown = false;
-    if (!this.leftDown && !this.rightDown && document.pointerLockElement) {
+    if (!this.mouseCameraEnabled && !this.leftDown && !this.rightDown && document.pointerLockElement) {
       document.exitPointerLock();
     }
-    if (!wasDrag && e.button === this.downButton && (e.target === this.canvas || document.pointerLockElement === this.canvas)) {
+    const onCanvas = e.target === this.canvas || document.pointerLockElement === this.canvas;
+    if (!wasDrag && e.button === this.downButton && onCanvas) {
       this.cb.onClickPick(e.clientX, e.clientY, e.button);
     }
     this.downButton = -1;
@@ -210,6 +232,7 @@ export class Input {
     }
     if (!this.leftDown && !this.rightDown) return;
     const mx = e.movementX ?? 0, my = e.movementY ?? 0;
+    if (mx === 0 && my === 0) return;
     this.dragDistance += Math.abs(mx) + Math.abs(my);
     this.camYaw -= mx * this.lookSensitivity;
     this.camPitch = Math.min(1.35, Math.max(-0.4, this.camPitch + my * this.lookSensitivity));
@@ -225,17 +248,29 @@ export class Input {
     const k = this.keys;
     const held = (id: string) => this.keybinds.codesForAction(id).some((c) => k.has(c));
     const bothButtons = this.leftDown && this.rightDown;
-    const mouselook = this.isMouselookActive();
-    // A/D (turn) double as strafe while mouselooking, matching WoW; Q/E always strafe
-    const aHeld = held('turnLeft');
-    const dHeld = held('turnRight');
     const forward = held('forward') || bothButtons || this.autorun || this.touchMove.forward;
     const back = held('back') || this.touchMove.back;
-    const strafeLeft = held('strafeLeft') || (mouselook && aHeld) || this.touchMove.strafeLeft;
-    const strafeRight = held('strafeRight') || (mouselook && dHeld) || this.touchMove.strafeRight;
-    const turnLeft = !mouselook && aHeld;
-    const turnRight = !mouselook && dHeld;
     const jump = held('jump');
-    return { forward, back, turnLeft, turnRight, strafeLeft, strafeRight, jump };
+
+    if (this.mouseCameraEnabled) {
+      return {
+        forward, back, jump,
+        turnLeft: false,
+        turnRight: false,
+        strafeLeft: held('strafeLeft') || held('turnLeft') || this.touchMove.strafeLeft,
+        strafeRight: held('strafeRight') || held('turnRight') || this.touchMove.strafeRight,
+      };
+    }
+
+    const mouselook = this.isMouselookActive();
+    const aHeld = held('turnLeft');
+    const dHeld = held('turnRight');
+    return {
+      forward, back, jump,
+      strafeLeft: held('strafeLeft') || (mouselook && aHeld) || this.touchMove.strafeLeft,
+      strafeRight: held('strafeRight') || (mouselook && dHeld) || this.touchMove.strafeRight,
+      turnLeft: !mouselook && aHeld,
+      turnRight: !mouselook && dHeld,
+    };
   }
 }
