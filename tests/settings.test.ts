@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { Settings, SETTING_RANGES } from '../src/game/settings';
+import { Settings, SETTING_RANGES, hasSeenCameraPrompt, markCameraPromptSeen } from '../src/game/settings';
 
 function installStorage(): void {
   const map = new Map<string, string>();
@@ -82,5 +82,13 @@ describe('Settings', () => {
     const snap = s.all();
     snap.cameraSpeed = 99;
     expect(s.get('cameraSpeed')).not.toBe(99);
+  });
+});
+
+describe('camera prompt flag', () => {
+  it('starts unseen and persists once marked', () => {
+    expect(hasSeenCameraPrompt()).toBe(false);
+    markCameraPromptSeen();
+    expect(hasSeenCameraPrompt()).toBe(true);
   });
 });

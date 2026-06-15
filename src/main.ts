@@ -2,7 +2,7 @@ import { Sim } from './sim/sim';
 import { Renderer } from './render/renderer';
 import { Input } from './game/input';
 import { Keybinds } from './game/keybinds';
-import { Settings, GameSettings, SETTING_RANGES } from './game/settings';
+import { Settings, GameSettings, SETTING_RANGES, hasSeenCameraPrompt, markCameraPromptSeen } from './game/settings';
 import { MobileControls, PHONE_TOUCH_QUERY, isPhoneTouchDevice } from './game/mobile_controls';
 import { Hud } from './ui/hud';
 import { audio } from './game/audio';
@@ -26,6 +26,7 @@ const WORLD_SEED = 20061; // fixed: World of Claudecraft is a persistent place
 
 const $ = <T extends HTMLElement = HTMLElement>(sel: string): T => document.querySelector(sel) as T;
 let pendingDeleteCharacter: CharacterSummary | null = null;
+let pendingCameraPrompt = false;
 
 declare const __APP_VERSION__: string;
 declare const __APP_BUILD_ID__: string;
@@ -465,6 +466,16 @@ async function startGame(world: IWorld, offlineSim: Sim | null, online: ClientWo
     settings,
     onSettingChange: (key, value) => applySetting(key, value),
   });
+  if (!isPhoneTouchDevice() && (pendingCameraPrompt || !hasSeenCameraPrompt())) {
+    hud.showCameraModePrompt((mouseCamera) => {
+      applySetting('mouseCamera', mouseCamera);
+      markCameraPromptSeen();
+      pendingCameraPrompt = false;
+    });
+  } else if (pendingCameraPrompt || !hasSeenCameraPrompt()) {
+    markCameraPromptSeen();
+    pendingCameraPrompt = false;
+  }
   if (online) {
     hud.attachReporting({
       submit: (targetPid, reason, details) => api.reportPlayer(online.characterId, targetPid, reason, details),
@@ -1822,7 +1833,10 @@ function wireStartScreens(): void {
     loginError('');
     try {
       if (mode === 'login') await api.login(username, password);
-      else await api.register(username, password);
+      else {
+        await api.register(username, password);
+        pendingCameraPrompt = true;
+      }
       $('#charselect-user').textContent = api.username ?? '';
       await enterRealmFlow();
     } catch (err: any) {

@@ -31,6 +31,16 @@ export type GameSettings = { [K in NumericSettingKey]: number } & { [K in BoolSe
 interface Range { min: number; max: number; def: number }
 
 const STORE_KEY = 'woc_settings';
+const CAMERA_PROMPT_KEY = 'woc_camera_prompt_seen';
+
+/** Whether the first-run camera mode picker has been dismissed on this browser. */
+export function hasSeenCameraPrompt(): boolean {
+  try { return localStorage.getItem(CAMERA_PROMPT_KEY) === '1'; } catch { return true; }
+}
+
+export function markCameraPromptSeen(): void {
+  try { localStorage.setItem(CAMERA_PROMPT_KEY, '1'); } catch { /* storage unavailable */ }
+}
 const NUMERIC_KEYS = Object.keys(SETTING_RANGES) as NumericSettingKey[];
 const BOOL_KEYS = Object.keys(BOOL_SETTINGS) as BoolSettingKey[];
 

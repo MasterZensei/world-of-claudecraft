@@ -72,6 +72,17 @@ export const gameStrings = {
   settings: {
     showOverflowXp: "Show Overflow XP",
   },
+  cameraPrompt: {
+    title: "Choose Your Camera",
+    body: "Pick how you want to move and look around. You can change this anytime in Esc → Key Bindings.",
+    classicTitle: "Classic Camera",
+    classicDesc: "A/D turns your character.",
+    classicDescDrag: "Drag with the mouse to orbit the camera.",
+    mouseTitle: "Mouse Camera",
+    mouseDesc: "Camera-relative movement: WASD moves where you look. A/D strafes. Hold right-click to look around.",
+    recommended: "Recommended",
+    continue: "Continue",
+  },
   // Talents & Specializations — UI chrome only (node/spec names are content,
   // rendered directly like ability names). Registered here so the panel routes
   // through t() per the i18n constraint.

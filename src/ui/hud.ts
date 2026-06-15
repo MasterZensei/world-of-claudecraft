@@ -3927,7 +3927,58 @@ export class Hud {
 
   // True while a menu that should pause character movement is up.
   isModalOpen(): boolean {
-    return this.optionsOpen;
+    return this.optionsOpen || !!document.getElementById('camera-mode-prompt');
+  }
+
+  /** First-run picker for Classic vs Mouse Camera. Mouse Camera is pre-selected. */
+  showCameraModePrompt(onChoose: (mouseCamera: boolean) => void): void {
+    document.getElementById('camera-mode-prompt')?.remove();
+    let mouseCamera = true;
+    const backdrop = document.createElement('div');
+    backdrop.id = 'camera-mode-prompt';
+    backdrop.className = 'modal-backdrop';
+    backdrop.setAttribute('role', 'dialog');
+    backdrop.setAttribute('aria-modal', 'true');
+    backdrop.setAttribute('aria-labelledby', 'camera-mode-title');
+    const panel = document.createElement('div');
+    panel.className = 'confirm-modal panel auth-panel-premium camera-mode-panel';
+    panel.innerHTML = `<h2 id="camera-mode-title">${esc(t('game.cameraPrompt.title'))}</h2>`
+      + `<p class="camera-mode-intro">${esc(t('game.cameraPrompt.body'))}</p>`
+      + `<div class="camera-mode-options">`
+      + `<button type="button" class="camera-mode-opt" data-mode="classic">`
+      + `<b>${esc(t('game.cameraPrompt.classicTitle'))}</b>`
+      + `<span>${esc(t('game.cameraPrompt.classicDesc'))}<br>${esc(t('game.cameraPrompt.classicDescDrag'))}</span>`
+      + `</button>`
+      + `<button type="button" class="camera-mode-opt sel" data-mode="mouse">`
+      + `<span class="camera-mode-badge">${esc(t('game.cameraPrompt.recommended'))}</span>`
+      + `<b>${esc(t('game.cameraPrompt.mouseTitle'))}</b>`
+      + `<span>${esc(t('game.cameraPrompt.mouseDesc'))}</span>`
+      + `</button>`
+      + `</div>`
+      + `<div class="camera-mode-actions"><button type="button" class="btn" data-continue>${esc(t('game.cameraPrompt.continue'))}</button></div>`;
+    backdrop.appendChild(panel);
+    document.body.appendChild(backdrop);
+    const opts = panel.querySelectorAll<HTMLButtonElement>('.camera-mode-opt');
+    const sync = () => {
+      opts.forEach((btn) => btn.classList.toggle('sel', btn.dataset.mode === (mouseCamera ? 'mouse' : 'classic')));
+    };
+    opts.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        audio.click();
+        mouseCamera = btn.dataset.mode === 'mouse';
+        sync();
+      });
+    });
+    const close = (choice: boolean) => {
+      backdrop.remove();
+      music.resumeFromMenu();
+      onChoose(choice);
+    };
+    panel.querySelector('[data-continue]')!.addEventListener('click', () => {
+      audio.click();
+      close(mouseCamera);
+    });
+    music.pauseForMenu();
   }
 
   toggleOptionsMenu(): void {
@@ -4260,6 +4311,8 @@ export class Hud {
     if (this.marketOpen) { this.closeMarket(); closed = true; }
     const confirmEl = document.getElementById('confirm-dialog');
     if (confirmEl) { confirmEl.remove(); closed = true; }
+    const cameraPrompt = document.getElementById('camera-mode-prompt');
+    if (cameraPrompt) { cameraPrompt.remove(); closed = true; }
     for (const id of Hud.MODAL_IDS) {
       const el = $(id);
       if (el.style.display === 'block') {

@@ -713,6 +713,103 @@
   #confirm-dialog .cd-actions { display: flex; justify-content: flex-end; gap: 8px; }
   #confirm-dialog .cd-ok { background: linear-gradient(#8a6a26, #5a4413 55%, #473409); color: #ffe6a8; }
 
+  /* first-run camera mode picker */
+  #camera-mode-prompt { z-index: 310; }
+  #camera-mode-prompt .camera-mode-panel {
+    width: min(440px, calc(100vw - 32px));
+    padding: 18px;
+    border-radius: 8px;
+  }
+  #camera-mode-prompt .camera-mode-panel h2 {
+    margin: 0 0 8px;
+    font-family: var(--title-font);
+    font-size: 20px;
+    color: var(--gold);
+  }
+  #camera-mode-prompt .camera-mode-intro {
+    margin: 0 0 14px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: #e8e0c8;
+  }
+  #camera-mode-prompt .camera-mode-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  #camera-mode-prompt .camera-mode-opt {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    padding: 12px 36px 12px 12px;
+    text-align: left;
+    border: 1px solid #5a4a22;
+    border-radius: 6px;
+    background: #1a140a;
+    color: #e8e0c8;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  }
+  #camera-mode-prompt .camera-mode-opt:hover,
+  #camera-mode-prompt .camera-mode-opt:focus-visible {
+    border-color: #8a6a26;
+    background: #221a0d;
+    outline: none;
+  }
+  #camera-mode-prompt .camera-mode-opt.sel {
+    border-color: var(--gold);
+    background: #2c2410;
+    box-shadow: inset 0 0 0 1px #ffd10033;
+  }
+  #camera-mode-prompt .camera-mode-opt.sel::after {
+    content: "✓";
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #120d04;
+    background: #ffd100;
+    border-radius: 50%;
+    font: 700 11px/1 var(--body-font);
+  }
+  #camera-mode-prompt .camera-mode-opt b {
+    font-size: 13px;
+    color: #fff;
+  }
+  #camera-mode-prompt .camera-mode-opt span {
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: #c8b888;
+  }
+  #camera-mode-prompt .camera-mode-badge {
+    align-self: flex-start;
+    margin-bottom: 2px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: linear-gradient(#8a6a26, #5a4413 55%, #473409);
+    color: #ffe6a8;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  #camera-mode-prompt .camera-mode-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  #camera-mode-prompt .camera-mode-actions .btn {
+    min-width: 120px;
+    background: linear-gradient(#8a6a26, #5a4413 55%, #473409);
+    color: #ffe6a8;
+  }
+
   /* vendor */
   #vendor-window { width: 400px; }
   .vendor-item { display: flex; gap: 8px; align-items: center; padding: 5px; border-radius: 4px; cursor: pointer; }
