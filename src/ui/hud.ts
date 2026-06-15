@@ -133,6 +133,7 @@ export class Hud {
   private lastArenaSig = '';
   private lastArenaStatusSig = '';
   private arenaMatchSeen = false; // closes the queue panel once a bout starts
+  private arenaBracket: import('../world_api').ArenaFormat = '1v1';
   // World Market (the Merchant's auction house)
   private marketOpen = false;
   private marketTab: 'browse' | 'sell' | 'collect' = 'browse';
@@ -1157,14 +1158,21 @@ export class Hud {
     const el = $('#arena-window');
     const a = this.sim.arenaInfo;
     if (!a) {
-      // offline / not yet synced: arena is an online ranked feature
-      el.innerHTML = `<div class="panel-title"><span>The Ashen Coliseum</span><span class="x-btn" data-close>${svgIcon('close')}</span></div>`
-        + `<div class="arena-note">The Ashen Coliseum is a ranked 1v1 arena for the live world. Play online to enter the queue and climb the ladder.</div>`;
+      el.innerHTML = `<div class="panel-title"><span>${t('game.arena.title')}</span><span class="x-btn" data-close>${svgIcon('close')}</span></div>`
+        + `<div class="arena-note">${t('game.arena.offlineNote')}</div>`;
       el.querySelector('[data-close]')?.addEventListener('click', () => { el.style.display = 'none'; });
       return;
     }
     const inMatch = a.match !== null;
+    const queuedFmt = a.queued ? a.format : null;
+    const bracket = a.match?.format ?? queuedFmt ?? this.arenaBracket;
+    if (queuedFmt || a.match) this.arenaBracket = bracket;
+    const canSwitchBracket = !a.queued && !inMatch;
     const myPid = this.sim.playerId;
+    const party = this.sim.partyInfo;
+    const partySize = party?.members.length ?? 1;
+    const isLeader = !party || party.leader === myPid;
+
     const ladder = a.ladder.map((r, i) => {
       const me = r.pid === myPid;
       const cls = CLASSES[r.cls]?.name ?? r.cls;
@@ -1172,17 +1180,57 @@ export class Hud {
         + `<span class="lr-name" title="${esc(r.name)} — ${esc(cls)}">${esc(r.name)}</span>`
         + `<span class="lr-rating">${r.rating}</span>`
         + `<span class="lr-wl">${r.wins}-${r.losses}</span></div>`;
-    }).join('') || `<div class="ladder-empty">No challengers ranked yet — be the first.</div>`;
+    }).join('') || `<div class="ladder-empty">${t('game.arena.noChallengers')}</div>`;
+
+    const bracketBtn = (fmt: import('../world_api').ArenaFormat) => {
+      const active = bracket === fmt;
+      const locked = !canSwitchBracket && !active;
+      return `<button class="arena-bracket${active ? ' active' : ''}${locked ? ' locked' : ''}" data-bracket="${fmt}"${locked ? ' disabled' : ''}>${t(fmt === '1v1' ? 'game.arena.bracket1v1' : 'game.arena.bracket2v2')}</button>`;
+    };
+    const bracketTabs = `<div class="arena-brackets">${bracketBtn('1v1')}${bracketBtn('2v2')}</div>`;
+
+    let partySection = '';
+    if (bracket === '2v2' && !inMatch && !a.queued) {
+      if (party && partySize === 2) {
+        const rows = party.members.map((m) => {
+          const cls = CLASSES[m.cls]?.name ?? m.cls;
+          const role = m.pid === party.leader ? t('game.arena.partyLeader') : t('game.arena.partyMember');
+          const me = m.pid === myPid ? ' me' : '';
+          return `<div class="arena-party-row${me}"><span class="apr-name">${esc(m.name)}</span>`
+            + `<span class="apr-meta">${role} · Lv ${m.level} ${esc(cls)}</span></div>`;
+        }).join('');
+        partySection = `<div class="arena-party"><div class="arena-party-title">${t('game.arena.partyRoster')}</div>${rows}</div>`;
+      } else if (party && partySize > 2) {
+        partySection = `<div class="arena-note arena-warn">${t('game.arena.partyTooBig')}</div>`;
+      } else {
+        partySection = `<div class="arena-note arena-party-invite">${t('game.arena.partyInviteHint')}</div>`;
+      }
+    }
 
     let action: string;
     if (inMatch) {
-      action = `<div class="arena-queue-status">${svgIcon('arena')} Match in progress vs ${esc(a.match!.oppName)}.</div>`;
+      action = `<div class="arena-queue-status">${svgIcon('arena')} ${t('game.arena.matchInProgress').replace('{opp}', esc(a.match!.oppName))}</div>`;
     } else if (a.queued) {
-      action = `<button class="btn leave" data-act="leave">Leave Queue</button>`
-        + `<div class="arena-queue-status">Searching for an opponent… (${a.queueSize} in queue)</div>`;
+      const qLabel = t('game.arena.searchingBracket')
+        .replace('{bracket}', bracket)
+        .replace('{n}', String(a.queueSize));
+      action = `<button class="btn leave" data-act="leave">${t('game.arena.leaveQueue')}</button>`
+        + `<div class="arena-queue-status">${qLabel}</div>`;
     } else {
-      action = `<button class="btn" data-act="queue">Enter the Queue</button>`
-        + `<div class="arena-note">You will be matched with the nearest-rated challenger online, then teleported to the sands. Win to climb; first to yield (1 health) loses. You return exactly where you queued.</div>`;
+      const note = bracket === '2v2' ? t('game.arena.queueNote2v2') : t('game.arena.queueNote1v1');
+      let queueLabel = t('game.arena.enterQueue');
+      let queueDisabled = false;
+      if (bracket === '2v2' && party && partySize === 2) {
+        if (isLeader) queueLabel = t('game.arena.queueAsTeam');
+        else { queueDisabled = true; queueLabel = t('game.arena.waitingForLeader'); }
+      } else if (bracket === '2v2' && party && partySize > 2) {
+        queueDisabled = true;
+      } else if (bracket === '1v1' && party && partySize > 1) {
+        queueDisabled = true;
+      }
+      const btnCls = queueDisabled ? 'btn disabled' : 'btn';
+      action = `<button class="${btnCls}" data-act="queue"${queueDisabled ? ' disabled' : ''}>${queueLabel}</button>`
+        + `<div class="arena-note">${note}</div>`;
     }
 
     this.fetchArenaLeaderboard();
@@ -1195,23 +1243,38 @@ export class Hud {
         + `<span class="lr-wl">${r.wins}-${r.losses}</span></div>`;
     }).join('');
     const allTimeSection = this.arenaAllTime && this.arenaAllTime.length > 0
-      ? `<div class="arena-sub">Ladder — All-Time</div>${allTime}`
+      ? `<div class="arena-sub">${t('game.arena.ladderAllTime')}</div>${allTime}`
       : '';
 
-    const sig = JSON.stringify([a.rating, a.wins, a.losses, a.queued, a.queueSize, inMatch, a.ladder, this.arenaAllTime]);
-    if (sig === this.lastArenaSig) return; // nothing changed; skip the DOM churn (and re-bind)
+    const sig = JSON.stringify([a.rating, a.wins, a.losses, a.queued, a.queueSize, inMatch, a.ladder, this.arenaAllTime, bracket, party, canSwitchBracket]);
+    if (sig === this.lastArenaSig) return;
     this.lastArenaSig = sig;
 
-    el.innerHTML = `<div class="panel-title"><span>The Ashen Coliseum <span style="color:#998d6a;font-size:11px">1v1 Ranked</span></span><span class="x-btn" data-close>${svgIcon('close')}</span></div>`
+    const rankedLabel = bracket === '2v2' ? t('game.arena.ranked2v2') : t('game.arena.ranked1v1');
+    const wl = t('game.arena.ratingWl').replace('{wins}', String(a.wins)).replace('{losses}', String(a.losses));
+    el.innerHTML = `<div class="panel-title"><span>${t('game.arena.title')} <span class="arena-bracket-tag">${rankedLabel}</span></span><span class="x-btn" data-close>${svgIcon('close')}</span></div>`
+      + bracketTabs
       + `<div class="arena-rank"><span class="rating">${a.rating}</span>`
-      + `<span class="wl">Rating &middot; <b>${a.wins}</b> wins / <i>${a.losses}</i> losses</span></div>`
+      + `<span class="wl">${wl}</span></div>`
+      + partySection
       + action
-      + `<div class="arena-sub">Ladder — Online</div>`
+      + `<div class="arena-sub">${t('game.arena.ladderOnline')}</div>`
       + ladder
       + allTimeSection;
 
     el.querySelector('[data-close]')?.addEventListener('click', () => { el.style.display = 'none'; });
-    el.querySelector('[data-act="queue"]')?.addEventListener('click', () => { this.sim.arenaQueueJoin(); audio.click(); });
+    el.querySelectorAll('[data-bracket]:not([disabled])').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        this.arenaBracket = (btn as HTMLElement).dataset.bracket as import('../world_api').ArenaFormat;
+        this.lastArenaSig = '';
+        this.renderArenaWindow();
+        audio.click();
+      });
+    });
+    el.querySelector('[data-act="queue"]:not([disabled])')?.addEventListener('click', () => {
+      this.sim.arenaQueueJoin(bracket);
+      audio.click();
+    });
     el.querySelector('[data-act="leave"]')?.addEventListener('click', () => { this.sim.arenaQueueLeave(); audio.click(); });
   }
 
@@ -1225,15 +1288,26 @@ export class Hud {
       this.lastArenaStatusSig = '';
       return;
     }
-    const label = m.state === 'countdown' ? 'Steel yourself…'
-      : m.state === 'over' ? `Returning to the world… ${m.returnIn ?? 0}`
-      : 'Fight to the yield!';
-    const sig = `${m.oppName}|${m.state}|${m.state === 'over' ? (m.returnIn ?? 0) : ''}`;
+    const label = m.state === 'countdown' ? t('game.arena.steelYourself')
+      : m.state === 'over' ? t('game.arena.returning').replace('{n}', String(m.returnIn ?? 0))
+      : t('game.arena.fight');
+    let vsBlock: string;
+    if (m.format === '2v2') {
+      const allyNames = [t('game.arena.you'), ...m.allies.map((c) => esc(c.name))].join(' · ');
+      const enemyNames = m.enemies.map((c) => esc(c.name)).join(' · ');
+      vsBlock = `<div class="as-teams">`
+        + `<div class="as-team allies"><span class="as-label">${t('game.arena.alliesLabel')}</span><span class="as-names">${allyNames}</span></div>`
+        + `<div class="as-mid">${t('game.arena.vs')}</div>`
+        + `<div class="as-team enemies"><span class="as-label">${t('game.arena.foesLabel')}</span><span class="as-names">${enemyNames}</span></div>`
+        + `</div>`;
+    } else {
+      vsBlock = `<div class="as-vs">${t('game.arena.vs')} <span class="opp">${esc(m.oppName)}</span>`
+        + ` <span class="as-lvl">Lv ${m.oppLevel} ${esc(CLASSES[m.oppClass]?.name ?? m.oppClass)}</span></div>`;
+    }
+    const sig = `${m.format}|${vsBlock}|${m.state}|${m.state === 'over' ? (m.returnIn ?? 0) : ''}`;
     if (sig !== this.lastArenaStatusSig) {
       this.lastArenaStatusSig = sig;
-      const cls = CLASSES[m.oppClass]?.name ?? m.oppClass;
-      el.innerHTML = `<div class="as-vs">${svgIcon('arena')} VS <span class="opp">${esc(m.oppName)}</span> <span style="color:#b6ad8c;font-size:11px">Lv ${m.oppLevel} ${esc(cls)}</span></div>`
-        + `<div class="as-timer">${label}</div>`;
+      el.innerHTML = `${vsBlock}<div class="as-timer">${label}</div>`;
       el.style.display = 'block';
     }
   }
@@ -1639,39 +1713,46 @@ export class Hud {
           audio.duelEnd();
           break;
         case 'arenaQueued':
-          this.log(`Queued for the Ashen Coliseum (position ${ev.position}).`, '#ffa040');
+          this.log(t('game.arena.queued').replace('{bracket}', ev.format).replace('{pos}', String(ev.position)), '#ffa040');
           break;
         case 'arenaUnqueued':
-          this.log('You leave the Ashen Coliseum queue.', '#ffa040');
+          this.log(t('game.arena.unqueued'), '#ffa040');
           break;
         case 'arenaFound': {
-          const cls = CLASSES[ev.oppClass]?.name ?? ev.oppClass;
-          this.showBanner(`Opponent found: ${ev.oppName}`);
-          this.log(`The Coliseum pairs you against ${ev.oppName}, level ${ev.oppLevel} ${cls}.`, '#ffa040');
+          const names = ev.enemies?.map((e) => e.name).join(' & ') ?? ev.oppName;
+          if (ev.format === '2v2') {
+            this.showBanner(t('game.arena.opponentsFound').replace('{names}', names));
+            this.log(t('game.arena.pairedAgainstTeam').replace('{names}', names), '#ffa040');
+          } else {
+            const cls = CLASSES[ev.oppClass]?.name ?? ev.oppClass;
+            this.showBanner(t('game.arena.opponentFound').replace('{name}', ev.oppName));
+            this.log(t('game.arena.pairedAgainst').replace('{name}', ev.oppName).replace('{level}', String(ev.oppLevel)).replace('{cls}', cls), '#ffa040');
+          }
           audio.duelChallenge();
           break;
         }
         case 'arenaCountdown':
-          this.showBanner(`The bout begins in ${ev.seconds}…`);
+          this.showBanner(t('game.arena.countdown').replace('{n}', String(ev.seconds)));
           audio.duelCountdownTick();
           break;
         case 'arenaStart':
-          this.showBanner('Fight!');
+          this.showBanner(t('game.arena.fightBanner'));
           audio.duelStart();
           break;
         case 'arenaEnd': {
           const delta = ev.ratingAfter - ev.ratingBefore;
           const sign = delta >= 0 ? '+' : '';
+          const deltaStr = `${sign}${delta}`;
           if (ev.draw) {
-            this.showBanner(`Arena draw vs ${ev.oppName} (${sign}${delta} rating)`);
-            this.combatLog(`Arena bout vs ${ev.oppName} ended in a draw. Rating ${ev.ratingAfter} (${sign}${delta}).`, '#fa6');
+            this.showBanner(t('game.arena.drawVs').replace('{opp}', ev.oppName).replace('{delta}', deltaStr));
+            this.combatLog(t('game.arena.drawLog').replace('{opp}', ev.oppName).replace('{rating}', String(ev.ratingAfter)).replace('{delta}', deltaStr), '#fa6');
           } else if (ev.won) {
-            this.showBanner(`Victory vs ${ev.oppName}!  Rating ${ev.ratingAfter} (${sign}${delta})`);
-            this.combatLog(`You defeated ${ev.oppName} in the Ashen Coliseum. Rating ${ev.ratingAfter} (${sign}${delta}).`, '#7fdc4f');
+            this.showBanner(t('game.arena.victoryVs').replace('{opp}', ev.oppName).replace('{rating}', String(ev.ratingAfter)).replace('{delta}', deltaStr));
+            this.combatLog(t('game.arena.victoryLog').replace('{opp}', ev.oppName).replace('{rating}', String(ev.ratingAfter)).replace('{delta}', deltaStr), '#7fdc4f');
             audio.duelEnd();
           } else {
-            this.showBanner(`Defeated by ${ev.oppName}.  Rating ${ev.ratingAfter} (${sign}${delta})`);
-            this.combatLog(`${ev.oppName} bested you in the Ashen Coliseum. Rating ${ev.ratingAfter} (${sign}${delta}).`, '#ff7a6a');
+            this.showBanner(t('game.arena.defeatVs').replace('{opp}', ev.oppName).replace('{rating}', String(ev.ratingAfter)).replace('{delta}', deltaStr));
+            this.combatLog(t('game.arena.defeatLog').replace('{opp}', ev.oppName).replace('{rating}', String(ev.ratingAfter)).replace('{delta}', deltaStr), '#ff7a6a');
             audio.death();
           }
           break;

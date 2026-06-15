@@ -1,4 +1,4 @@
-import type { Entity, EquipSlot, InvSlot, MoveInput, PlayerClass, QuestProgress, QuestState, ResourceType } from './sim/types';
+import type { Entity, EquipSlot, InvSlot, MoveInput, PlayerClass, QuestProgress, QuestState, ResourceType, ArenaFormat, ArenaCombatant } from './sim/types';
 import type { ResolvedAbility } from './sim/sim';
 import type { TalentAllocation, SavedLoadout, Role } from './sim/content/talents';
 
@@ -98,6 +98,8 @@ export interface LeaderboardEntry {
   realm?: string; // present on the global (cross-realm) home-page board
 }
 
+export type { ArenaFormat, ArenaCombatant };
+
 export interface ArenaLadderEntry {
   pid: number;
   name: string;
@@ -111,15 +113,19 @@ export interface ArenaInfo {
   rating: number;
   wins: number;
   losses: number;
+  format: ArenaFormat | null;
   queued: boolean;
   queueSize: number;
   // present only while in a match
   match: {
+    format: ArenaFormat;
     state: 'countdown' | 'active' | 'over';
     oppName: string;
     oppClass: PlayerClass;
     oppLevel: number;
     oppPid: number;
+    allies: ArenaCombatant[];
+    enemies: ArenaCombatant[];
     returnIn?: number; // whole seconds left in the post-bout aftermath ('over')
   } | null;
   // live standings of rated players currently online, best first
@@ -237,7 +243,7 @@ export interface IWorld {
   guildDisband(): void;
   // realm-scoped username typeahead for friend/ignore/guild search
   searchCharacters(query: string): Promise<CharacterSearchResult[]>;
-  arenaQueueJoin(): void;
+  arenaQueueJoin(format?: ArenaFormat): void;
   arenaQueueLeave(): void;
   // World Market
   marketList(itemId: string, count: number, price: number): void;
