@@ -4,7 +4,7 @@ import type { PlayerMeta } from '../src/sim/sim';
 import { DT, Entity, SimEvent, dist2d, emptyMoveInput } from '../src/sim/types';
 import { parseMoveInputFrame } from '../src/sim/move_input';
 import { stealthDetectionRadius, threatEntries } from '../src/sim/threat';
-import { zoneAt, DUNGEONS } from '../src/sim/data';
+import { zoneAt, DUNGEONS, DELVES, isDelvePos } from '../src/sim/data';
 import { saveCharacterState, openPlaySession, closePlaySession, insertChatLogs, pool, loadMarketState, saveMarketState } from './db';
 import type { AccountChatMuteStatus, RequestMetadata } from './db';
 import { ChatFilter } from './chat_filter';
@@ -1002,6 +1002,23 @@ export class GameServer {
         if (exit) sim.leaveDungeon(pid);
         break;
       }
+      case 'enter_delve': {
+        if (typeof msg.delveId !== 'string' || typeof msg.tierId !== 'string') break;
+        const e = sim.entities.get(pid);
+        const delve = DELVES[msg.delveId];
+        if (!e || !delve || e.dead) break;
+        if (Math.hypot(e.pos.x - delve.doorPos.x, e.pos.z - delve.doorPos.z) > 12) break;
+        sim.enterDelve(msg.delveId, msg.tierId, pid);
+        this.resyncDelves(session);
+        break;
+      }
+      case 'leave_delve': {
+        const e = sim.entities.get(pid);
+        if (!e || !isDelvePos(e.pos.x)) break;
+        sim.leaveDelve(pid);
+        this.resyncDelves(session);
+        break;
+      }
     }
   }
 
@@ -1175,6 +1192,10 @@ export class GameServer {
     // market info is null unless the player is standing at the Merchant, so it
     // only rides the wire for players actually browsing the World Market
     maybe('market', this.sim.marketInfoFor(session.pid));
+    maybe('drun', this.sim.delveRunWire(session.pid));
+    maybe('dmarks', this.sim.delveMarksFor(session.pid));
+    maybe('dcomp', this.sim.companionUpgradesFor(session.pid));
+    maybe('delveDaily', this.sim.delveDailyWire(session.pid));
     // talents/spec/loadouts ride the wire only when they change (PR-5: never
     // every snapshot). The client recomputes its known abilities from this.
     maybe('tal', { alloc: meta.talents, spec: meta.talentMods.spec, role: meta.talentMods.role, loadouts: meta.loadouts, activeLoadout: meta.activeLoadout });
@@ -1524,6 +1545,13 @@ export class GameServer {
   private resyncQuests(session: ClientSession): void {
     delete session.lastSent.qlog;
     delete session.lastSent.qdone;
+  }
+
+  private resyncDelves(session: ClientSession): void {
+    delete session.lastSent.drun;
+    delete session.lastSent.dmarks;
+    delete session.lastSent.dcomp;
+    delete session.lastSent.delveDaily;
   }
 
   private send(session: ClientSession, obj: unknown): void {

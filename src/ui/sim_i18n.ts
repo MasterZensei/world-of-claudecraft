@@ -114,10 +114,26 @@ const petEnTable = {
   "aura.fed": "Fed",
 } as const;
 
-const enTable = { ...baseEnTable, ...petEnTable } as const;
+const delveEnTable = {
+  "error.delveCannotEnterNow": "You cannot enter a delve right now.",
+  "error.leaveDungeonFirst": "Leave the dungeon first.",
+  "error.leaveArenaFirst": "Leave the arena first.",
+  "error.alreadyInDelve": "You are already in a delve.",
+  "error.delveWhileTrading": "You cannot enter a delve while trading.",
+  "error.delveDuringDuel": "You cannot enter a delve during a duel.",
+  "error.delveDuringArena": "You cannot enter a delve during an arena match.",
+  "error.unknownDelveTier": "Unknown delve tier.",
+  "error.delveLevelRequired": "You must be level {level} to enter {name}.",
+  "error.delveInstancesBusy": "All instances of {name} are busy. Try again soon.",
+  "log.delveRunFailed": "{name} run failed.",
+  "log.delveComplete": "{name} complete.",
+} as const;
+
+const enTable = { ...baseEnTable, ...petEnTable, ...delveEnTable } as const;
 
 type BaseSimMessageKey = keyof typeof baseEnTable;
 type PetSimMessageKey = keyof typeof petEnTable;
+type DelveSimMessageKey = keyof typeof delveEnTable;
 export type SimMessageKey = keyof typeof enTable;
 
 // Per-locale table. Typed Record<SupportedLanguage, Record<...>> so tsc fails on
@@ -1389,6 +1405,176 @@ const PET_DICT_RU: Record<PetSimMessageKey, string> = {
   "aura.fed": "Накормлен",
 };
 
+
+const DELVE_DICT_EN: Record<DelveSimMessageKey, string> = { ...delveEnTable };
+
+const DELVE_DICT_ES: Record<DelveSimMessageKey, string> = {
+  "error.delveCannotEnterNow": "No puedes entrar en una profundidad ahora mismo.",
+  "error.leaveDungeonFirst": "Sal de la mazmorra primero.",
+  "error.leaveArenaFirst": "Sal de la arena primero.",
+  "error.alreadyInDelve": "Ya estás en una profundidad.",
+  "error.delveWhileTrading": "No puedes entrar en una profundidad mientras comercias.",
+  "error.delveDuringDuel": "No puedes entrar en una profundidad durante un duelo.",
+  "error.delveDuringArena": "No puedes entrar en una profundidad durante un combate de arena.",
+  "error.unknownDelveTier": "Nivel de profundidad desconocido.",
+  "error.delveLevelRequired": "Debes ser nivel {level} para entrar en {name}.",
+  "error.delveInstancesBusy": "Todas las instancias de {name} están ocupadas. Inténtalo de nuevo pronto.",
+  "log.delveRunFailed": "La partida de {name} ha fallado.",
+  "log.delveComplete": "{name} completada.",
+};
+
+const DELVE_DICT_FR: Record<DelveSimMessageKey, string> = {
+  "error.delveCannotEnterNow": "Vous ne pouvez pas entrer dans une fouille pour le moment.",
+  "error.leaveDungeonFirst": "Quittez d'abord le donjon.",
+  "error.leaveArenaFirst": "Quittez d'abord l'arène.",
+  "error.alreadyInDelve": "Vous êtes déjà dans une fouille.",
+  "error.delveWhileTrading": "Vous ne pouvez pas entrer dans une fouille pendant un échange.",
+  "error.delveDuringDuel": "Vous ne pouvez pas entrer dans une fouille pendant un duel.",
+  "error.delveDuringArena": "Vous ne pouvez pas entrer dans une fouille pendant un match d'arène.",
+  "error.unknownDelveTier": "Palier de fouille inconnu.",
+  "error.delveLevelRequired": "Vous devez être niveau {level} pour entrer dans {name}.",
+  "error.delveInstancesBusy": "Toutes les instances de {name} sont occupées. Réessayez bientôt.",
+  "log.delveRunFailed": "La partie {name} a échoué.",
+  "log.delveComplete": "{name} terminée.",
+};
+
+const DELVE_DICT_IT: Record<DelveSimMessageKey, string> = {
+  "error.delveCannotEnterNow": "Non puoi entrare in una scavo in questo momento.",
+  "error.leaveDungeonFirst": "Esci prima dal dungeon.",
+  "error.leaveArenaFirst": "Esci prima dall'arena.",
+  "error.alreadyInDelve": "Sei già in uno scavo.",
+  "error.delveWhileTrading": "Non puoi entrare in uno scavo mentre commerci.",
+  "error.delveDuringDuel": "Non puoi entrare in uno scavo durante un duello.",
+  "error.delveDuringArena": "Non puoi entrare in uno scavo durante un incontro nell'arena.",
+  "error.unknownDelveTier": "Livello di scavo sconosciuto.",
+  "error.delveLevelRequired": "Devi essere di livello {level} per entrare in {name}.",
+  "error.delveInstancesBusy": "Tutte le istanze di {name} sono occupate. Riprova tra poco.",
+  "log.delveRunFailed": "La run di {name} è fallita.",
+  "log.delveComplete": "{name} completato.",
+};
+
+const DELVE_DICT_DE: Record<DelveSimMessageKey, string> = {
+  "error.delveCannotEnterNow": "Du kannst gerade keine Tiefe betreten.",
+  "error.leaveDungeonFirst": "Verlasse zuerst den Dungeon.",
+  "error.leaveArenaFirst": "Verlasse zuerst die Arena.",
+  "error.alreadyInDelve": "Du bist bereits in einer Tiefe.",
+  "error.delveWhileTrading": "Du kannst keine Tiefe betreten, während du handelst.",
+  "error.delveDuringDuel": "Du kannst keine Tiefe betreten, während du dich duellierst.",
+  "error.delveDuringArena": "Du kannst keine Tiefe betreten, während ein Arenakampf läuft.",
+  "error.unknownDelveTier": "Unbekannte Tiefenstufe.",
+  "error.delveLevelRequired": "Du musst Stufe {level} sein, um {name} zu betreten.",
+  "error.delveInstancesBusy": "Alle Instanzen von {name} sind belegt. Versuche es bald erneut.",
+  "log.delveRunFailed": "{name}-Durchlauf fehlgeschlagen.",
+  "log.delveComplete": "{name} abgeschlossen.",
+};
+
+const DELVE_DICT_ZH_CN: Record<DelveSimMessageKey, string> = {
+  "error.delveCannotEnterNow": "你现在无法进入地下探索。",
+  "error.leaveDungeonFirst": "请先离开地下城。",
+  "error.leaveArenaFirst": "请先离开竞技场。",
+  "error.alreadyInDelve": "你已经在地下探索中。",
+  "error.delveWhileTrading": "交易时无法进入地下探索。",
+  "error.delveDuringDuel": "决斗时无法进入地下探索。",
+  "error.delveDuringArena": "竞技场对战时无法进入地下探索。",
+  "error.unknownDelveTier": "未知的地下探索难度。",
+  "error.delveLevelRequired": "你必须达到 {level} 级才能进入{name}。",
+  "error.delveInstancesBusy": "{name} 的所有副本都已满员，请稍后再试。",
+  "log.delveRunFailed": "{name} 挑战失败。",
+  "log.delveComplete": "{name} 已完成。",
+};
+
+const DELVE_DICT_ZH_TW: Record<DelveSimMessageKey, string> = {
+  "error.delveCannotEnterNow": "你現在無法進入地下探索。",
+  "error.leaveDungeonFirst": "請先離開地下城。",
+  "error.leaveArenaFirst": "請先離開競技場。",
+  "error.alreadyInDelve": "你已經在地下探索中。",
+  "error.delveWhileTrading": "交易時無法進入地下探索。",
+  "error.delveDuringDuel": "決鬥時無法進入地下探索。",
+  "error.delveDuringArena": "競技場對戰時無法進入地下探索。",
+  "error.unknownDelveTier": "未知的地下探索難度。",
+  "error.delveLevelRequired": "你必須達到 {level} 級才能進入{name}。",
+  "error.delveInstancesBusy": "{name} 的所有副本都已滿員，請稍後再試。",
+  "log.delveRunFailed": "{name} 挑戰失敗。",
+  "log.delveComplete": "{name} 已完成。",
+};
+
+const DELVE_DICT_KO: Record<DelveSimMessageKey, string> = {
+  "error.delveCannotEnterNow": "지금은 탐색에 들어갈 수 없습니다.",
+  "error.leaveDungeonFirst": "먼저 던전을 나가세요.",
+  "error.leaveArenaFirst": "먼저 투기장을 나가세요.",
+  "error.alreadyInDelve": "이미 탐색 중입니다.",
+  "error.delveWhileTrading": "거래 중에는 탐색에 들어갈 수 없습니다.",
+  "error.delveDuringDuel": "결투 중에는 탐색에 들어갈 수 없습니다.",
+  "error.delveDuringArena": "투기장 전투 중에는 탐색에 들어갈 수 없습니다.",
+  "error.unknownDelveTier": "알 수 없는 탐색 난이도입니다.",
+  "error.delveLevelRequired": "{name}에 들어가려면 {level}레벨이어야 합니다.",
+  "error.delveInstancesBusy": "{name}의 모든 인스턴스가 사용 중입니다. 잠시 후 다시 시도하세요.",
+  "log.delveRunFailed": "{name} 도전이 실패했습니다.",
+  "log.delveComplete": "{name} 완료.",
+};
+
+const DELVE_DICT_JA: Record<DelveSimMessageKey, string> = {
+  "error.delveCannotEnterNow": "今はダンジョン探索に入れません。",
+  "error.leaveDungeonFirst": "まずダンジョンから出てください。",
+  "error.leaveArenaFirst": "まずアリーナから出てください。",
+  "error.alreadyInDelve": "すでにダンジョン探索中です。",
+  "error.delveWhileTrading": "取引中はダンジョン探索に入れません。",
+  "error.delveDuringDuel": "決闘中はダンジョン探索に入れません。",
+  "error.delveDuringArena": "アリーナ戦中はダンジョン探索に入れません。",
+  "error.unknownDelveTier": "不明な探索難易度です。",
+  "error.delveLevelRequired": "{name}に入るにはレベル{level}が必要です。",
+  "error.delveInstancesBusy": "{name}のインスタンスはすべて使用中です。しばらくしてから再試行してください。",
+  "log.delveRunFailed": "{name}の挑戦は失敗しました。",
+  "log.delveComplete": "{name}をクリアしました。",
+};
+
+const DELVE_DICT_PT: Record<DelveSimMessageKey, string> = {
+  "error.delveCannotEnterNow": "Você não pode entrar em uma expedição agora.",
+  "error.leaveDungeonFirst": "Saia da masmorra primeiro.",
+  "error.leaveArenaFirst": "Saia da arena primeiro.",
+  "error.alreadyInDelve": "Você já está em uma expedição.",
+  "error.delveWhileTrading": "Você não pode entrar em uma expedição enquanto negocia.",
+  "error.delveDuringDuel": "Você não pode entrar em uma expedição durante um duelo.",
+  "error.delveDuringArena": "Você não pode entrar em uma expedição durante uma partida de arena.",
+  "error.unknownDelveTier": "Dificuldade de expedição desconhecida.",
+  "error.delveLevelRequired": "Você precisa ser nível {level} para entrar em {name}.",
+  "error.delveInstancesBusy": "Todas as instâncias de {name} estão ocupadas. Tente novamente em breve.",
+  "log.delveRunFailed": "A tentativa em {name} falhou.",
+  "log.delveComplete": "{name} concluída.",
+};
+
+const DELVE_DICT_RU: Record<DelveSimMessageKey, string> = {
+  "error.delveCannotEnterNow": "Сейчас нельзя войти в вылазку.",
+  "error.leaveDungeonFirst": "Сначала покиньте подземелье.",
+  "error.leaveArenaFirst": "Сначала покиньте арену.",
+  "error.alreadyInDelve": "Вы уже в вылазке.",
+  "error.delveWhileTrading": "Нельзя войти в вылазку во время торговли.",
+  "error.delveDuringDuel": "Нельзя войти в вылазку во время дуэли.",
+  "error.delveDuringArena": "Нельзя войти в вылазку во время боя на арене.",
+  "error.unknownDelveTier": "Неизвестный уровень сложности вылазки.",
+  "error.delveLevelRequired": "Чтобы войти в {name}, нужен {level} уровень.",
+  "error.delveInstancesBusy": "Все экземпляры {name} заняты. Попробуйте позже.",
+  "log.delveRunFailed": "Прохождение {name} провалено.",
+  "log.delveComplete": "{name} завершена.",
+};
+
+const DELVE_DICT: Record<SupportedLanguage, Record<DelveSimMessageKey, string>> = {
+  en: DELVE_DICT_EN,
+  en_CA: DELVE_DICT_EN,
+  es: DELVE_DICT_ES,
+  es_ES: DELVE_DICT_ES,
+  fr_FR: DELVE_DICT_FR,
+  fr_CA: DELVE_DICT_FR,
+  it_IT: DELVE_DICT_IT,
+  de_DE: DELVE_DICT_DE,
+  zh_CN: DELVE_DICT_ZH_CN,
+  zh_TW: DELVE_DICT_ZH_TW,
+  ko_KR: DELVE_DICT_KO,
+  ja_JP: DELVE_DICT_JA,
+  pt_BR: DELVE_DICT_PT,
+  ru_RU: DELVE_DICT_RU,
+};
+
 const PET_DICT: Record<SupportedLanguage, Record<PetSimMessageKey, string>> = {
   en: PET_DICT_EN,
   en_CA: PET_DICT_EN,
@@ -1407,7 +1593,7 @@ const PET_DICT: Record<SupportedLanguage, Record<PetSimMessageKey, string>> = {
 };
 
 export const DICT: Record<SupportedLanguage, Record<SimMessageKey, string>> = Object.fromEntries(
-  supportedLanguages.map((lang) => [lang, { ...BASE_DICT[lang], ...PET_DICT[lang] }]),
+  supportedLanguages.map((lang) => [lang, { ...BASE_DICT[lang], ...PET_DICT[lang], ...DELVE_DICT[lang] }]),
 ) as Record<SupportedLanguage, Record<SimMessageKey, string>>;
 
 function interpolate(template: string, params?: InterpolationValues): string {
@@ -1501,6 +1687,10 @@ const RULES: Rule[] = [
   { re: /^(.+) leaves the party\.$/, build: (m) => tSim('log.partyLeaves', { name: m[1] }) },
   { re: /^(.+) has left the party\.$/, build: (m) => tSim('log.partyLeft', { name: m[1] }) },
   { re: /^(.+) has been removed from the party\.$/, build: (m) => tSim('log.partyRemoved', { name: m[1] }) },
+  { re: /^You must be level (\d+) to enter (.+)\.$/, build: (m) => tSim('error.delveLevelRequired', { level: m[1], name: m[2] }) },
+  { re: /^All instances of (.+) are busy\. Try again soon\.$/, build: (m) => tSim('error.delveInstancesBusy', { name: m[1] }) },
+  { re: /^(.+) run failed\.$/, build: (m) => tSim('log.delveRunFailed', { name: m[1] }) },
+  { re: /^(.+) complete\.$/, build: (m) => tSim('log.delveComplete', { name: m[1] }) },
 ];
 
 // Returns the localized form of a sim-emitted message, or null if not one of ours.

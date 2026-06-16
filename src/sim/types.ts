@@ -604,6 +604,10 @@ export type SimEvent = { pid?: number } & (
   // entityId (when set) anchors the log to that entity so the server only
   // delivers it to nearby players; anchorless logs broadcast server-wide
   | { type: 'log'; text: string; color?: string; entityId?: number }
+  | { type: 'delveEntered'; delveId: string; tierId: string }
+  | { type: 'delveComplete'; delveId: string; tierId: string }
+  | { type: 'delveFailed'; delveId: string; tierId: string }
+  | { type: 'companionBark'; barkId: string }
 );
 
 export interface MoveInput {

@@ -11,7 +11,7 @@ import {
   emptyMoveInput,
 } from '../sim/types';
 import { normalizeMoveFacing, sanitizeMoveInput } from '../sim/move_input';
-import { isOverheadEmoteId, type ArenaInfo, type CharacterSearchResult, type DuelInfo, type FriendInfo, type IWorld, type LeaderboardEntry, type MarketInfo, type OverheadEmoteId, type PartyInfo, type PresenceStatus, type SocialInfo, type TradeInfo } from '../world_api';
+import { isOverheadEmoteId, type ArenaInfo, type CharacterSearchResult, type DelveDailyInfo, type DelveRunInfo, type DuelInfo, type FriendInfo, type IWorld, type LeaderboardEntry, type MarketInfo, type OverheadEmoteId, type PartyInfo, type PresenceStatus, type SocialInfo, type TradeInfo } from '../world_api';
 
 // ---------------------------------------------------------------------------
 // REST
@@ -254,6 +254,10 @@ export class ClientWorld implements IWorld {
   socialInfo: SocialInfo | null = null;
   arenaInfo: ArenaInfo | null = null;
   marketInfo: MarketInfo | null = null;
+  delveRun: DelveRunInfo | null = null;
+  delveMarks = 0;
+  companionUpgrades: Record<string, number> = {};
+  delveDaily: DelveDailyInfo = { date: '', firstClearXp: [], markClears: 0 };
   markers: Record<number, number> = {}; // entityId -> markerId, mirrored from the self-wire
   realm = '';
   // bumped whenever a fresh social snapshot lands, so an open panel re-renders
@@ -676,6 +680,10 @@ export class ClientWorld implements IWorld {
       if (s.duel !== undefined) this.duelInfo = s.duel;
       if (s.arena !== undefined) this.arenaInfo = s.arena;
       if (s.market !== undefined) this.marketInfo = s.market;
+      if (s.drun !== undefined) this.delveRun = s.drun;
+      if (s.dmarks !== undefined) this.delveMarks = s.dmarks ?? 0;
+      if (s.dcomp !== undefined) this.companionUpgrades = s.dcomp ?? {};
+      if (s.delveDaily !== undefined) this.delveDaily = s.delveDaily;
       // camera follows server-side facing changes when not mouselooking
       if (prevSelfFacing !== undefined && this.mouselookFacing === null) {
         let d = e.facing - prevSelfFacing;
@@ -926,6 +934,12 @@ export class ClientWorld implements IWorld {
   }
   leaveDungeon(): void {
     this.cmd({ cmd: 'leave_dungeon' });
+  }
+  enterDelve(delveId: string, tierId: string): void {
+    this.cmd({ cmd: 'enter_delve', delveId, tierId });
+  }
+  leaveDelve(): void {
+    this.cmd({ cmd: 'leave_delve' });
   }
   async leaderboard(): Promise<LeaderboardEntry[]> {
     try {

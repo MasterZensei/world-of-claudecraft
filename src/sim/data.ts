@@ -5,7 +5,7 @@
 // and owns the world-layout constants.
 
 import type {
-  CampDef, DelveDef, DungeonDef, GroundObjectDef, ItemDef, MobTemplate, NpcDef,
+  CampDef, DelveDef, DelveModuleDef, DungeonDef, GroundObjectDef, ItemDef, MobTemplate, NpcDef,
   PlayerClass, QuestDef, QuestState, ZoneDef, ZonePropsDef,
 } from './types';
 import { BASE_ITEMS } from './content/items';
@@ -28,7 +28,9 @@ import {
   TEMPLE_CAMPS, TEMPLE_DUNGEON_DEFS, TEMPLE_DUNGEON_MOBS, TEMPLE_ITEMS, TEMPLE_MOBS,
   TEMPLE_NPCS, TEMPLE_OBJECTS, TEMPLE_PROPS, TEMPLE_QUEST_ORDER, TEMPLE_QUESTS,
 } from './content/temple';
-import { PLACEHOLDER_DELVE } from './content/delves/_placeholder';
+import {
+  PLACEHOLDER_DELVE, PLACEHOLDER_DELVE_MODULES, PLACEHOLDER_DELVE_MOBS,
+} from './content/delves/_placeholder';
 
 function mergeItems(...parts: Record<string, ItemDef>[]): Record<string, ItemDef> {
   const merged = Object.assign({}, ...parts);
@@ -56,6 +58,7 @@ export const ITEMS: Record<string, ItemDef> = mergeItems(BASE_ITEMS, ZONE2_ITEMS
 export const MOBS: Record<string, MobTemplate> = {
   ...ZONE1_MOBS, ...ZONE2_MOBS, ...ZONE3_MOBS, ...DUNGEON_MOBS,
   ...WARLOCK_PET_MOBS, ...TEMPLE_MOBS, ...TEMPLE_DUNGEON_MOBS,
+  ...PLACEHOLDER_DELVE_MOBS,
 };
 
 export const NPCS: Record<string, NpcDef> = {
@@ -241,6 +244,7 @@ export function delveAt(x: number): DelveDef | null {
 
 export const DELVES: Record<string, DelveDef> = { [PLACEHOLDER_DELVE.id]: PLACEHOLDER_DELVE };
 export const DELVE_LIST: DelveDef[] = Object.values(DELVES).sort((a, b) => a.index - b.index);
+export const DELVE_MODULES: Record<string, DelveModuleDef> = { ...PLACEHOLDER_DELVE_MODULES };
 
 // Legacy aliases for the Hollow Crypt (tests + scripts reference these).
 export const CRYPT_DOOR_POS = DUNGEONS.hollow_crypt.doorPos;

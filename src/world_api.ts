@@ -1,4 +1,4 @@
-import { OVERHEAD_EMOTE_IDS, type Entity, type EquipSlot, type InvSlot, type MoveInput, type OverheadEmoteId, type PetMode, type PlayerClass, type QuestProgress, type QuestState, type ResourceType } from './sim/types';
+import { OVERHEAD_EMOTE_IDS, type DelveObjectiveState, type Entity, type EquipSlot, type InvSlot, type MoveInput, type OverheadEmoteId, type PetMode, type PlayerClass, type QuestProgress, type QuestState, type ResourceType } from './sim/types';
 import type { ResolvedAbility } from './sim/sim';
 import type { TalentAllocation, SavedLoadout, Role } from './sim/content/talents';
 
@@ -41,6 +41,23 @@ export interface DuelInfo {
   otherPid: number;
   otherName: string;
   state: 'countdown' | 'active';
+}
+
+export interface DelveRunInfo {
+  delveId: string;
+  tierId: string;
+  moduleIndex: number;
+  moduleCount: number;
+  modules: string[];
+  objective: DelveObjectiveState;
+  affixes: string[];
+  completed: boolean;
+}
+
+export interface DelveDailyInfo {
+  date: string;
+  firstClearXp: string[];
+  markClears: number;
 }
 
 export const OVERHEAD_EMOTES = [
@@ -280,6 +297,12 @@ export interface IWorld {
   marketCollect(): void;
   enterDungeon(dungeonId: string): void;
   leaveDungeon(): void;
+  enterDelve(delveId: string, tierId: string): void;
+  leaveDelve(): void;
+  delveRun: DelveRunInfo | null;
+  delveMarks: number;
+  companionUpgrades: Record<string, number>;
+  delveDaily: DelveDailyInfo;
   // Post-cap progression: the realm-scoped lifetime-XP leaderboard, and the
   // opt-in cosmetic prestige action (Phase 4).
   leaderboard(): Promise<LeaderboardEntry[]>;
