@@ -54,6 +54,14 @@ export interface DelveRunInfo {
   completed: boolean;
 }
 
+export interface DelveCompanionInfo {
+  companionId: string;
+  entityId: number;
+  rank: number;
+  hp: number;
+  maxHp: number;
+}
+
 export interface DelveDailyInfo {
   date: string;
   firstClearXp: string[];
@@ -299,7 +307,10 @@ export interface IWorld {
   leaveDungeon(): void;
   enterDelve(delveId: string, tierId: string): void;
   leaveDelve(): void;
+  delveInteract(objectId: number): void;
+  companionUpgrade(companionId: string): void;
   delveRun: DelveRunInfo | null;
+  companionState: DelveCompanionInfo | null;
   delveMarks: number;
   companionUpgrades: Record<string, number>;
   delveDaily: DelveDailyInfo;

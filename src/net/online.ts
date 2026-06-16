@@ -11,7 +11,7 @@ import {
   emptyMoveInput,
 } from '../sim/types';
 import { normalizeMoveFacing, sanitizeMoveInput } from '../sim/move_input';
-import { isOverheadEmoteId, type ArenaInfo, type CharacterSearchResult, type DelveDailyInfo, type DelveRunInfo, type DuelInfo, type FriendInfo, type IWorld, type LeaderboardEntry, type MarketInfo, type OverheadEmoteId, type PartyInfo, type PresenceStatus, type SocialInfo, type TradeInfo } from '../world_api';
+import { isOverheadEmoteId, type ArenaInfo, type CharacterSearchResult, type DelveCompanionInfo, type DelveDailyInfo, type DelveRunInfo, type DuelInfo, type FriendInfo, type IWorld, type LeaderboardEntry, type MarketInfo, type OverheadEmoteId, type PartyInfo, type PresenceStatus, type SocialInfo, type TradeInfo } from '../world_api';
 
 // ---------------------------------------------------------------------------
 // REST
@@ -255,6 +255,7 @@ export class ClientWorld implements IWorld {
   arenaInfo: ArenaInfo | null = null;
   marketInfo: MarketInfo | null = null;
   delveRun: DelveRunInfo | null = null;
+  companionState: DelveCompanionInfo | null = null;
   delveMarks = 0;
   companionUpgrades: Record<string, number> = {};
   delveDaily: DelveDailyInfo = { date: '', firstClearXp: [], markClears: 0 };
@@ -681,6 +682,7 @@ export class ClientWorld implements IWorld {
       if (s.arena !== undefined) this.arenaInfo = s.arena;
       if (s.market !== undefined) this.marketInfo = s.market;
       if (s.drun !== undefined) this.delveRun = s.drun;
+      if (s.dcompanion !== undefined) this.companionState = s.dcompanion;
       if (s.dmarks !== undefined) this.delveMarks = s.dmarks ?? 0;
       if (s.dcomp !== undefined) this.companionUpgrades = s.dcomp ?? {};
       if (s.delveDaily !== undefined) this.delveDaily = s.delveDaily;
@@ -940,6 +942,12 @@ export class ClientWorld implements IWorld {
   }
   leaveDelve(): void {
     this.cmd({ cmd: 'leave_delve' });
+  }
+  delveInteract(objectId: number): void {
+    this.cmd({ cmd: 'delve_interact', objectId });
+  }
+  companionUpgrade(companionId: string): void {
+    this.cmd({ cmd: 'companion_upgrade', companionId });
   }
   async leaderboard(): Promise<LeaderboardEntry[]> {
     try {

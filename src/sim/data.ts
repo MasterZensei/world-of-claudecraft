@@ -29,6 +29,12 @@ import {
   TEMPLE_NPCS, TEMPLE_OBJECTS, TEMPLE_PROPS, TEMPLE_QUEST_ORDER, TEMPLE_QUESTS,
 } from './content/temple';
 import {
+  BROTHER_HALVEN,
+  COLLAPSED_RELIQUARY_DELVE,
+  COLLAPSED_RELIQUARY_MODULES,
+  DELVE_MOBS,
+} from './content/delves';
+import {
   PLACEHOLDER_DELVE, PLACEHOLDER_DELVE_MODULES, PLACEHOLDER_DELVE_MOBS,
 } from './content/delves/_placeholder';
 
@@ -58,11 +64,12 @@ export const ITEMS: Record<string, ItemDef> = mergeItems(BASE_ITEMS, ZONE2_ITEMS
 export const MOBS: Record<string, MobTemplate> = {
   ...ZONE1_MOBS, ...ZONE2_MOBS, ...ZONE3_MOBS, ...DUNGEON_MOBS,
   ...WARLOCK_PET_MOBS, ...TEMPLE_MOBS, ...TEMPLE_DUNGEON_MOBS,
-  ...PLACEHOLDER_DELVE_MOBS,
+  ...DELVE_MOBS, ...PLACEHOLDER_DELVE_MOBS,
 };
 
 export const NPCS: Record<string, NpcDef> = {
   ...ZONE1_NPCS, ...ZONE2_NPCS, ...ZONE3_NPCS, ...TEMPLE_NPCS,
+  brother_halven: BROTHER_HALVEN,
 };
 
 export const QUESTS: Record<string, QuestDef> = {
@@ -242,9 +249,16 @@ export function delveAt(x: number): DelveDef | null {
   return DELVE_LIST.find((d) => d.index === index) ?? null;
 }
 
-export const DELVES: Record<string, DelveDef> = { [PLACEHOLDER_DELVE.id]: PLACEHOLDER_DELVE };
+export const DELVES: Record<string, DelveDef> = {
+  [COLLAPSED_RELIQUARY_DELVE.id]: COLLAPSED_RELIQUARY_DELVE,
+  [PLACEHOLDER_DELVE.id]: PLACEHOLDER_DELVE,
+};
 export const DELVE_LIST: DelveDef[] = Object.values(DELVES).sort((a, b) => a.index - b.index);
-export const DELVE_MODULES: Record<string, DelveModuleDef> = { ...PLACEHOLDER_DELVE_MODULES };
+export const DELVE_MODULES: Record<string, DelveModuleDef> = {
+  ...COLLAPSED_RELIQUARY_MODULES,
+  ...PLACEHOLDER_DELVE_MODULES,
+};
+export { DELVE_AFFIXES, DELVE_COMPANIONS, COMPANION_UPGRADE_COSTS } from './content/delves';
 
 // Legacy aliases for the Hollow Crypt (tests + scripts reference these).
 export const CRYPT_DOOR_POS = DUNGEONS.hollow_crypt.doorPos;

@@ -1014,9 +1014,19 @@ export class GameServer {
       }
       case 'leave_delve': {
         const e = sim.entities.get(pid);
-        if (!e || !isDelvePos(e.pos.x)) break;
+        if (!e || !sim.delveRunForPlayer(pid)) break;
         sim.leaveDelve(pid);
         this.resyncDelves(session);
+        break;
+      }
+      case 'delve_interact': {
+        if (typeof msg.objectId !== 'number') break;
+        sim.delveInteract(msg.objectId, pid);
+        break;
+      }
+      case 'companion_upgrade': {
+        if (typeof msg.companionId !== 'string') break;
+        sim.companionUpgrade(msg.companionId, pid);
         break;
       }
     }
@@ -1193,6 +1203,7 @@ export class GameServer {
     // only rides the wire for players actually browsing the World Market
     maybe('market', this.sim.marketInfoFor(session.pid));
     maybe('drun', this.sim.delveRunWire(session.pid));
+    maybe('dcompanion', this.sim.delveCompanionWire(session.pid));
     maybe('dmarks', this.sim.delveMarksFor(session.pid));
     maybe('dcomp', this.sim.companionUpgradesFor(session.pid));
     maybe('delveDaily', this.sim.delveDailyWire(session.pid));

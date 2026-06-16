@@ -607,7 +607,7 @@ export type SimEvent = { pid?: number } & (
   | { type: 'delveEntered'; delveId: string; tierId: string }
   | { type: 'delveComplete'; delveId: string; tierId: string }
   | { type: 'delveFailed'; delveId: string; tierId: string }
-  | { type: 'companionBark'; barkId: string }
+  | { type: 'companionBark'; barkId: string; pid?: number }
 );
 
 export interface MoveInput {
@@ -940,6 +940,11 @@ export interface DelveRun {
   completed: boolean;
   emptyFor: number;
   deathsThisRun: Record<number, number>;
+  objectState: Record<number, DelveObjectState>;
+  raiseDeadChannel: DelveRaiseDeadChannel | null;
+  restlessPending: DelveRestlessPending[];
+  badAirTimer: number;
+  companionBarks: string[];
 }
 
 export interface DelveDailyState {
@@ -959,4 +964,29 @@ export interface DelveAffixDef {
   id: string;
   name: string;
   themes: DelveTheme[];
+  blessing?: boolean;
+}
+
+export interface DelveObjectState {
+  kind: string;
+  triggered: boolean;
+  hp: number;
+  maxHp: number;
+  linkIds: number[];
+  open: boolean;
+}
+
+export interface DelveRaiseDeadChannel {
+  graveId: number;
+  bossId: number;
+  mobId: string;
+  count: number;
+  remaining: number;
+}
+
+export interface DelveRestlessPending {
+  at: number;
+  x: number;
+  z: number;
+  mobId: string;
 }

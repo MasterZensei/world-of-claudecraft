@@ -114,7 +114,7 @@ export const PLACEHOLDER_DELVE: DelveDef = {
 
   theme: 'crypt',
 
-  index: 0,
+  index: 1,
 
   minLevel: 1,
 
