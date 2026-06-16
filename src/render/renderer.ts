@@ -3,8 +3,9 @@ import { Entity, SimEvent } from '../sim/types';
 import { OVERHEAD_EMOTES, type IWorld } from '../world_api';
 import { groundHeight, WATER_LEVEL, zoneBiomeAt } from '../sim/world';
 import {
-  MOBS, ABILITIES, DUNGEON_X_THRESHOLD, DUNGEON_LIST, QUESTS,
-  instanceOrigin, INSTANCE_SLOT_COUNT, ARENA_SLOT_COUNT, arenaOrigin, arenaOriginAt, isArenaPos, dungeonAt,
+  MOBS, ABILITIES, DUNGEON_X_THRESHOLD, DUNGEON_LIST, DELVE_LIST, DELVE_SLOT_COUNT, QUESTS,
+  instanceOrigin, INSTANCE_SLOT_COUNT, ARENA_SLOT_COUNT, arenaOrigin, arenaOriginAt,
+  delveOrigin, isArenaPos, isDelvePos, dungeonAt,
 } from '../sim/data';
 import { ARENA_LAYOUT, DUNGEON_WALL_X } from '../sim/dungeon_layout';
 import { cameraOcclusion } from '../sim/colliders';
@@ -15,6 +16,8 @@ import { LocoTrack, newLocoTrack, updateLocomotion } from './locomotion';
 import { buildProps } from './props';
 import { plankTexture, sparkleTexture } from './textures';
 import { DungeonInteriors, ensureDungeonAssets } from './dungeon';
+import { buildDelveModule } from './delve_interiors';
+import { ensureDelveInteriorKit } from './interior_kit';
 import { buildGroundQuestObject } from './quest_objects';
 import { Vfx } from './vfx';
 import {
@@ -858,6 +861,13 @@ export class Renderer {
     });
   }
 
+  private buildDelveInterior(moduleId: string, ox: number, oz: number): void {
+    this.dungeons ??= new DungeonInteriors(this.scene, this.lowGfx, this.flames, this.fireLights);
+    void buildDelveModule(this.dungeons, moduleId, ox, oz).catch((err) => {
+      console.error('Failed to build delve interior:', err);
+    });
+  }
+
   // Outdoor fog presets per biome (high tier eases between them as the
   // player crosses zone bands; low keeps the legacy vale fog everywhere).
   private static BIOME_FOG: Record<BiomeId, { color: number; near: number; far: number }> = {
@@ -874,10 +884,23 @@ export class Renderer {
 
   private updateAmbience(px: number, camY: number, dt: number): void {
     const inside = px > DUNGEON_X_THRESHOLD;
-    if (inside && isArenaPos(px)) {
+    const pz = this.sim.player.pos.z;
+    if (isDelvePos(px)) {
+      void ensureDelveInteriorKit().catch(() => undefined);
+      for (const delve of DELVE_LIST) {
+        for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
+          const key = `delve:${delve.id}:${i}`;
+          if (this.builtInteriors.has(key)) continue;
+          const o = delveOrigin(delve.index, i);
+          if (Math.abs(px - o.x) < 200 && Math.abs(pz - o.z) < 250) {
+            this.builtInteriors.add(key);
+            this.buildDelveInterior('reliquary_sunken_ossuary', o.x, o.z);
+          }
+        }
+      }
+    } else if (inside && isArenaPos(px)) {
       void ensureDungeonAssets().catch(() => undefined);
       // build the Ashen Coliseum copy the player was matched into
-      const pz = this.sim.player.pos.z;
       for (let i = 0; i < ARENA_SLOT_COUNT; i++) {
         const key = `arena:${i}`;
         if (this.builtInteriors.has(key)) continue;
@@ -895,7 +918,7 @@ export class Renderer {
           const key = `${dungeon.id}:${i}`;
           if (this.builtInteriors.has(key)) continue;
           const o = instanceOrigin(dungeon.index, i);
-          if (Math.abs(px - o.x) < 200 && Math.abs(this.sim.player.pos.z - o.z) < 250) {
+          if (Math.abs(px - o.x) < 200 && Math.abs(pz - o.z) < 250) {
             this.builtInteriors.add(key);
             this.buildInterior(dungeon.interior, o.x, o.z);
           }
@@ -904,7 +927,7 @@ export class Renderer {
     }
     // the Drowned Temple reads as submerged: a teal murk instead of the
     // crypt's near-black, so its flooded halls feel underwater, not just dark
-    const inTemple = inside && !isArenaPos(px) && dungeonAt(px)?.interior === 'temple';
+    const inTemple = inside && !isDelvePos(px) && !isArenaPos(px) && dungeonAt(px)?.interior === 'temple';
     const desired = inTemple ? 'temple'
       : inside ? 'dungeon'
         : camY < WATER_LEVEL - 0.05 ? 'underwater' : 'outdoor';
