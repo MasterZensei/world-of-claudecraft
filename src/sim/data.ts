@@ -5,7 +5,7 @@
 // and owns the world-layout constants.
 
 import type {
-  CampDef, DungeonDef, GroundObjectDef, ItemDef, MobTemplate, NpcDef,
+  CampDef, DelveDef, DungeonDef, GroundObjectDef, ItemDef, MobTemplate, NpcDef,
   PlayerClass, QuestDef, QuestState, ZoneDef, ZonePropsDef,
 } from './types';
 import { BASE_ITEMS } from './content/items';
@@ -28,6 +28,7 @@ import {
   TEMPLE_CAMPS, TEMPLE_DUNGEON_DEFS, TEMPLE_DUNGEON_MOBS, TEMPLE_ITEMS, TEMPLE_MOBS,
   TEMPLE_NPCS, TEMPLE_OBJECTS, TEMPLE_PROPS, TEMPLE_QUEST_ORDER, TEMPLE_QUESTS,
 } from './content/temple';
+import { PLACEHOLDER_DELVE } from './content/delves/_placeholder';
 
 function mergeItems(...parts: Record<string, ItemDef>[]): Record<string, ItemDef> {
   const merged = Object.assign({}, ...parts);
@@ -43,7 +44,7 @@ export { CLASSES, ABILITIES, abilitiesKnownAt } from './content/classes';
 export type { ClassDef } from './content/classes';
 // Re-export content shapes so existing `from './data'` imports keep working.
 export type {
-  BiomeId, CampDef, DungeonDef, DungeonSpawn, GroundObjectDef, NpcDef, ZoneDef, ZonePropsDef,
+  BiomeId, CampDef, DelveDef, DungeonDef, DungeonSpawn, GroundObjectDef, NpcDef, ZoneDef, ZonePropsDef,
 } from './types';
 
 // ---------------------------------------------------------------------------
@@ -213,6 +214,33 @@ export function arenaOriginAt(z: number): { x: number; z: number; slot: number }
   const o = arenaOrigin(best);
   return { x: o.x, z: o.z, slot: best };
 }
+
+// ---------------------------------------------------------------------------
+// Delves — private party instances past the arena x-band (see docs/prd/delves.md).
+// DELVE_X_MIN must stay above ARENA_X_MIN (2800) and ARENA_X (3000).
+// ---------------------------------------------------------------------------
+
+export const DELVE_X_MIN = 3600;
+export const DELVE_SLOT_COUNT = 6;
+const DELVE_Z0 = -1250;
+const DELVE_SLOT_SPACING = 500;
+
+export function delveOrigin(delveIndex: number, slot: number): { x: number; z: number } {
+  return { x: DELVE_X_MIN + delveIndex * 600, z: DELVE_Z0 + slot * DELVE_SLOT_SPACING };
+}
+
+export function isDelvePos(x: number): boolean {
+  return x >= DELVE_X_MIN;
+}
+
+export function delveAt(x: number): DelveDef | null {
+  if (!isDelvePos(x)) return null;
+  const index = Math.round((x - DELVE_X_MIN) / 600);
+  return DELVE_LIST.find((d) => d.index === index) ?? null;
+}
+
+export const DELVES: Record<string, DelveDef> = { [PLACEHOLDER_DELVE.id]: PLACEHOLDER_DELVE };
+export const DELVE_LIST: DelveDef[] = Object.values(DELVES).sort((a, b) => a.index - b.index);
 
 // Legacy aliases for the Hollow Crypt (tests + scripts reference these).
 export const CRYPT_DOOR_POS = DUNGEONS.hollow_crypt.doorPos;

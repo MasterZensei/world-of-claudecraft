@@ -828,3 +828,131 @@ export function armorReduction(armor: number, attackerLevel: number): number {
   const a = Math.max(0, armor);
   return Math.min(0.75, a / (a + 85 * attackerLevel + 400));
 }
+
+// ---------------------------------------------------------------------------
+// Delves — replayable modular instances (see docs/prd/delves.md)
+// ---------------------------------------------------------------------------
+
+export type DelveTheme = 'crypt' | 'cave' | 'mine' | 'ruin' | 'sewer' | 'vault' | 'lair';
+
+export type DelveObjectiveKind =
+  | 'kill_boss'
+  | 'recover_artifact'
+  | 'seal_portal'
+  | 'survive_ambush'
+  | 'escort_researcher'
+  | 'investigate_clues';
+
+export interface DelveRewardTable {
+  copperMin: number;
+  copperMax: number;
+  firstClearXp: number;
+  repeatClearXp: number;
+}
+
+export interface DelveTierDef {
+  id: string;
+  label: string;
+  enemyLevelBonus: number;
+  affixCount: number;
+  rewardMult: number;
+  unlock?: { delveId: string; tierId: string; clears: number };
+}
+
+export interface DelvePatrol {
+  mobId: string;
+  from: { x: number; z: number };
+  to: { x: number; z: number };
+}
+
+export interface DelveSpawnSet {
+  id: string;
+  weight: number;
+  spawns: DungeonSpawn[];
+  patrols?: DelvePatrol[];
+}
+
+export interface DelveInteractableSlot {
+  x: number;
+  z: number;
+  variants: string[];
+}
+
+export interface DelveModuleDef {
+  id: string;
+  interior: 'crypt' | 'cave' | 'mine';
+  layout: string;
+  length: number;
+  spawnSets: DelveSpawnSet[];
+  interactableSlots: DelveInteractableSlot[];
+  sideRoom?: { chance: number; moduleId: string };
+}
+
+export interface DelveDef {
+  id: string;
+  name: string;
+  theme: DelveTheme;
+  index: number;
+  minLevel: number;
+  suggestedPlayers: number;
+  doorPos: { x: number; z: number };
+  modules: string[];
+  moduleCount: [number, number];
+  finaleModuleId: string;
+  bosses: string[];
+  objective: DelveObjectiveKind;
+  tiers: DelveTierDef[];
+  baseRewards: DelveRewardTable;
+  boardNpcId: string;
+  enterText: string;
+  leaveText: string;
+}
+
+export interface DelveObjectiveState {
+  kind: DelveObjectiveKind;
+  counts: number[];
+  complete: boolean;
+}
+
+export interface DelveCompanionState {
+  companionId: string;
+  entityId: number;
+}
+
+export interface DelveRun {
+  delveId: string;
+  slot: number;
+  partyKey: string | null;
+  seed: number;
+  tierId: string;
+  affixes: string[];
+  modules: string[];
+  moduleIndex: number;
+  origin: { x: number; z: number };
+  mobIds: number[];
+  objectIds: number[];
+  objective: DelveObjectiveState;
+  companion?: DelveCompanionState;
+  completed: boolean;
+  emptyFor: number;
+  deathsThisRun: Record<number, number>;
+}
+
+export interface DelveDailyState {
+  date: string;
+  firstClearXp: string[];
+  markClears: number;
+}
+
+export interface DelveCompanionDef {
+  id: string;
+  name: string;
+  role: 'healer' | 'tank' | 'scout' | 'dps';
+  mobTemplateId: string;
+}
+
+export interface DelveAffixDef {
+  id: string;
+  name: string;
+  themes: DelveTheme[];
+}
