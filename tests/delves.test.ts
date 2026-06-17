@@ -47,7 +47,7 @@ function teleport(sim: Sim, x: number, z: number) {
 }
 
 function enterReliquary(sim: Sim, tier: 'normal' | 'heroic' = 'normal') {
-  sim.setPlayerLevel(10);
+  sim.setPlayerLevel(DELVES.collapsed_reliquary.minLevel);
   const door = DELVES.collapsed_reliquary.doorPos;
   teleport(sim, door.x, door.z);
   sim.enterDelve('collapsed_reliquary', tier);

@@ -691,7 +691,12 @@ async function startGame(world: IWorld, offlineSim: Sim | null, online: ClientWo
       world.pickUpObject(bestObj);
       return;
     }
-    if (bestNpc !== null) { hud.openQuestDialog(bestNpc); return; }
+    if (bestNpc !== null) {
+      const npc = world.entities.get(bestNpc);
+      if (npc?.kind === 'npc' && npc.templateId === 'brother_halven') hud.openDelveBoard(bestNpc);
+      else hud.openQuestDialog(bestNpc);
+      return;
+    }
     hud.showError(t('errors.nothingInteract'));
   }
 

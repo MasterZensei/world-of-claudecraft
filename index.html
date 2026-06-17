@@ -616,6 +616,31 @@
   .qd-obj.done,
   .quest-complete { color: var(--color-text-success); }
 
+  /* ---------- delve tracker ---------- */
+  #delve-tracker { position: absolute; right: 14px; top: 380px; width: 240px; font-size: 12px;
+    color: var(--gold); text-shadow: 1px 1px 2px #000; pointer-events: none; display: none; }
+  #delve-tracker .dt-header { font-family: var(--title-font); font-size: 14px; border-bottom: 1px solid #ffd10044; margin-bottom: 4px; padding-bottom: 2px; }
+  #delve-tracker .dt-title { font-weight: bold; margin-top: 8px; font-family: var(--title-font); }
+  #delve-tracker .dt-tier { color: #c9b27a; font-size: 11px; font-weight: normal; }
+  #delve-tracker .dt-obj { color: #e8e0c8; font-size: 11px; margin-left: 8px; }
+  #delve-tracker .dt-obj.done { color: var(--color-text-success); }
+  #delve-tracker .dt-affix-row { pointer-events: auto; margin: 4px 0 0 8px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  #delve-tracker .dt-affix-label { color: #c9b27a; font-size: 11px; margin-right: 2px; }
+  #delve-tracker .dt-affix-icon { display: inline-block; width: 14px; height: 14px; border-radius: 2px; border: 1px solid #0008; cursor: help; }
+
+  /* ---------- delve board ---------- */
+  #delve-board { width: 360px; padding: 14px; }
+  #delve-board .delve-board-name { font-family: var(--title-font); font-size: 16px; color: var(--gold); margin: 8px 0 4px; }
+  #delve-board .delve-board-meta { font-size: 12px; color: #c9b27a; margin-bottom: 10px; }
+  #delve-board .delve-board-greeting { font-size: 12px; color: #e8e0c8; margin-bottom: 10px; line-height: 1.35; }
+  #delve-board .delve-tier-row { display: flex; gap: 6px; margin-bottom: 10px; }
+  #delve-board .delve-tier-btn { flex: 1; min-height: 40px; font-size: 13px; background: #1a1410; border: 1px solid #463a1c; border-radius: 3px; color: #c9b27a; cursor: pointer; }
+  #delve-board .delve-tier-btn.selected { color: var(--gold); border-color: var(--gold-dim); background: #2a2010; }
+  #delve-board .delve-companion-row { margin-bottom: 10px; }
+  #delve-board .delve-companion-label { font-size: 11px; color: #c9b27a; margin-bottom: 4px; }
+  #delve-board .delve-companion-btn { width: 100%; min-height: 40px; box-sizing: border-box; text-align: left; padding: 6px 10px; font-size: 13px; background: #1a1410; border: 1px solid #463a1c; border-radius: 3px; color: var(--gold); cursor: default; }
+  #delve-board .btn { width: 100%; margin: 4px 0 0; box-sizing: border-box; text-align: center; }
+
   /* ---------- combat meters ---------- */
   #meters-window { width: 240px; padding: 8px 10px; display: none; align-self: flex-end; margin-bottom: 6px; text-align: left; }
   #meters-window .panel-title { margin-bottom: 4px; }
@@ -4361,6 +4386,7 @@
     </div>
 
     <div id="quest-tracker"></div>
+    <div id="delve-tracker"></div>
 
     <div id="bottom-bar">
       <div id="actionbar-row">
@@ -4412,6 +4438,7 @@
     </div>
 
     <div id="quest-dialog" class="window panel"></div>
+    <div id="delve-board" class="window panel"></div>
     <div id="loot-window" class="window panel"></div>
     <div id="bags" class="window panel"></div>
     <div id="char-window" class="window panel"></div>

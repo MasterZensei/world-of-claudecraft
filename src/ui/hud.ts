@@ -1,11 +1,11 @@
 import type { ResolvedAbility } from '../sim/sim';
-import { OVERHEAD_EMOTES, isOverheadEmoteId, type FriendInfo, type IWorld, type LeaderboardEntry, type MarketInfo, type OverheadEmoteId } from '../world_api';
+import { OVERHEAD_EMOTES, isOverheadEmoteId, type DelveRunInfo, type FriendInfo, type IWorld, type LeaderboardEntry, type MarketInfo, type OverheadEmoteId } from '../world_api';
 import { Renderer } from '../render/renderer';
 import { CharacterPreview } from '../render/characters';
 import { skinCount } from '../render/characters/manifest';
 import { emoteIconUrl } from './emote_icons';
 import {
-  ABILITIES, CLASSES, DUNGEON_LIST, DUNGEON_X_THRESHOLD, ITEMS, MOBS, NPCS, PROPS, QUESTS,
+  ABILITIES, CLASSES, DELVE_AFFIXES, DELVES, DUNGEON_LIST, DUNGEON_X_THRESHOLD, ITEMS, MOBS, NPCS, PROPS, QUESTS,
   WORLD_MAX_X, WORLD_MAX_Z, WORLD_MIN_X, WORLD_MIN_Z, ZONES, dungeonAt, questRewardItem, zoneAt,
   zoneWelcomeText,
 } from '../sim/data';
@@ -29,7 +29,7 @@ import { isPhoneTouchDevice } from '../game/mobile_controls';
 import { chatPlayerContextActions } from './player_context_menu';
 import { TouchPeekGuard, TOOLTIP_PEEK_MS } from './touch_peek';
 import { maskProfanity } from './profanity';
-import { formatMoney as formatLocalizedMoney, formatNumber, moneyParts, t, type TranslationKey } from './i18n';
+import { formatMoney as formatLocalizedMoney, formatNumber, moneyParts, t, tOptional, type TranslationKey } from './i18n';
 import { tEntity } from './entity_i18n';
 import { localizeServerText, localizeZone } from './server_i18n';
 import { localizeSimText, localizeSimAuraName } from './sim_i18n';
@@ -206,6 +206,18 @@ const CHAT_TEMPLATE_KEYS = {
 } satisfies Record<string, TranslationKey>;
 type HotbarForm = 'normal' | 'bear' | 'cat' | 'stealth';
 
+const DELVE_AFFIX_COLORS: Record<string, string> = {
+  restless_graves: '#8b7355',
+  bad_air: '#6a8a6a',
+  candleblind: '#c9a227',
+  old_mechanisms: '#7a8a9a',
+  flooded_paths: '#4a7a9a',
+  grave_tax: '#9a6a4a',
+  unstable_roof: '#8a6a5a',
+  cult_remnants: '#7a4a8a',
+  chapel_candle: '#ffd100',
+};
+
 // world map: terrain is pre-rendered for the whole zone at this resolution
 // (cached per zone) and a sub-rect is blitted for the current zoom.
 const MAP_BG_RES = 480;
@@ -273,6 +285,10 @@ export class Hud {
   private mapBg: HTMLCanvasElement | null = null;
   private openLootMobId: number | null = null;
   private openVendorNpcId: number | null = null;
+  private openDelveBoardNpcId: number | null = null;
+  private lastDelveTrackerSig = '';
+  private selectedDelveTier: 'normal' | 'heroic' = 'normal';
+  private delveBoardReturnFocus: HTMLElement | null = null;
   private openGossipNpcId: number | null = null;
   private openQuestDetailId: string | null = null;
   private selectedQuestLogId: string | null = null;
@@ -646,6 +662,7 @@ export class Hud {
       case 'vendor-window': this.closeVendor(); break;
       case 'loot-window': this.closeLoot(); break;
       case 'quest-dialog': this.closeQuestDialog(); break;
+      case 'delve-board': this.closeDelveBoard(); break;
       case 'talents-window': el.style.display = 'none'; this.talentStage = null; this.hideTooltip(); break;
       case 'emote-editor': this.closeEmoteEditor(); break;
       default: el.style.display = 'none'; this.hideTooltip(); break;
@@ -1063,6 +1080,7 @@ export class Hud {
 
   private refreshLocalizedDynamicUi(): void {
     this.updateQuestTracker();
+    this.updateDelveTracker();
     const log = $('#quest-log-window');
     if (log.style.display === 'block') this.renderQuestLog();
     if ($('#bags').style.display === 'block') this.renderBags();
@@ -1728,6 +1746,7 @@ export class Hud {
       music.update(zone, inCombat);
 
       this.updateQuestTracker();
+      this.updateDelveTracker();
       this.updatePartyFrames();
       this.updateTradeWindow();
       this.updateArenaStatus();
@@ -1801,6 +1820,147 @@ export class Hud {
       });
     }
     if (el.innerHTML !== html) el.innerHTML = html;
+  }
+
+  // -------------------------------------------------------------------------
+  // Delve board & tracker
+  // -------------------------------------------------------------------------
+
+  openDelveBoard(npcId: number): void {
+    const npc = this.sim.entities.get(npcId);
+    if (!npc || npc.kind !== 'npc') return;
+    const delve = Object.values(DELVES).find((d) => d.boardNpcId === npc.templateId);
+    if (!delve) return;
+    if ($('#delve-board').style.display !== 'block') this.delveBoardReturnFocus = this.currentFocusableElement();
+    this.openDelveBoardNpcId = npcId;
+    this.selectedDelveTier = 'normal';
+    this.closeOtherWindows('#delve-board');
+    $('#delve-board').style.display = 'block';
+    this.renderDelveBoard();
+  }
+
+  private renderDelveBoard(): void {
+    const el = $('#delve-board');
+    const npcId = this.openDelveBoardNpcId;
+    if (npcId === null) {
+      el.style.display = 'none';
+      return;
+    }
+    const npc = this.sim.entities.get(npcId);
+    if (!npc || npc.kind !== 'npc') {
+      this.closeDelveBoard();
+      return;
+    }
+    const delve = Object.values(DELVES).find((d) => d.boardNpcId === npc.templateId);
+    if (!delve) {
+      this.closeDelveBoard();
+      return;
+    }
+    const delveName = delveDisplayName(delve.id);
+    const canEnter = this.sim.player.level >= delve.minLevel;
+    const tierNormal = t('delveUi.board.tier.normal');
+    const tierHeroic = t('delveUi.board.tier.heroic');
+    const marks = formatNumber(this.sim.delveMarks, { maximumFractionDigits: 0 });
+    const tessaRank = this.sim.companionUpgrades.companion_tessa ?? 1;
+    const tessaRankLabel = t('delveUi.board.companion.rank', {
+      rank: formatNumber(tessaRank, { maximumFractionDigits: 0 }),
+    });
+    const tierRow = ['normal', 'heroic'].map((tierId) => {
+      const label = tierId === 'heroic' ? tierHeroic : tierNormal;
+      const selected = this.selectedDelveTier === tierId ? ' selected' : '';
+      return `<button type="button" class="delve-tier-btn${selected}" data-tier-pick="${esc(tierId)}" aria-pressed="${this.selectedDelveTier === tierId}">${esc(label)}</button>`;
+    }).join('');
+    el.innerHTML = `<div class="panel-title"><span>${esc(t('delveUi.board.title'))}</span><button type="button" class="x-btn" data-close aria-label="${esc(t('questUi.dialog.close'))}">${svgIcon('close')}</button></div>`
+      + `<div class="delve-board-name">${esc(delveName)}</div>`
+      + `<div class="delve-board-meta">${esc(t('delveUi.board.marks', { count: marks }))}</div>`
+      + `<div class="delve-board-greeting">${esc(t('delveUi.npc.halven.greeting'))}</div>`
+      + `<div class="delve-tier-row">${tierRow}</div>`
+      + `<div class="delve-companion-row"><div class="delve-companion-label">${esc(t('delveUi.board.companion.pick'))}</div>`
+      + `<button type="button" class="delve-companion-btn" disabled aria-label="${esc(t('delveUi.board.companion.tessa'))}">${esc(t('delveUi.board.companion.tessa'))} <span class="quest-muted">(${esc(tessaRankLabel)})</span></button></div>`
+      + `<button type="button" class="btn delve-enter-btn" data-delve-enter aria-label="${esc(t('delveUi.board.enterAria', { delve: delveName, tier: this.selectedDelveTier === 'heroic' ? tierHeroic : tierNormal }))}"${canEnter ? '' : ' disabled'}>${esc(t('delveUi.board.enter'))}</button>`;
+    el.querySelectorAll('[data-tier-pick]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        this.selectedDelveTier = (btn as HTMLElement).dataset.tierPick as 'normal' | 'heroic';
+        this.renderDelveBoard();
+      });
+    });
+    el.querySelector('[data-delve-enter]')?.addEventListener('click', () => {
+      this.sim.enterDelve('collapsed_reliquary', this.selectedDelveTier);
+      this.closeDelveBoard();
+    });
+    el.querySelector('[data-close]')?.addEventListener('click', () => this.closeDelveBoard());
+    this.focusFirstInteractive(el, '.delve-enter-btn');
+  }
+
+  private closeDelveBoard(restoreFocus = true): void {
+    $('#delve-board').style.display = 'none';
+    this.openDelveBoardNpcId = null;
+    this.hideTooltip();
+    const target = this.delveBoardReturnFocus;
+    this.delveBoardReturnFocus = null;
+    if (restoreFocus) this.restoreFocus(target);
+  }
+
+  private delveObjectiveLine(run: DelveRunInfo): string {
+    if (run.objective.kind === 'kill_boss') {
+      const bossId = DELVES[run.delveId]?.bosses[0] ?? 'deacon_varric';
+      return t('delveUi.objective.kill_boss', { boss: mobDisplayName(bossId) });
+    }
+    return t(`delveUi.objective.${run.objective.kind}` as TranslationKey);
+  }
+
+  private delveAffixLabel(affixId: string): string {
+    const affix = DELVE_AFFIXES[affixId];
+    if (!affix) return affixId;
+    if (affix.blessing) return t(`delveUi.blessing.${affixId}` as TranslationKey);
+    return t(`delveUi.affix.${affixId}` as TranslationKey);
+  }
+
+  private updateDelveTracker(): void {
+    const el = $('#delve-tracker');
+    const run = this.sim.delveRun;
+    if (!run) {
+      this.lastDelveTrackerSig = '';
+      if (el.innerHTML !== '') el.innerHTML = '';
+      el.style.display = 'none';
+      return;
+    }
+    const sig = JSON.stringify([run.delveId, run.tierId, run.moduleIndex, run.moduleCount, run.modules, run.objective, run.affixes, run.completed, this.sim.delveMarks]);
+    if (sig === this.lastDelveTrackerSig) return;
+    this.lastDelveTrackerSig = sig;
+    el.style.display = 'block';
+    const delveName = delveDisplayName(run.delveId);
+    const tierLabel = run.tierId === 'heroic' ? t('delveUi.board.tier.heroic') : t('delveUi.board.tier.normal');
+    const modId = run.modules[run.moduleIndex];
+    const modName = modId ? t(`delveUi.module.${modId}` as TranslationKey) : '';
+    const moduleLine = t('delveUi.tracker.module', {
+      current: formatNumber(run.moduleIndex + 1, { maximumFractionDigits: 0 }),
+      total: formatNumber(run.moduleCount, { maximumFractionDigits: 0 }),
+    });
+    const objectiveLine = this.delveObjectiveLine(run);
+    const complete = run.objective.complete || run.completed
+      ? ` <span class="quest-complete">(${esc(t('delveUi.tracker.complete'))})</span>`
+      : '';
+    let affixHtml = '';
+    if (run.affixes.length > 0) {
+      affixHtml = `<div class="dt-affix-row"><span class="dt-affix-label">${esc(t('delveUi.tracker.affix'))}</span>`;
+      for (const affixId of run.affixes) {
+        const color = DELVE_AFFIX_COLORS[affixId] ?? '#888';
+        affixHtml += `<span class="dt-affix-icon" data-affix="${esc(affixId)}" style="background:${color}" aria-hidden="true"></span>`;
+      }
+      affixHtml += '</div>';
+    }
+    const marks = formatNumber(this.sim.delveMarks, { maximumFractionDigits: 0 });
+    el.innerHTML = `<div class="dt-header">${esc(t('delveUi.tracker.title'))}</div>`
+      + `<div class="dt-title">${esc(delveName)} <span class="dt-tier">${esc(tierLabel)}</span>${complete}</div>`
+      + `<div class="dt-obj">- ${esc(moduleLine)}${modName ? `: ${esc(modName)}` : ''}</div>`
+      + `<div class="dt-obj${run.objective.complete ? ' done' : ''}">- ${esc(t('delveUi.tracker.objective'))}: ${esc(objectiveLine)}</div>`
+      + `<div class="dt-obj">- ${esc(t('delveUi.tracker.marks', { count: marks }))}</div>`
+      + affixHtml;
+    el.querySelectorAll('.dt-affix-icon').forEach((icon) => {
+      const affixId = (icon as HTMLElement).dataset.affix!;
+      this.attachTooltip(icon as HTMLElement, () => `<div class="tt-title">${esc(this.delveAffixLabel(affixId))}</div>`);
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -3004,6 +3164,9 @@ export class Hud {
     if (def?.market) {
       html += `<button type="button" class="qd-list-item" data-market="1" aria-label="${esc(t('questUi.dialog.worldMarketAria'))}"><span class="gold">${svgIcon('market')}</span> ${esc(t('questUi.dialog.worldMarket'))}</button>`;
     }
+    if (Object.values(DELVES).some((d) => d.boardNpcId === npc.templateId)) {
+      html += `<button type="button" class="qd-list-item" data-delve-board="1" aria-label="${esc(t('delveUi.board.openDelveAria', { name: npcName }))}"><span class="gold">${svgIcon('skull')}</span> ${esc(t('delveUi.board.openDelve'))}</button>`;
+    }
     el.innerHTML = html;
     el.querySelectorAll('[data-quest]').forEach((item) => {
       item.addEventListener('click', () => this.renderQuestDetail(npc, (item as HTMLElement).dataset.quest!));
@@ -3015,6 +3178,10 @@ export class Hud {
     el.querySelector('[data-market]')?.addEventListener('click', () => {
       this.closeQuestDialog(false);
       this.openMarket();
+    });
+    el.querySelector('[data-delve-board]')?.addEventListener('click', () => {
+      this.closeQuestDialog(false);
+      this.openDelveBoard(npc.id);
     });
     el.querySelector('[data-close]')?.addEventListener('click', () => this.closeQuestDialog());
     el.style.display = 'block';
@@ -5810,6 +5977,10 @@ export class Hud {
     this.closeManagedWindow(top);
     return true;
   }
+}
+
+function delveDisplayName(delveId: string): string {
+  return tEntity({ kind: 'delve', id: delveId, field: 'name' });
 }
 
 function describeAbilitySummary(known: ResolvedAbility, resourceType: ResourceType | null): string {
