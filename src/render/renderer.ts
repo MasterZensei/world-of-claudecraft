@@ -1410,6 +1410,7 @@ export class Renderer {
   private updateCamera(alpha: number, dt: number): void {
     const p = this.sim.player;
     const seed = this.sim.cfg.seed;
+    const run = this.sim.delveRun;
     const px = p.prevPos.x + (p.pos.x - p.prevPos.x) * alpha;
     const py = p.prevPos.y + (p.pos.y - p.prevPos.y) * alpha;
     const pz = p.prevPos.z + (p.pos.z - p.prevPos.z) * alpha;
@@ -1436,7 +1437,6 @@ export class Renderer {
         if (d < bestD) { bestD = d; slot = i; }
       }
       const origin = delveOrigin(index, slot);
-      const run = this.sim.delveRun;
       const modules = (run?.modules?.length ? run.modules : ['reliquary_sunken_ossuary']) as DelveModuleId[];
       const mi = run?.moduleIndex ?? 0;
       const layout = DELVE_MODULE_LAYOUTS[modules[mi] ?? 'reliquary_sunken_ossuary'];
