@@ -945,6 +945,8 @@ export interface DelveRun {
   restlessPending: DelveRestlessPending[];
   badAirTimer: number;
   companionBarks: string[];
+  /** True when the current module exit portal is active (trash cleared + plate if any). */
+  exitPortalOpen: boolean;
 }
 
 export interface DelveDailyState {

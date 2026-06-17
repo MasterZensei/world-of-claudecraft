@@ -32,8 +32,10 @@ Do **not** run `npm run server`. Open **http://localhost:5173/**.
 6. Delve board opens → pick **Normal** or **Heroic** → **Enter**.
 7. Confirm delve tracker (top quest tracker area) shows module, objective, affixes.
 8. **Visual check:** you should see a KayKit crypt interior (stone floor, walls, blue torchlight) — not a black void. If the screen stays black, hard-refresh and re-enter.
-9. Fight trash, progress modules, kill **Deacon Varric** in the finale.
-10. **Leave delve** (no HUD button yet): browser console → `__game.sim.leaveDelve()` — returns you to Halven.
+9. **Module progression:** clear trash in each chamber. Modules with a pressure plate require stepping on it first (chat: *"A passage opens to the north"*). When ready, an **Exit Portal** appears at the **far north end** (+Z) of the room. Walk into it (or interact) to advance to the next module. The delve tracker shows *"Find the exit portal (north)"* when the portal is open.
+10. **Companion:** solo runs spawn **Acolyte Tessa** — she follows, heals every few seconds, and assists in combat.
+11. Fight trash, progress modules, kill **Deacon Varric** in the finale.
+12. **Leave delve** (no HUD button yet): browser console → `__game.sim.leaveDelve()` — returns you to Halven.
 
 ## Dev console hooks (`window.__game`)
 
@@ -67,6 +69,10 @@ npx vitest run tests/delves.test.ts
 ```
 
 13 tests cover spatial band, enter/leave lifecycle, death rules, companions, and pet stow — all headless `Sim`, no server.
+
+```powershell
+npx vitest run tests/delves.test.ts tests/delve_companion.test.ts
+```
 
 ## What does *not* work offline
 

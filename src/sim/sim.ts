@@ -1,12 +1,13 @@
 import {
   ABILITIES, ARENA_SLOT_COUNT, CAMPS, CLASSES, COMPANION_UPGRADE_COSTS, DELVE_AFFIXES, DELVE_COMPANIONS,
-  DELVE_LIST, DELVE_MODULES, DELVES, DELVE_SLOT_COUNT,
+  DELVE_LIST, DELVE_MODULES, DELVE_MODULE_GAP, DELVE_MODULE_Z_START, DELVES, DELVE_SLOT_COUNT,
   DUNGEONS, DUNGEON_LIST, DungeonDef, arenaOrigin, delveAt, delveOrigin, delveModuleZOffset, dungeonAt,
   DUNGEON_X_THRESHOLD, GROUND_OBJECTS, GROUP_XP_BONUS, INSTANCE_SLOT_COUNT, isArenaPos, isDelvePos,
   ITEMS, MOBS, NPCS, PLAYER_START, QUESTS, questRewardItemId, abilitiesKnownAt, instanceOrigin,
   zoneAt, ZONES,
 } from './data';
 import { ARENA_SPAWN_A, ARENA_SPAWN_B } from './dungeon_layout';
+import { DELVE_MODULE_LAYOUTS, type DelveModuleId } from './delve_layout';
 import { lineOfSightClear, resolvePosition } from './colliders';
 import { findPath } from './pathfind';
 import { createGroundObject, createMob, createNpc, createPlayer, recalcPlayerStats, PlayerEquipment } from './entity';
@@ -153,6 +154,7 @@ const DELVE_RAISE_DEAD_CHANNEL = 5;
 const DELVE_COMPANION_HEAL_RANGE = 22;
 const DELVE_COMPANION_HEAL_INTERVAL = 3;
 const DELVE_COMPANION_FOLLOW = 4;
+const DELVE_EXIT_PORTAL_RADIUS = 3.5;
 const MAX_CLIMB_SLOPE = 1.5; // rise/run above which a ground move is blocked (cliffs, world rim)
 
 // How far a mob pulls same-family neighbours into a fight ("social aggro").
@@ -636,6 +638,7 @@ export class Sim {
           restlessPending: [],
           badAirTimer: 0,
           companionBarks: [],
+          exitPortalOpen: false,
         });
       }
     }
@@ -1535,7 +1538,7 @@ export class Sim {
     const h1 = groundHeight(nx, nz, this.cfg.seed);
     if (h1 < WATER_LEVEL - SWIM_DEPTH) return done(false);
     if (h1 > h0 && (h1 - h0) / step > MAX_CLIMB_SLOPE) return done(false);
-    const resolved = resolvePosition(this.cfg.seed, nx, nz, BODY_RADIUS);
+    const resolved = this.resolveMove(nx, nz, BODY_RADIUS, p);
     p.pos.x = resolved.x;
     p.pos.z = resolved.z;
     p.pos.y = groundHeight(resolved.x, resolved.z, this.cfg.seed);
@@ -1584,7 +1587,7 @@ export class Sim {
     const h1 = groundHeight(nx, nz, this.cfg.seed);
     if (h1 < WATER_LEVEL - SWIM_DEPTH) return true; // don't trail into deep water
     if (h1 > h0 && step > 1e-5 && (h1 - h0) / step > MAX_CLIMB_SLOPE) return true; // wall/cliff
-    const resolved = resolvePosition(this.cfg.seed, nx, nz, BODY_RADIUS);
+    const resolved = this.resolveMove(nx, nz, BODY_RADIUS, p);
     p.pos.x = resolved.x;
     p.pos.z = resolved.z;
     p.pos.y = groundHeight(resolved.x, resolved.z, this.cfg.seed);
@@ -1654,7 +1657,7 @@ export class Sim {
         }
       }
       // slide along buildings, trees, crypt walls
-      const resolved = resolvePosition(this.cfg.seed, nx, nz, BODY_RADIUS);
+      const resolved = this.resolveMove(nx, nz, BODY_RADIUS, p);
       p.pos.x = resolved.x;
       p.pos.z = resolved.z;
       if (!p.onGround && (resolved.x !== nx || resolved.z !== nz)) {
@@ -4371,7 +4374,7 @@ export class Sim {
       const nz = e.pos.z + Math.cos(a) * step;
       // landlocked creatures stop at the waterline instead of walking under it
       if (!canSwim && groundHeight(nx, nz, this.cfg.seed) < WATER_LEVEL - SWIM_DEPTH) continue;
-      const r = resolvePosition(this.cfg.seed, nx, nz, BODY_RADIUS);
+      const r = this.resolveMove(nx, nz, BODY_RADIUS, e);
       const progress = d - Math.hypot(r.x - dest.x, r.z - dest.z);
       if (progress > bestProgress) { bestProgress = progress; bestX = r.x; bestZ = r.z; }
       if (off === 0 && progress >= step - 1e-3) break; // straight path is clear
@@ -4394,7 +4397,7 @@ export class Sim {
     const nx = e.pos.x + Math.sin(facing) * step;
     const nz = e.pos.z + Math.cos(facing) * step;
     if (!this.mobCanSwim(MOBS[e.templateId]) && groundHeight(nx, nz, this.cfg.seed) < WATER_LEVEL - SWIM_DEPTH) return true;
-    const resolved = resolvePosition(this.cfg.seed, nx, nz, BODY_RADIUS);
+    const resolved = this.resolveMove(nx, nz, BODY_RADIUS, e);
     // a collider ate most of the intended movement -> still blocked
     return Math.hypot(nx - resolved.x, nz - resolved.z) > step * 0.5;
   }
@@ -7567,6 +7570,25 @@ export class Sim {
     return delveModuleZOffset(run.modules, moduleIndex);
   }
 
+  private delveOccupancyRadius(run: DelveRun): number {
+    let z = DELVE_MODULE_Z_START;
+    for (const mid of run.modules) {
+      z += (DELVE_MODULES[mid]?.length ?? 50) + DELVE_MODULE_GAP;
+    }
+    return z + 40;
+  }
+
+  private delveRunForEntity(e: Entity): DelveRun | null {
+    const byPlayer = this.delveRunForPlayer(e.id);
+    if (byPlayer) return byPlayer;
+    return this.delveRunForMob(e.id);
+  }
+
+  private resolveMove(nx: number, nz: number, r: number, e: Entity): { x: number; z: number } {
+    const modules = (isDelvePos(nx) || isDelvePos(e.pos.x)) ? this.delveRunForEntity(e)?.modules : undefined;
+    return resolvePosition(this.cfg.seed, nx, nz, r, modules);
+  }
+
   delveModuleEntry(run: DelveRun): Vec3 {
     return this.groundPos(run.origin.x + 5, run.origin.z + this.delveModuleZOffset(run));
   }
@@ -7579,7 +7601,7 @@ export class Sim {
       if (run.partyKey !== key) continue;
       const dx = Math.abs(e.pos.x - run.origin.x);
       const dz = Math.abs(e.pos.z - run.origin.z);
-      if (dx <= 96 && dz <= 140) return run;
+      if (dx <= 120 && dz <= this.delveOccupancyRadius(run)) return run;
     }
     if (!isDelvePos(e.pos.x)) return null;
     const delve = delveAt(e.pos.x);
@@ -7723,6 +7745,7 @@ export class Sim {
     run.badAirTimer = 0;
     run.companionBarks = [];
     run.companion = undefined;
+    run.exitPortalOpen = false;
     run.objective = { kind: delve.objective, counts: [0], complete: false };
     const origin = this.delveOriginOf(run);
     run.origin = { x: origin.x, z: origin.z };
@@ -7746,6 +7769,7 @@ export class Sim {
     run.objectIds = [];
     run.objectState = {};
     run.raiseDeadChannel = null;
+    run.exitPortalOpen = false;
 
     const moduleId = run.modules[run.moduleIndex];
     const mod = DELVE_MODULES[moduleId];
@@ -7771,6 +7795,7 @@ export class Sim {
       run.mobIds.push(mob.id);
     }
     this.spawnDelveInteractables(run, mod, zBase);
+    if (run.moduleIndex < run.modules.length - 1) this.spawnDelveModuleExit(run, mod, zBase);
     if (run.companion) {
       const companion = this.entities.get(run.companion.entityId);
       if (companion) {
@@ -7814,6 +7839,7 @@ export class Sim {
     run.badAirTimer = 0;
     run.companionBarks = [];
     run.companion = undefined;
+    run.exitPortalOpen = false;
   }
 
   private updateDelveRuns(): void {
@@ -7827,7 +7853,7 @@ export class Sim {
       let occupied = false;
       for (const meta of this.players.values()) {
         const e = this.entities.get(meta.entityId);
-        if (e && Math.abs(e.pos.x - origin.x) < 120 && Math.abs(e.pos.z - origin.z) < 400) {
+        if (e && Math.abs(e.pos.x - origin.x) < 120 && Math.abs(e.pos.z - origin.z) < this.delveOccupancyRadius(run)) {
           occupied = true;
           break;
         }
@@ -7968,13 +7994,14 @@ export class Sim {
       locked_door: 'Locked Door',
       cracked_grave: 'Cracked Grave',
       destructible_wall: 'Cracked Wall',
+      module_exit: 'Exit Portal',
     };
     const maxHp = kind === 'destructible_wall' ? 80 : 1;
     const obj = createGroundObject(this.nextId++, '', names[kind] ?? kind, pos);
     obj.templateId = `delve_${kind}`;
     obj.maxHp = maxHp;
     obj.hp = maxHp;
-    obj.lootable = kind === 'cracked_grave' || kind === 'locked_door' || kind === 'destructible_wall';
+    obj.lootable = kind === 'cracked_grave' || kind === 'locked_door' || kind === 'destructible_wall' || kind === 'module_exit';
     run.objectIds.push(obj.id);
     run.objectState[obj.id] = { kind, triggered: false, hp: maxHp, maxHp, linkIds: [], open: kind !== 'locked_door' };
     this.addEntity(obj);
@@ -7983,9 +8010,96 @@ export class Sim {
 
   private tickDelveRun(run: DelveRun): void {
     this.tickDelvePressurePlates(run);
+    this.tickDelveModuleExit(run);
     this.tickDelveRaiseDeadChannel(run);
     this.tickDelveBadAir(run);
     this.tickDelveRestlessGraves(run);
+  }
+
+  private spawnDelveModuleExit(run: DelveRun, mod: DelveModuleDef, zBase: number): void {
+    const layout = DELVE_MODULE_LAYOUTS[mod.layout as DelveModuleId];
+    if (!layout) return;
+    const pos = this.groundPos(run.origin.x, run.origin.z + zBase + layout.zMax - 6);
+    const obj = this.createDelveObject(run, 'module_exit', pos);
+    run.objectState[obj.id].open = false;
+    obj.name = 'Sealed Passage';
+  }
+
+  private findDelveExitPortal(run: DelveRun): Entity | null {
+    for (const id of run.objectIds) {
+      if (run.objectState[id]?.kind === 'module_exit') return this.entities.get(id) ?? null;
+    }
+    return null;
+  }
+
+  private tryOpenDelveExitPortal(run: DelveRun): void {
+    if (run.exitPortalOpen || run.moduleIndex >= run.modules.length - 1) return;
+    const liveMobs = run.mobIds.some((id) => {
+      const e = this.entities.get(id);
+      return e && !e.dead;
+    });
+    if (liveMobs) return;
+    const plates = run.objectIds.filter((id) => run.objectState[id]?.kind === 'pressure_plate');
+    if (plates.length > 0 && !plates.some((id) => run.objectState[id].triggered)) return;
+    this.openDelveExitPortal(run);
+  }
+
+  private openDelveExitPortal(run: DelveRun): void {
+    if (run.exitPortalOpen) return;
+    run.exitPortalOpen = true;
+    const portal = this.findDelveExitPortal(run);
+    if (portal) {
+      run.objectState[portal.id].open = true;
+      portal.name = 'Exit Portal';
+    }
+    if (!run.partyKey) return;
+    for (const pid of this.partyMembersForKey(run.partyKey)) {
+      this.emit({
+        type: 'log',
+        text: 'A shimmering portal opens at the far end of the chamber. Walk into it to continue.',
+        color: '#8cf',
+        pid,
+      });
+    }
+  }
+
+  private advanceDelveModule(run: DelveRun): void {
+    if (!run.exitPortalOpen || run.moduleIndex >= run.modules.length - 1) return;
+    const members = run.partyKey ? this.partyMembersForKey(run.partyKey) : [];
+    run.moduleIndex += 1;
+    this.spawnDelveModule(run);
+    const entry = this.delveModuleEntry(run);
+    for (const pid of members) {
+      const p = this.entities.get(pid);
+      if (!p || p.dead) continue;
+      p.pos = entry;
+      p.prevPos = { ...entry };
+      this.rebucket(p);
+      p.facing = 0;
+      this.emit({
+        type: 'log',
+        text: 'You step through into the next reliquary chamber.',
+        color: '#b9f',
+        pid,
+      });
+    }
+  }
+
+  private tickDelveModuleExit(run: DelveRun): void {
+    if (!run.exitPortalOpen) {
+      this.tryOpenDelveExitPortal(run);
+      return;
+    }
+    const portal = this.findDelveExitPortal(run);
+    if (!portal || !run.partyKey) return;
+    for (const pid of this.partyMembersForKey(run.partyKey)) {
+      const p = this.entities.get(pid);
+      if (!p || p.dead) continue;
+      if (dist2d(p.pos, portal.pos) <= DELVE_EXIT_PORTAL_RADIUS) {
+        this.advanceDelveModule(run);
+        return;
+      }
+    }
   }
 
   private tickDelvePressurePlates(run: DelveRun): void {
@@ -8002,7 +8116,12 @@ export class Sim {
           const linked = run.objectState[linkId];
           if (linked) linked.open = true;
         }
-        this.emit({ type: 'log', text: 'A mechanism clicks open nearby.', color: '#cc9', pid });
+        this.emit({
+          type: 'log',
+          text: 'A mechanism clicks open nearby. A passage opens to the north — find the exit portal ahead.',
+          color: '#cc9',
+          pid,
+        });
         break;
       }
     }
@@ -8101,6 +8220,7 @@ export class Sim {
     mob.ownerId = pid;
     mob.hostile = false;
     mob.aiState = 'idle';
+    mob.wanderTimer = DELVE_COMPANION_HEAL_INTERVAL;
     this.addEntity(mob);
     run.companion = { companionId, entityId: mob.id };
   }
@@ -8124,6 +8244,41 @@ export class Sim {
     if (!run?.companion || run.companion.entityId !== companion.id) { this.dropEntity(companion.id); return; }
     if (owner.inCombat) this.maybeCompanionBark(run, owner.id, 'combat_start');
     if (owner.hp / Math.max(1, owner.maxHp) < 0.3) this.maybeCompanionBark(run, owner.id, 'low_hp');
+
+    companion.swingTimer = (companion.swingTimer ?? 0) - DT;
+    let combatTarget: Entity | null = null;
+    if (owner.targetId !== null) {
+      const t = this.entities.get(owner.targetId);
+      if (t && !t.dead && t.kind === 'mob' && t.hostile) combatTarget = t;
+    }
+    if (!combatTarget && owner.inCombat) {
+      for (const m of this.entities.values()) {
+        if (m.kind === 'mob' && !m.dead && m.hostile && m.aggroTargetId === owner.id) {
+          combatTarget = m;
+          break;
+        }
+      }
+    }
+    if (combatTarget) {
+      companion.inCombat = true;
+      const reach = MELEE_RANGE * 0.9;
+      const cd = dist2d(companion.pos, combatTarget.pos);
+      if (cd > reach) {
+        if (!this.isRooted(companion)) {
+          this.moveToward(companion, combatTarget.pos, companion.moveSpeed * this.moveSpeedMult(companion));
+        }
+      } else {
+        companion.facing = angleTo(companion.pos, combatTarget.pos);
+        if (companion.swingTimer <= 0) {
+          this.mobSwing(companion, combatTarget);
+          companion.swingTimer = companion.weapon.speed * this.swingIntervalMult(companion);
+        }
+      }
+    } else {
+      companion.inCombat = false;
+      companion.swingTimer = Math.max(0, companion.swingTimer);
+    }
+
     companion.wanderTimer = (companion.wanderTimer ?? 0) - DT;
     if (companion.wanderTimer <= 0) {
       companion.wanderTimer = DELVE_COMPANION_HEAL_INTERVAL;
@@ -8148,6 +8303,7 @@ export class Sim {
         this.emit({ type: 'spellfx', sourceId: companion.id, targetId: target.id, school: 'holy', fx: 'heal' });
       }
     }
+    if (combatTarget) return;
     const d = dist2d(companion.pos, owner.pos);
     if (d > PET_TELEPORT_DISTANCE) {
       companion.pos = { ...owner.pos };
@@ -8192,6 +8348,18 @@ export class Sim {
     }
     if (state.kind === 'destructible_wall') {
       this.error(r.meta.entityId, 'Strike the wall to break through.');
+      return;
+    }
+    if (state.kind === 'module_exit') {
+      if (!state.open) {
+        this.error(r.meta.entityId, 'The passage is sealed.');
+        return;
+      }
+      if (dist2d(r.e.pos, obj.pos) > DELVE_EXIT_PORTAL_RADIUS + 2) {
+        this.error(r.meta.entityId, 'Move closer to the portal.');
+        return;
+      }
+      this.advanceDelveModule(run);
       return;
     }
     this.error(r.meta.entityId, 'Nothing happens.');
@@ -8248,6 +8416,7 @@ export class Sim {
       objective: run.objective,
       affixes: run.affixes,
       completed: run.completed,
+      exitPortalOpen: run.exitPortalOpen,
     };
   }
 

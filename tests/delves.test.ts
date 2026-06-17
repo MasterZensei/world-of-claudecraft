@@ -365,4 +365,50 @@ describe('delve interactables and affixes', () => {
     const after = [...sim.entities.values()].filter((e) => e.templateId === 'reliquary_bonewalker').length;
     expect(after).toBe(before);
   });
+
+  it('clears trash and opens exit portal at module far end', () => {
+    const sim = makeSim();
+    enterReliquary(sim);
+    const run = sim.delveRunForPlayer(sim.playerId)!;
+    run.modules = ['reliquary_bell_niche', 'reliquary_finale'];
+    run.moduleIndex = 0;
+    (sim as any).spawnDelveModule(run);
+    const exitId = run.objectIds.find((id) => run.objectState[id]?.kind === 'module_exit');
+    expect(exitId).toBeDefined();
+    expect(run.exitPortalOpen).toBe(false);
+    for (const id of [...run.mobIds]) {
+      const mob = sim.entities.get(id);
+      if (mob && !mob.dead) (sim as any).dealDamage(sim.player, mob, mob.maxHp + 1, false, 'physical', null, 'hit', true);
+    }
+    sim.tick();
+    expect(run.exitPortalOpen).toBe(true);
+    const portal = sim.entities.get(exitId!)!;
+    sim.player.pos = { ...portal.pos };
+    sim.player.prevPos = { ...portal.pos };
+    sim.tick();
+    expect(run.moduleIndex).toBe(1);
+    expect(run.modules[run.moduleIndex]).toBe('reliquary_finale');
+  });
+
+  it('pressure plate required before exit opens when module has one', () => {
+    const sim = makeSim();
+    enterReliquary(sim);
+    const run = sim.delveRunForPlayer(sim.playerId)!;
+    run.modules = ['reliquary_sunken_ossuary', 'reliquary_finale'];
+    run.moduleIndex = 0;
+    (sim as any).spawnDelveModule(run);
+    for (const id of [...run.mobIds]) {
+      const mob = sim.entities.get(id);
+      if (mob && !mob.dead) (sim as any).dealDamage(sim.player, mob, mob.maxHp + 1, false, 'physical', null, 'hit', true);
+    }
+    sim.tick();
+    expect(run.exitPortalOpen).toBe(false);
+    const plate = run.objectIds.map((id) => ({ id, state: run.objectState[id] }))
+      .find((o) => o.state?.kind === 'pressure_plate');
+    const plateEnt = sim.entities.get(plate!.id)!;
+    sim.player.pos = { ...plateEnt.pos };
+    sim.player.prevPos = { ...plateEnt.pos };
+    sim.tick();
+    expect(run.exitPortalOpen).toBe(true);
+  });
 });

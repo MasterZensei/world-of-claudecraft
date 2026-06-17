@@ -52,6 +52,7 @@ export interface DelveRunInfo {
   objective: DelveObjectiveState;
   affixes: string[];
   completed: boolean;
+  exitPortalOpen: boolean;
 }
 
 export interface DelveCompanionInfo {

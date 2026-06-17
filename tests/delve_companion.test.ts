@@ -63,4 +63,20 @@ describe('delve companions', () => {
     expect(meta.companionUpgrades.companion_tessa).toBe(2);
     expect(meta.delveMarks).toBe(6);
   });
+
+  it('companion heals owner on interval', () => {
+    const sim = makeSim();
+    sim.setPlayerLevel(10);
+    teleport(sim, 0, 0);
+    sim.enterDelve('collapsed_reliquary', 'normal');
+    const run = sim.delveRunForPlayer(sim.playerId)!;
+    const companion = sim.entities.get(run.companion!.entityId)!;
+    sim.player.hp = Math.max(1, Math.round(sim.player.maxHp * 0.5));
+    companion.wanderTimer = 0;
+    for (let i = 0; i < 20 * 4; i++) {
+      sim.tick();
+      if (sim.player.hp > Math.round(sim.player.maxHp * 0.5)) break;
+    }
+    expect(sim.player.hp).toBeGreaterThan(Math.round(sim.player.maxHp * 0.5));
+  });
 });

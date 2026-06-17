@@ -1450,8 +1450,8 @@ export class Renderer {
     // inside geometry. A soft sweep starts the pull slightly before the hard
     // collider hits; if the hard limit appears suddenly, the physical camera is
     // clamped safe and the lens eases the perceived zoom instead of clipping.
-    let hardT = cameraOcclusion(seed, px, eyeY, pz, cx, cy, cz, CAMERA_COLLIDER_PAD);
-    let softT = cameraOcclusion(seed, px, eyeY, pz, cx, cy, cz, CAMERA_SOFT_COLLIDER_PAD);
+    let hardT = cameraOcclusion(seed, px, eyeY, pz, cx, cy, cz, CAMERA_COLLIDER_PAD, run?.modules);
+    let softT = cameraOcclusion(seed, px, eyeY, pz, cx, cy, cz, CAMERA_SOFT_COLLIDER_PAD, run?.modules);
     const segLen = Math.hypot(cx - px, cy - eyeY, cz - pz);
     if (segLen > 1e-3) {
       const minT = CAMERA_MIN_DIST / segLen;

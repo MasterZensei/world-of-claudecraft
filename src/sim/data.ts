@@ -271,6 +271,70 @@ export function delveModuleZOffset(modules: readonly string[], moduleIndex: numb
   return z;
 }
 
+/** Default module chain for a delve when no active run is available. */
+export function defaultDelveModules(delveId: string): string[] {
+  const delve = DELVES[delveId];
+  if (!delve) return ['reliquary_sunken_ossuary'];
+  const count = delve.moduleCount[0] ?? delve.modules.length;
+  return [...delve.modules.slice(0, count), delve.finaleModuleId];
+}
+
+/** Map world position to the active delve module band (instance-local coords). */
+export function delveModuleLocal(
+  x: number,
+  z: number,
+  modules: readonly string[],
+): {
+  ox: number;
+  oz: number;
+  moduleIndex: number;
+  moduleId: string;
+  localX: number;
+  localZ: number;
+} {
+  const delve = delveAt(x);
+  const index = delve?.index ?? Math.round((x - DELVE_X_MIN) / 600);
+  let best = 0;
+  let bestD = Infinity;
+  for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
+    const o = delveOrigin(index, i);
+    const d = Math.abs(z - o.z);
+    if (d < bestD) { bestD = d; best = i; }
+  }
+  const slot = delveOrigin(index, best);
+  const ox = slot.x;
+  const slotOz = slot.z;
+  const relZ = z - slotOz;
+  const mods = modules.length > 0
+    ? modules
+    : (delve ? defaultDelveModules(delve.id) : ['reliquary_sunken_ossuary']);
+  let zCursor = DELVE_MODULE_Z_START;
+  for (let i = 0; i < mods.length; i++) {
+    const mod = DELVE_MODULES[mods[i]];
+    const len = mod?.length ?? 50;
+    if (relZ < zCursor + len || i === mods.length - 1) {
+      return {
+        ox,
+        oz: slotOz + zCursor,
+        moduleIndex: i,
+        moduleId: mods[i],
+        localX: x - ox,
+        localZ: relZ - zCursor,
+      };
+    }
+    zCursor += len + DELVE_MODULE_GAP;
+  }
+  const last = mods[mods.length - 1];
+  return {
+    ox,
+    oz: slotOz + zCursor,
+    moduleIndex: mods.length - 1,
+    moduleId: last,
+    localX: x - ox,
+    localZ: relZ - zCursor,
+  };
+}
+
 export { DELVE_AFFIXES, DELVE_COMPANIONS, COMPANION_UPGRADE_COSTS } from './content/delves';
 
 // Legacy aliases for the Hollow Crypt (tests + scripts reference these).

@@ -1925,7 +1925,7 @@ export class Hud {
       el.style.display = 'none';
       return;
     }
-    const sig = JSON.stringify([run.delveId, run.tierId, run.moduleIndex, run.moduleCount, run.modules, run.objective, run.affixes, run.completed, this.sim.delveMarks]);
+    const sig = JSON.stringify([run.delveId, run.tierId, run.moduleIndex, run.moduleCount, run.modules, run.objective, run.affixes, run.completed, run.exitPortalOpen, this.sim.delveMarks]);
     if (sig === this.lastDelveTrackerSig) return;
     this.lastDelveTrackerSig = sig;
     el.style.display = 'block';
@@ -1951,10 +1951,15 @@ export class Hud {
       affixHtml += '</div>';
     }
     const marks = formatNumber(this.sim.delveMarks, { maximumFractionDigits: 0 });
+    // TODO(i18n): delveUi.tracker.exitPortal
+    const exitHint = run.exitPortalOpen && run.moduleIndex < run.moduleCount - 1
+      ? `<div class="dt-obj dt-hint">→ Find the exit portal (north)</div>`
+      : '';
     el.innerHTML = `<div class="dt-header">${esc(t('delveUi.tracker.title'))}</div>`
       + `<div class="dt-title">${esc(delveName)} <span class="dt-tier">${esc(tierLabel)}</span>${complete}</div>`
       + `<div class="dt-obj">- ${esc(moduleLine)}${modName ? `: ${esc(modName)}` : ''}</div>`
       + `<div class="dt-obj${run.objective.complete ? ' done' : ''}">- ${esc(t('delveUi.tracker.objective'))}: ${esc(objectiveLine)}</div>`
+      + exitHint
       + `<div class="dt-obj">- ${esc(t('delveUi.tracker.marks', { count: marks }))}</div>`
       + affixHtml;
     el.querySelectorAll('.dt-affix-icon').forEach((icon) => {
