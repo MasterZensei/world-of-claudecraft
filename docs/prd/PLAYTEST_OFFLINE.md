@@ -31,8 +31,9 @@ Do **not** run `npm run server`. Open **http://localhost:5173/**.
 5. **Interact** with Brother Halven (default interact key, or right-click → open delve board).
 6. Delve board opens → pick **Normal** or **Heroic** → **Enter**.
 7. Confirm delve tracker (top quest tracker area) shows module, objective, affixes.
-8. Fight trash, progress modules, kill **Deacon Varric** in the finale.
-9. **Leave delve** (no HUD button yet): browser console → `__game.sim.leaveDelve()` — returns you to Halven.
+8. **Visual check:** you should see a KayKit crypt interior (stone floor, walls, blue torchlight) — not a black void. If the screen stays black, hard-refresh and re-enter.
+9. Fight trash, progress modules, kill **Deacon Varric** in the finale.
+10. **Leave delve** (no HUD button yet): browser console → `__game.sim.leaveDelve()` — returns you to Halven.
 
 ## Dev console hooks (`window.__game`)
 

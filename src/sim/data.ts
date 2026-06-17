@@ -209,7 +209,7 @@ export function arenaOrigin(slot: number): { x: number; z: number } {
 }
 
 export function isArenaPos(x: number): boolean {
-  return x >= ARENA_X_MIN;
+  return x >= ARENA_X_MIN && x < DELVE_X_MIN;
 }
 
 // Nearest arena instance origin to a far-off position, matched by z-band (the
@@ -232,6 +232,8 @@ export function arenaOriginAt(z: number): { x: number; z: number; slot: number }
 
 export const DELVE_X_MIN = 3600;
 export const DELVE_SLOT_COUNT = 6;
+export const DELVE_MODULE_GAP = 20;
+export const DELVE_MODULE_Z_START = 8;
 const DELVE_Z0 = -1250;
 const DELVE_SLOT_SPACING = 500;
 
@@ -258,6 +260,17 @@ export const DELVE_MODULES: Record<string, DelveModuleDef> = {
   ...COLLAPSED_RELIQUARY_MODULES,
   ...PLACEHOLDER_DELVE_MODULES,
 };
+
+/** World-z offset of a delve module within its instance slot (matches Sim). */
+export function delveModuleZOffset(modules: readonly string[], moduleIndex: number): number {
+  let z = DELVE_MODULE_Z_START;
+  for (let i = 0; i < moduleIndex; i++) {
+    const mod = DELVE_MODULES[modules[i]];
+    z += (mod?.length ?? 50) + DELVE_MODULE_GAP;
+  }
+  return z;
+}
+
 export { DELVE_AFFIXES, DELVE_COMPANIONS, COMPANION_UPGRADE_COSTS } from './content/delves';
 
 // Legacy aliases for the Hollow Crypt (tests + scripts reference these).

@@ -20,7 +20,11 @@ import {
 
   delveOrigin,
 
+  delveModuleZOffset,
+
   dungeonAt,
+
+  isArenaPos,
 
   isDelvePos,
 
@@ -118,6 +122,32 @@ describe('delve spatial band', () => {
     expect(isDelvePos(2700)).toBe(false);
 
     expect(isDelvePos(DELVE_X_MIN)).toBe(true);
+
+    expect(isArenaPos(ARENA_X)).toBe(true);
+
+    expect(isArenaPos(DELVE_X_MIN)).toBe(false);
+
+  });
+
+
+
+  it('enterReliquary places player in delve band near instance origin', () => {
+
+    const sim = makeSim();
+
+    enterReliquary(sim);
+
+    const run = sim.delveRunForPlayer(sim.playerId)!;
+
+    const p = sim.player;
+
+    expect(isDelvePos(p.pos.x)).toBe(true);
+
+    expect(Math.abs(p.pos.x - run.origin.x)).toBeLessThan(200);
+
+    expect(Math.abs(p.pos.z - run.origin.z)).toBeLessThan(250);
+
+    expect(delveModuleZOffset(run.modules, 0)).toBe(8);
 
   });
 

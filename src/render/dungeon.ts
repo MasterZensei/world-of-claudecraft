@@ -274,11 +274,11 @@ export class DungeonInteriors {
     private fireLights: THREE.PointLight[],
   ) {}
 
-  async buildInterior(interior: string, ox: number, oz: number): Promise<void> {
+  async buildInterior(interior: string, ox: number, oz: number, layoutOverride?: DungeonLayout): Promise<void> {
     await ensureDungeonAssets();
-    const layout = interior === 'sanctum' ? SANCTUM_LAYOUT
+    const layout = layoutOverride ?? (interior === 'sanctum' ? SANCTUM_LAYOUT
       : interior === 'temple' ? TEMPLE_LAYOUT
-        : interior === 'arena' ? ARENA_LAYOUT : CRYPT_LAYOUT;
+        : interior === 'arena' ? ARENA_LAYOUT : CRYPT_LAYOUT);
     const variant = this.variantFor(interior, ox);
     const group = new THREE.Group();
     const p = new Placements();

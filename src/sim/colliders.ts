@@ -353,6 +353,11 @@ export function cameraOcclusion(
   bx: number, by: number, bz: number,
   pad = 0.35,
 ): number {
+  if (isDelvePos(ax)) {
+    const { ox, oz } = delveInstanceLocal(ax, az);
+    const colliders = INTERIOR_COLLIDERS.crypt ?? CRYPT_COLLIDERS;
+    return sweepColliders(colliders, ax - ox, ay, az - oz, bx - ox, by, bz - oz, pad, true);
+  }
   if (isArenaPos(ax)) {
     const o = arenaOriginAt(az);
     return sweepColliders(ARENA_COLLIDERS, ax - o.x, ay, az - o.z, bx - o.x, by, bz - o.z, pad, true);

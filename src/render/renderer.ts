@@ -3,11 +3,12 @@ import { Entity, SimEvent } from '../sim/types';
 import { OVERHEAD_EMOTES, type IWorld } from '../world_api';
 import { groundHeight, WATER_LEVEL, zoneBiomeAt } from '../sim/world';
 import {
-  MOBS, ABILITIES, DUNGEON_X_THRESHOLD, DUNGEON_LIST, DELVE_LIST, DELVE_SLOT_COUNT, QUESTS,
+  MOBS, ABILITIES, DUNGEON_X_THRESHOLD, DUNGEON_LIST, DELVE_SLOT_COUNT, QUESTS,
   instanceOrigin, INSTANCE_SLOT_COUNT, ARENA_SLOT_COUNT, arenaOrigin, arenaOriginAt,
-  delveOrigin, isArenaPos, isDelvePos, dungeonAt,
+  delveAt, delveOrigin, delveModuleZOffset, isArenaPos, isDelvePos, dungeonAt,
 } from '../sim/data';
 import { ARENA_LAYOUT, DUNGEON_WALL_X } from '../sim/dungeon_layout';
+import { DELVE_MODULE_LAYOUTS, type DelveModuleId } from '../sim/delve_layout';
 import { cameraOcclusion } from '../sim/colliders';
 import type { BiomeId } from '../sim/types';
 import { AnimState, CharacterVisual, createCharacterVisual } from './characters';
@@ -852,6 +853,7 @@ export class Renderer {
   // ---------------------------------------------------------------------
 
   private builtInteriors = new Set<string>();
+  private pendingInteriors = new Set<string>();
   private fogState: 'outdoor' | 'dungeon' | 'temple' | 'underwater' = 'outdoor';
 
   private buildInterior(interior: string, ox: number, oz: number): void {
@@ -861,11 +863,41 @@ export class Renderer {
     });
   }
 
-  private buildDelveInterior(moduleId: string, ox: number, oz: number): void {
+  private scheduleDelveModuleBuild(key: string, moduleId: DelveModuleId, ox: number, oz: number): void {
+    if (this.builtInteriors.has(key) || this.pendingInteriors.has(key)) return;
+    this.pendingInteriors.add(key);
     this.dungeons ??= new DungeonInteriors(this.scene, this.lowGfx, this.flames, this.fireLights);
-    void buildDelveModule(this.dungeons, moduleId, ox, oz).catch((err) => {
+    void buildDelveModule(this.dungeons, moduleId, ox, oz).then(() => {
+      this.builtInteriors.add(key);
+      this.pendingInteriors.delete(key);
+    }).catch((err) => {
+      this.pendingInteriors.delete(key);
       console.error('Failed to build delve interior:', err);
     });
+  }
+
+  private ensureDelveInteriorsNear(px: number, pz: number): void {
+    const delve = delveAt(px);
+    if (!delve) return;
+    void ensureDelveInteriorKit().catch(() => undefined);
+    let slot = 0;
+    let bestD = Infinity;
+    for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
+      const o = delveOrigin(delve.index, i);
+      const d = Math.hypot(px - o.x, pz - o.z);
+      if (d < bestD) { bestD = d; slot = i; }
+    }
+    const origin = delveOrigin(delve.index, slot);
+    if (Math.abs(px - origin.x) >= 200 || Math.abs(pz - origin.z) >= 250) return;
+    const run = this.sim.delveRun;
+    const modules = (run?.modules?.length ? run.modules : ['reliquary_sunken_ossuary']) as DelveModuleId[];
+    for (let mi = 0; mi < modules.length; mi++) {
+      const moduleId = modules[mi];
+      const key = `delve:${delve.id}:${slot}:m${mi}`;
+      if (this.builtInteriors.has(key) || this.pendingInteriors.has(key)) continue;
+      const zOff = delveModuleZOffset(modules, mi);
+      this.scheduleDelveModuleBuild(key, moduleId, origin.x, origin.z + zOff);
+    }
   }
 
   // Outdoor fog presets per biome (high tier eases between them as the
@@ -886,18 +918,7 @@ export class Renderer {
     const inside = px > DUNGEON_X_THRESHOLD;
     const pz = this.sim.player.pos.z;
     if (isDelvePos(px)) {
-      void ensureDelveInteriorKit().catch(() => undefined);
-      for (const delve of DELVE_LIST) {
-        for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
-          const key = `delve:${delve.id}:${i}`;
-          if (this.builtInteriors.has(key)) continue;
-          const o = delveOrigin(delve.index, i);
-          if (Math.abs(px - o.x) < 200 && Math.abs(pz - o.z) < 250) {
-            this.builtInteriors.add(key);
-            this.buildDelveInterior('reliquary_sunken_ossuary', o.x, o.z);
-          }
-        }
-      }
+      this.ensureDelveInteriorsNear(px, pz);
     } else if (inside && isArenaPos(px)) {
       void ensureDungeonAssets().catch(() => undefined);
       // build the Ashen Coliseum copy the player was matched into
@@ -1404,6 +1425,25 @@ export class Renderer {
       const m = 2; // clearance from the wall faces
       cx = Math.min(Math.max(cx, o.x - DUNGEON_WALL_X + m), o.x + DUNGEON_WALL_X - m);
       cz = Math.min(Math.max(cz, o.z + ARENA_LAYOUT.zMin + m), o.z + ARENA_LAYOUT.zMax - m);
+    } else if (isDelvePos(p.pos.x)) {
+      const delve = delveAt(p.pos.x);
+      const index = delve?.index ?? 0;
+      let slot = 0;
+      let bestD = Infinity;
+      for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
+        const o = delveOrigin(index, i);
+        const d = Math.abs(pz - o.z);
+        if (d < bestD) { bestD = d; slot = i; }
+      }
+      const origin = delveOrigin(index, slot);
+      const run = this.sim.delveRun;
+      const modules = (run?.modules?.length ? run.modules : ['reliquary_sunken_ossuary']) as DelveModuleId[];
+      const mi = run?.moduleIndex ?? 0;
+      const layout = DELVE_MODULE_LAYOUTS[modules[mi] ?? 'reliquary_sunken_ossuary'];
+      const oz = origin.z + delveModuleZOffset(modules, mi);
+      const m = 2;
+      cx = Math.min(Math.max(cx, origin.x - DUNGEON_WALL_X + m), origin.x + DUNGEON_WALL_X - m);
+      cz = Math.min(Math.max(cz, oz + layout.zMin + m), oz + layout.zMax - m);
     }
     // Camera collision: pull the cam in to the surface of any building/object
     // between the player's head and the desired position so it never sits

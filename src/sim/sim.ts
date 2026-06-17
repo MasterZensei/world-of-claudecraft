@@ -1,7 +1,7 @@
 import {
   ABILITIES, ARENA_SLOT_COUNT, CAMPS, CLASSES, COMPANION_UPGRADE_COSTS, DELVE_AFFIXES, DELVE_COMPANIONS,
   DELVE_LIST, DELVE_MODULES, DELVES, DELVE_SLOT_COUNT,
-  DUNGEONS, DUNGEON_LIST, DungeonDef, arenaOrigin, delveAt, delveOrigin, dungeonAt,
+  DUNGEONS, DUNGEON_LIST, DungeonDef, arenaOrigin, delveAt, delveOrigin, delveModuleZOffset, dungeonAt,
   DUNGEON_X_THRESHOLD, GROUND_OBJECTS, GROUP_XP_BONUS, INSTANCE_SLOT_COUNT, isArenaPos, isDelvePos,
   ITEMS, MOBS, NPCS, PLAYER_START, QUESTS, questRewardItemId, abilitiesKnownAt, instanceOrigin,
   zoneAt, ZONES,
@@ -146,7 +146,6 @@ const MARKET_LISTING_DURATION = 48 * 3600; // sim-seconds an unsold listing ling
 const MARKET_WIRE_LIMIT = 120; // most listings shipped to one client at a time
 const VENDOR_BUYBACK_LIMIT = 12;
 const INSTANCE_EMPTY_TIMEOUT = 300; // seconds before an empty instance resets
-const DELVE_MODULE_GAP = 20; // z gap between delve modules in one slot
 const DELVE_PLATE_RADIUS = 2.5;
 const DELVE_INTERACT_RANGE = 6;
 const DELVE_BAD_AIR_INTERVAL = 8;
@@ -7565,12 +7564,7 @@ export class Sim {
   }
 
   private delveModuleZOffset(run: DelveRun, moduleIndex = run.moduleIndex): number {
-    let z = 8;
-    for (let i = 0; i < moduleIndex; i++) {
-      const mod = DELVE_MODULES[run.modules[i]];
-      z += (mod?.length ?? 50) + DELVE_MODULE_GAP;
-    }
-    return z;
+    return delveModuleZOffset(run.modules, moduleIndex);
   }
 
   delveModuleEntry(run: DelveRun): Vec3 {
