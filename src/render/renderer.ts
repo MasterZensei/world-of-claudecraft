@@ -5,7 +5,8 @@ import { groundHeight, WATER_LEVEL, zoneBiomeAt } from '../sim/world';
 import {
   MOBS, ABILITIES, DUNGEON_X_THRESHOLD, DUNGEON_LIST, DELVE_SLOT_COUNT, QUESTS,
   instanceOrigin, INSTANCE_SLOT_COUNT, ARENA_SLOT_COUNT, arenaOrigin, arenaOriginAt,
-  delveAt, delveOrigin, delveModuleZOffset, isArenaPos, isDelvePos, dungeonAt,
+  defaultDelveModules, delveAt, delveModuleLocal, delveOrigin, delveModuleZOffset,
+  DELVE_MODULE_Z_START, isArenaPos, isDelvePos, dungeonAt,
 } from '../sim/data';
 import { ARENA_LAYOUT, DUNGEON_WALL_X } from '../sim/dungeon_layout';
 import { DELVE_MODULE_LAYOUTS, type DelveModuleId } from '../sim/delve_layout';
@@ -919,9 +920,18 @@ export class Renderer {
       if (d < bestD) { bestD = d; slot = i; }
     }
     const origin = delveOrigin(delve.index, slot);
-    if (Math.abs(px - origin.x) >= 200 || Math.abs(pz - origin.z) >= 250) return;
     const run = this.sim.delveRun;
-    const modules = (run?.modules?.length ? run.modules : ['reliquary_sunken_ossuary']) as DelveModuleId[];
+    const modules = (run?.modules?.length
+      ? run.modules
+      : defaultDelveModules(delve.id)) as DelveModuleId[];
+    // Slot origin is the delve door; modules stack north up to ~300u. The old
+    // 250u z gate never built interiors past the first chamber (finale = void).
+    if (Math.abs(px - origin.x) >= 120) return;
+    const lastId = modules[modules.length - 1] ?? 'reliquary_sunken_ossuary';
+    const lastLayout = DELVE_MODULE_LAYOUTS[lastId as DelveModuleId];
+    const stackEndZ = origin.z + delveModuleZOffset(modules, modules.length - 1)
+      + (lastLayout?.zMax ?? 61) + 40;
+    if (pz < origin.z + DELVE_MODULE_Z_START - 30 || pz > stackEndZ) return;
     for (let mi = 0; mi < modules.length; mi++) {
       const moduleId = modules[mi];
       const key = `delve:${delve.id}:${slot}:m${mi}`;
@@ -1464,30 +1474,26 @@ export class Renderer {
       cz = Math.min(Math.max(cz, o.z + ARENA_LAYOUT.zMin + m), o.z + ARENA_LAYOUT.zMax - m);
     } else if (isDelvePos(p.pos.x)) {
       const delve = delveAt(p.pos.x);
-      const index = delve?.index ?? 0;
-      let slot = 0;
-      let bestD = Infinity;
-      for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
-        const o = delveOrigin(index, i);
-        const d = Math.abs(pz - o.z);
-        if (d < bestD) { bestD = d; slot = i; }
-      }
-      const origin = delveOrigin(index, slot);
-      const modules = (run?.modules?.length ? run.modules : ['reliquary_sunken_ossuary']) as DelveModuleId[];
-      const mi = run?.moduleIndex ?? 0;
-      const layout = DELVE_MODULE_LAYOUTS[modules[mi] ?? 'reliquary_sunken_ossuary'];
-      const oz = origin.z + delveModuleZOffset(modules, mi);
+      const modules = (run?.modules?.length
+        ? run.modules
+        : defaultDelveModules(delve?.id ?? 'collapsed_reliquary'));
+      const loc = delveModuleLocal(px, pz, modules);
+      const layout = DELVE_MODULE_LAYOUTS[loc.moduleId as DelveModuleId]
+        ?? DELVE_MODULE_LAYOUTS.reliquary_sunken_ossuary;
       const m = 2;
-      cx = Math.min(Math.max(cx, origin.x - DUNGEON_WALL_X + m), origin.x + DUNGEON_WALL_X - m);
-      cz = Math.min(Math.max(cz, oz + layout.zMin + m), oz + layout.zMax - m);
+      cx = Math.min(Math.max(cx, loc.ox - DUNGEON_WALL_X + m), loc.ox + DUNGEON_WALL_X - m);
+      cz = Math.min(Math.max(cz, loc.oz + layout.zMin + m), loc.oz + layout.zMax - m);
     }
     // Camera collision: pull the cam in to the surface of any building/object
     // between the player's head and the desired position so it never sits
     // inside geometry. A soft sweep starts the pull slightly before the hard
     // collider hits; if the hard limit appears suddenly, the physical camera is
     // clamped safe and the lens eases the perceived zoom instead of clipping.
-    let hardT = cameraOcclusion(seed, px, eyeY, pz, cx, cy, cz, CAMERA_COLLIDER_PAD, run?.modules);
-    let softT = cameraOcclusion(seed, px, eyeY, pz, cx, cy, cz, CAMERA_SOFT_COLLIDER_PAD, run?.modules);
+    // Delve modules are compact crypt rooms: wall/pillar sweeps pin the chase
+    // cam (yaw locked, void framing) so keep only a minimum-distance guard.
+    const inDelve = isDelvePos(p.pos.x);
+    let hardT = inDelve ? 1 : cameraOcclusion(seed, px, eyeY, pz, cx, cy, cz, CAMERA_COLLIDER_PAD, run?.modules);
+    let softT = inDelve ? 1 : cameraOcclusion(seed, px, eyeY, pz, cx, cy, cz, CAMERA_SOFT_COLLIDER_PAD, run?.modules);
     const segLen = Math.hypot(cx - px, cy - eyeY, cz - pz);
     if (segLen > 1e-3) {
       const minT = CAMERA_MIN_DIST / segLen;

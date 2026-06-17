@@ -1,6 +1,6 @@
 // Delve module layout collision smoke tests (spatial band PR 4 partial).
 import { describe, expect, it } from 'vitest';
-import { isBlocked } from '../src/sim/colliders';
+import { isBlocked, resolvePosition } from '../src/sim/colliders';
 import { delveOrigin, DELVE_MODULE_Z_START } from '../src/sim/data';
 import {
   DELVE_MODULE_LAYOUTS,
@@ -29,5 +29,18 @@ describe('delve module colliders', () => {
     const layout = DELVE_MODULE_LAYOUTS.reliquary_saintless_hall;
     const midZ = (layout.zMin + layout.zMax) / 2;
     expect(isBlocked(SEED, origin.x + 23, origin.z + DELVE_MODULE_Z_START + midZ, 0.5)).toBe(true);
+  });
+
+  it('east aisle x=20 is walkable within a module', () => {
+    const origin = delveOrigin(0, 0);
+    const modules: DelveModuleId[] = ['reliquary_finale'];
+    const layout = DELVE_MODULE_LAYOUTS.reliquary_finale;
+    const midZ = (layout.zMin + layout.zMax) / 2;
+    const wx = origin.x + 20;
+    const wz = origin.z + DELVE_MODULE_Z_START + midZ;
+    const res = resolvePosition(SEED, wx, wz, 0.5, modules);
+    expect(Math.abs(res.x - wx)).toBeLessThan(0.05);
+    expect(Math.abs(res.z - wz)).toBeLessThan(0.05);
+    expect(isBlocked(SEED, wx, wz, 0.5, modules)).toBe(false);
   });
 });
