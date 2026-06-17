@@ -1902,6 +1902,8 @@ export class Hud {
   }
 
   private delveObjectiveLine(run: DelveRunInfo): string {
+    const isFinale = run.moduleIndex >= run.moduleCount - 1;
+    if (!isFinale) return 'Clear the room';
     if (run.objective.kind === 'kill_boss') {
       const bossId = DELVES[run.delveId]?.bosses[0] ?? 'deacon_varric';
       return t('delveUi.objective.kill_boss', { boss: mobDisplayName(bossId) });
@@ -1951,10 +1953,14 @@ export class Hud {
       affixHtml += '</div>';
     }
     const marks = formatNumber(this.sim.delveMarks, { maximumFractionDigits: 0 });
-    // TODO(i18n): delveUi.tracker.exitPortal
-    const exitHint = run.exitPortalOpen && run.moduleIndex < run.moduleCount - 1
-      ? `<div class="dt-obj dt-hint">→ Find the exit portal (north)</div>`
-      : '';
+    let exitHint = '';
+    if (run.moduleIndex < run.moduleCount - 1) {
+      if (run.exitPortalOpen) {
+        exitHint = '<div class="dt-obj dt-hint">→ Walk into the tombstone passage (north)</div>';
+      } else {
+        exitHint = '<div class="dt-obj dt-hint">Clear trash mobs to open the passage north</div>';
+      }
+    }
     el.innerHTML = `<div class="dt-header">${esc(t('delveUi.tracker.title'))}</div>`
       + `<div class="dt-title">${esc(delveName)} <span class="dt-tier">${esc(tierLabel)}</span>${complete}</div>`
       + `<div class="dt-obj">- ${esc(moduleLine)}${modName ? `: ${esc(modName)}` : ''}</div>`

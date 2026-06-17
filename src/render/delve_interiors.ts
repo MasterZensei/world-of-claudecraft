@@ -13,5 +13,6 @@ export function buildDelveModule(
   const mod = DELVE_MODULES[moduleId];
   const layout = DELVE_MODULE_LAYOUTS[moduleId];
   const interior = mod?.interior ?? 'crypt';
-  return dungeons.buildInterior(interior, ox, oz, layout);
+  // Delve origins sit past the dungeon x-bands; force crypt dressing (not bastion).
+  return dungeons.buildInterior(interior, ox, oz, layout, 'crypt');
 }

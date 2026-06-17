@@ -37,6 +37,7 @@ import {
 import {
   PLACEHOLDER_DELVE, PLACEHOLDER_DELVE_MODULES, PLACEHOLDER_DELVE_MOBS,
 } from './content/delves/_placeholder';
+import { DELVE_MODULE_LAYOUTS, delveModuleSpan, type DelveModuleId } from './delve_layout';
 
 function mergeItems(...parts: Record<string, ItemDef>[]): Record<string, ItemDef> {
   const merged = Object.assign({}, ...parts);
@@ -261,12 +262,18 @@ export const DELVE_MODULES: Record<string, DelveModuleDef> = {
   ...PLACEHOLDER_DELVE_MODULES,
 };
 
+function delveModuleFootprint(moduleId: string): number {
+  const mod = DELVE_MODULES[moduleId];
+  const layoutId = (mod?.layout ?? moduleId) as DelveModuleId;
+  if (DELVE_MODULE_LAYOUTS[layoutId]) return delveModuleSpan(layoutId);
+  return mod?.length ?? 50;
+}
+
 /** World-z offset of a delve module within its instance slot (matches Sim). */
 export function delveModuleZOffset(modules: readonly string[], moduleIndex: number): number {
   let z = DELVE_MODULE_Z_START;
   for (let i = 0; i < moduleIndex; i++) {
-    const mod = DELVE_MODULES[modules[i]];
-    z += (mod?.length ?? 50) + DELVE_MODULE_GAP;
+    z += delveModuleFootprint(modules[i]) + DELVE_MODULE_GAP;
   }
   return z;
 }
@@ -310,8 +317,7 @@ export function delveModuleLocal(
     : (delve ? defaultDelveModules(delve.id) : ['reliquary_sunken_ossuary']);
   let zCursor = DELVE_MODULE_Z_START;
   for (let i = 0; i < mods.length; i++) {
-    const mod = DELVE_MODULES[mods[i]];
-    const len = mod?.length ?? 50;
+    const len = delveModuleFootprint(mods[i]);
     if (relZ < zCursor + len || i === mods.length - 1) {
       return {
         ox,

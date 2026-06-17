@@ -106,3 +106,9 @@ export function delveModuleColliders(moduleId: DelveModuleId): Collider[] {
 export function delveModuleEntry(layout: DungeonLayout): { x: number; z: number } {
   return { x: 0, z: layout.zMin + 8 };
 }
+
+/** Walkable depth of a module — matches KayKit floor/wall placement (zMin..zMax). */
+export function delveModuleSpan(moduleId: DelveModuleId): number {
+  const layout = DELVE_MODULE_LAYOUTS[moduleId];
+  return layout.zMax - layout.zMin;
+}

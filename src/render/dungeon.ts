@@ -274,12 +274,18 @@ export class DungeonInteriors {
     private fireLights: THREE.PointLight[],
   ) {}
 
-  async buildInterior(interior: string, ox: number, oz: number, layoutOverride?: DungeonLayout): Promise<void> {
+  async buildInterior(
+    interior: string,
+    ox: number,
+    oz: number,
+    layoutOverride?: DungeonLayout,
+    variantOverride?: Variant,
+  ): Promise<void> {
     await ensureDungeonAssets();
     const layout = layoutOverride ?? (interior === 'sanctum' ? SANCTUM_LAYOUT
       : interior === 'temple' ? TEMPLE_LAYOUT
         : interior === 'arena' ? ARENA_LAYOUT : CRYPT_LAYOUT);
-    const variant = this.variantFor(interior, ox);
+    const variant = variantOverride ?? this.variantFor(interior, ox);
     const group = new THREE.Group();
     const p = new Placements();
 
@@ -511,7 +517,7 @@ export class DungeonInteriors {
   private placeFloor(p: Placements, layout: DungeonLayout, variant: Variant): void {
     const quarter = Math.PI / 2;
     for (let z = layout.zMin - 2; z <= layout.zMax + 2; z += FLOOR_CELL) {
-      for (let x = -22; x <= 22; x += FLOOR_CELL) {
+      for (let x = -24; x <= 24; x += FLOOR_CELL) {
         let kind = this.floorKind(variant, hash2(x * 1.31, z));
         if (kind === 'grate' && Math.abs(x) < 4) kind = 'floor_tile_large'; // keep pits off the walk aisle
         if (kind === 'grate') {
@@ -588,7 +594,7 @@ export class DungeonInteriors {
       }
     }
     for (const end of [{ z: layout.zMin, ry: 0 }, { z: layout.zMax, ry: Math.PI }]) {
-      for (let x = -20; x <= 20; x += 8) {
+      for (let x = -24; x <= 24; x += 8) {
         const kind = this.wallKind(variant, hash2(x, end.z * 3.1));
         p.add(kind, x, 0, end.z, end.ry, MODULE_SCALE);
       }

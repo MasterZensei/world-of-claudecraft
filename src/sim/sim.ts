@@ -7,7 +7,7 @@ import {
   zoneAt, ZONES,
 } from './data';
 import { ARENA_SPAWN_A, ARENA_SPAWN_B } from './dungeon_layout';
-import { DELVE_MODULE_LAYOUTS, type DelveModuleId } from './delve_layout';
+import { DELVE_MODULE_LAYOUTS, delveModuleEntry as delveLayoutEntry, type DelveModuleId } from './delve_layout';
 import { lineOfSightClear, resolvePosition } from './colliders';
 import { findPath } from './pathfind';
 import { createGroundObject, createMob, createNpc, createPlayer, recalcPlayerStats, PlayerEquipment } from './entity';
@@ -155,6 +155,12 @@ const DELVE_COMPANION_HEAL_RANGE = 22;
 const DELVE_COMPANION_HEAL_INTERVAL = 3;
 const DELVE_COMPANION_FOLLOW = 4;
 const DELVE_EXIT_PORTAL_RADIUS = 3.5;
+const DELVE_MODULE_NAMES: Record<string, string> = {
+  reliquary_sunken_ossuary: 'The Sunken Ossuary',
+  reliquary_bell_niche: 'The Bell Niche',
+  reliquary_saintless_hall: 'The Saintless Hall',
+  reliquary_finale: 'The Bell-Buried Chamber',
+};
 const MAX_CLIMB_SLOPE = 1.5; // rise/run above which a ground move is blocked (cliffs, world rim)
 
 // How far a mob pulls same-family neighbours into a fight ("social aggro").
@@ -7571,11 +7577,11 @@ export class Sim {
   }
 
   private delveOccupancyRadius(run: DelveRun): number {
-    let z = DELVE_MODULE_Z_START;
-    for (const mid of run.modules) {
-      z += (DELVE_MODULES[mid]?.length ?? 50) + DELVE_MODULE_GAP;
-    }
-    return z + 40;
+    const mi = Math.max(0, run.modules.length - 1);
+    const modId = run.modules[mi] as DelveModuleId;
+    const layout = DELVE_MODULE_LAYOUTS[modId];
+    const span = layout ? layout.zMax - layout.zMin : 50;
+    return delveModuleZOffset(run.modules, mi) + span + 40;
   }
 
   private delveRunForEntity(e: Entity): DelveRun | null {
@@ -7590,7 +7596,11 @@ export class Sim {
   }
 
   delveModuleEntry(run: DelveRun): Vec3 {
-    return this.groundPos(run.origin.x + 5, run.origin.z + this.delveModuleZOffset(run));
+    const moduleId = run.modules[run.moduleIndex] as DelveModuleId;
+    const layout = DELVE_MODULE_LAYOUTS[moduleId];
+    const entry = layout ? delveLayoutEntry(layout) : { x: 0, z: 8 };
+    const zBase = this.delveModuleZOffset(run);
+    return this.groundPos(run.origin.x + entry.x, run.origin.z + zBase + entry.z);
   }
 
   delveRunForPlayer(pid: number): DelveRun | null {
@@ -7796,6 +7806,7 @@ export class Sim {
     }
     this.spawnDelveInteractables(run, mod, zBase);
     if (run.moduleIndex < run.modules.length - 1) this.spawnDelveModuleExit(run, mod, zBase);
+    this.emitDelveModuleEnter(run, mod);
     if (run.companion) {
       const companion = this.entities.get(run.companion.entityId);
       if (companion) {
@@ -7994,7 +8005,7 @@ export class Sim {
       locked_door: 'Locked Door',
       cracked_grave: 'Cracked Grave',
       destructible_wall: 'Cracked Wall',
-      module_exit: 'Exit Portal',
+      module_exit: 'Sealed Passage',
     };
     const maxHp = kind === 'destructible_wall' ? 80 : 1;
     const obj = createGroundObject(this.nextId++, '', names[kind] ?? kind, pos);
@@ -8014,6 +8025,29 @@ export class Sim {
     this.tickDelveRaiseDeadChannel(run);
     this.tickDelveBadAir(run);
     this.tickDelveRestlessGraves(run);
+  }
+
+  private emitDelveModuleEnter(run: DelveRun, mod: DelveModuleDef): void {
+    if (!run.partyKey) return;
+    const modName = DELVE_MODULE_NAMES[mod.id] ?? mod.id;
+    const isFinale = run.moduleIndex >= run.modules.length - 1;
+    const objective = isFinale ? 'Defeat the boss.' : 'Clear the room.';
+    for (const pid of this.partyMembersForKey(run.partyKey)) {
+      this.emit({
+        type: 'log',
+        text: `${modName} — ${objective}`,
+        color: '#cc9',
+        pid,
+      });
+      if (run.moduleIndex === 0 && !isFinale) {
+        this.emit({
+          type: 'log',
+          text: 'A tombstone passage opens to the north when the room is cleared.',
+          color: '#aaa',
+          pid,
+        });
+      }
+    }
   }
 
   private spawnDelveModuleExit(run: DelveRun, mod: DelveModuleDef, zBase: number): void {
@@ -8050,13 +8084,13 @@ export class Sim {
     const portal = this.findDelveExitPortal(run);
     if (portal) {
       run.objectState[portal.id].open = true;
-      portal.name = 'Exit Portal';
+      portal.name = 'Exit to next chamber';
     }
     if (!run.partyKey) return;
     for (const pid of this.partyMembersForKey(run.partyKey)) {
       this.emit({
         type: 'log',
-        text: 'A shimmering portal opens at the far end of the chamber. Walk into it to continue.',
+        text: 'A sealed tombstone passage grinds open to the north. Walk into it to continue.',
         color: '#8cf',
         pid,
       });
@@ -8069,6 +8103,8 @@ export class Sim {
     run.moduleIndex += 1;
     this.spawnDelveModule(run);
     const entry = this.delveModuleEntry(run);
+    const modId = run.modules[run.moduleIndex];
+    const modName = modId ? (DELVE_MODULE_NAMES[modId] ?? modId) : 'the next chamber';
     for (const pid of members) {
       const p = this.entities.get(pid);
       if (!p || p.dead) continue;
@@ -8078,7 +8114,7 @@ export class Sim {
       p.facing = 0;
       this.emit({
         type: 'log',
-        text: 'You step through into the next reliquary chamber.',
+        text: `You pass through the tombstone into ${modName}.`,
         color: '#b9f',
         pid,
       });
@@ -8356,7 +8392,7 @@ export class Sim {
         return;
       }
       if (dist2d(r.e.pos, obj.pos) > DELVE_EXIT_PORTAL_RADIUS + 2) {
-        this.error(r.meta.entityId, 'Move closer to the portal.');
+        this.error(r.meta.entityId, 'Move closer to the passage.');
         return;
       }
       this.advanceDelveModule(run);

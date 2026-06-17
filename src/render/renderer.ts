@@ -130,6 +130,7 @@ interface EntityView {
   sparkle?: THREE.Sprite; // ground objects
   objectMesh?: THREE.Object3D;
   portal?: THREE.Mesh; // dungeon door swirl
+  delveGlow?: THREE.PointLight; // delve tombstone passage
   objectCasters: THREE.Object3D[]; // object-view shadow meshes, distance-gated
   shadowOn: boolean;
   isFar: boolean;
@@ -692,7 +693,37 @@ export class Renderer {
     let objectMesh: THREE.Object3D | undefined;
 
     let portal: THREE.Mesh | undefined;
-    if (e.kind === 'object' && (e.templateId === 'dungeon_door' || e.templateId === 'dungeon_exit')) {
+    let delveGlow: THREE.PointLight | undefined;
+    if (e.kind === 'object' && e.templateId === 'delve_module_exit') {
+      body = new THREE.Group();
+      height = 2.5;
+      this.doorStoneMat ??= new THREE.MeshLambertMaterial({ color: 0x5a5a62 });
+      const stone = this.doorStoneMat;
+      const plinth = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.45, 1.2), stone);
+      plinth.position.y = 0.22;
+      plinth.castShadow = true;
+      body!.add(plinth);
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(1.55, 1.55, 0.38), stone);
+      slab.position.set(0, 1.15, 0);
+      slab.castShadow = true;
+      body!.add(slab);
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.5, 0.42), stone);
+      cap.position.set(0, 2.0, 0);
+      cap.castShadow = true;
+      body!.add(cap);
+      delveGlow = new THREE.PointLight(0x66bbff, 0, 12, 2);
+      delveGlow.position.y = 1.6;
+      body!.add(delveGlow);
+      if (!this.sparkleMat) {
+        this.sparkleMat = new THREE.SpriteMaterial({ map: sparkleTexture(), transparent: true, depthWrite: false });
+        if (!this.lowGfx) this.sparkleMat.color.setScalar(SPARKLE_BOOST);
+      }
+      sparkle = new THREE.Sprite(this.sparkleMat);
+      sparkle.scale.set(1.1, 1.1, 1);
+      sparkle.position.y = 2.35;
+      group.add(sparkle);
+      objectMesh = body!;
+    } else if (e.kind === 'object' && (e.templateId === 'dungeon_door' || e.templateId === 'dungeon_exit')) {
       // dungeon doorway: stone arch with a swirling portal
       const entering = e.templateId === 'dungeon_door';
       const tint = entering ? 0x9a5df0 : 0x6ab8ff;
@@ -818,7 +849,7 @@ export class Renderer {
     if (!visual) collectCasters(group, objectCasters);
     this.views.set(e.id, {
       group, visual, sheepVisual: null, bearVisual: null, catVisual: null, height, clickTarget,
-      nameplate: np, nameEl, hpBar, hpFill, emoteEl, emoteIconEl, emoteLabelEl, markerEl: marker, raidMarkEl: raidMark, sparkle, objectMesh, portal,
+      nameplate: np, nameEl, hpBar, hpFill, emoteEl, emoteIconEl, emoteLabelEl, markerEl: marker, raidMarkEl: raidMark, sparkle, objectMesh, portal, delveGlow,
       nameplateDisplay: 'none', nameplateTransform: '', nameplateSig: '', nameplateHpWidth: '',
       objectCasters, shadowOn: true, isFar: false, lastOverheadEmoteKey: null,
       lastX: e.pos.x, lastZ: e.pos.z, skin: e.skin,
@@ -1151,15 +1182,20 @@ export class Renderer {
       v.group.rotation.y = facing;
 
       if (e.kind === 'object') {
-        const vis = e.lootable;
+        const vis = e.lootable || (e.templateId?.startsWith('delve_') ?? false);
         v.group.visible = vis;
         if (v.sparkle && vis) {
           // sub-pixel beyond ~45u but still a full transparent draw each
           const sdx = e.pos.x - p.pos.x, sdz = e.pos.z - p.pos.z;
           v.sparkle.visible = sdx * sdx + sdz * sdz < SPARKLE_DRAW_RANGE_SQ;
-          const pulse = 0.75 + Math.sin(this.time * 3 + e.id) * 0.25;
+          const openPassage = e.templateId === 'delve_module_exit' && e.name !== 'Sealed Passage';
+          const pulse = (openPassage ? 0.85 : 0.65) + Math.sin(this.time * (openPassage ? 4 : 2.5) + e.id) * 0.25;
           v.sparkle.scale.set(pulse, pulse, 1);
-          v.sparkle.material.rotation = this.time * 0.8;
+          v.sparkle.material.rotation = this.time * (openPassage ? 1.2 : 0.8);
+        }
+        if (v.delveGlow) {
+          const openPassage = e.name !== 'Sealed Passage';
+          v.delveGlow.intensity = openPassage ? (this.lowGfx ? 5 : 10) : 0;
         }
         if (v.portal && vis) {
           v.portal.rotation.z = this.time * 1.4;
@@ -1496,9 +1532,10 @@ export class Renderer {
       const isSelf = id === p.id;
       const hasOverheadEmote = !!(e.kind === 'player' && e.overheadEmoteId && !e.dead);
       const isDoor = e.templateId === 'dungeon_door' || e.templateId === 'dungeon_exit';
+      const isDelveObj = e.templateId?.startsWith('delve_') ?? false;
       const hidden = (isSelf && !hasOverheadEmote) || d2 > NAMEPLATE_RANGE_SQ
         || (e.dead && !e.lootable && e.kind === 'mob')
-        || (e.kind === 'object' && !isDoor)
+        || (e.kind === 'object' && !isDoor && !isDelveObj)
         || (!this.showNameplates && e.kind === 'mob' && !e.dead);
       if (hidden) {
         if (v.nameplateDisplay !== 'none') {
