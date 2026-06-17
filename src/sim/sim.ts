@@ -8446,6 +8446,8 @@ export class Sim {
     return {
       delveId: run.delveId,
       tierId: run.tierId,
+      slot: run.slot,
+      origin: { x: run.origin.x, z: run.origin.z },
       moduleIndex: run.moduleIndex,
       moduleCount: run.modules.length,
       modules: run.modules,

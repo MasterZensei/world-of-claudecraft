@@ -3,9 +3,10 @@ import { Entity, SimEvent } from '../sim/types';
 import { OVERHEAD_EMOTES, type IWorld } from '../world_api';
 import { groundHeight, WATER_LEVEL, zoneBiomeAt } from '../sim/world';
 import {
-  MOBS, ABILITIES, DUNGEON_X_THRESHOLD, DUNGEON_LIST, DELVE_SLOT_COUNT, QUESTS,
+  MOBS, ABILITIES, DUNGEON_X_THRESHOLD, DUNGEON_LIST, QUESTS,
   instanceOrigin, INSTANCE_SLOT_COUNT, ARENA_SLOT_COUNT, arenaOrigin, arenaOriginAt,
-  defaultDelveModules, delveAt, delveModuleLocal, delveOrigin, delveModuleZOffset,
+  defaultDelveModules, delveAt, delveModuleLocal, delveModuleStackEndRelZ, delveOrigin,
+  delveModuleZOffset, delveSlotAt,
   DELVE_MODULE_Z_START, isArenaPos, isDelvePos, dungeonAt,
 } from '../sim/data';
 import { ARENA_LAYOUT, DUNGEON_WALL_X } from '../sim/dungeon_layout';
@@ -673,6 +674,9 @@ export class Renderer {
       case 'levelup':
         this.vfx.levelUpPillar(this.sim.playerId);
         break;
+      case 'delveEntered':
+        this.prebuildDelveInteriors(ev.delveId);
+        break;
     }
   }
 
@@ -904,41 +908,60 @@ export class Renderer {
       this.pendingInteriors.delete(key);
     }).catch((err) => {
       this.pendingInteriors.delete(key);
-      console.error('Failed to build delve interior:', err);
+      if (import.meta.env?.DEV) {
+        console.warn('Failed to build delve interior:', moduleId, 'at', ox, oz, err);
+      }
     });
+  }
+
+  /** Build every module in a delve run at its stacked z offset (parallel async). */
+  private buildAllDelveModules(
+    delveId: string,
+    slot: number,
+    origin: { x: number; z: number },
+    modules: readonly DelveModuleId[],
+  ): void {
+    void ensureDelveInteriorKit().catch(() => undefined);
+    for (let mi = 0; mi < modules.length; mi++) {
+      const moduleId = modules[mi];
+      const key = `delve:${delveId}:${slot}:${moduleId}`;
+      if (this.builtInteriors.has(key) || this.pendingInteriors.has(key)) continue;
+      const zOff = delveModuleZOffset(modules, mi);
+      this.scheduleDelveModuleBuild(key, moduleId, origin.x, origin.z + zOff);
+    }
+  }
+
+  /** Prebuild the full module stack when a delve run starts (offline + online). */
+  private prebuildDelveInteriors(delveId: string): void {
+    const run = this.sim.delveRun;
+    if (!run || run.delveId !== delveId || !run.modules.length) return;
+    this.buildAllDelveModules(
+      delveId,
+      run.slot,
+      run.origin,
+      run.modules as DelveModuleId[],
+    );
   }
 
   private ensureDelveInteriorsNear(px: number, pz: number): void {
     const delve = delveAt(px);
     if (!delve) return;
-    void ensureDelveInteriorKit().catch(() => undefined);
-    let slot = 0;
-    let bestD = Infinity;
-    for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
-      const o = delveOrigin(delve.index, i);
-      const d = Math.hypot(px - o.x, pz - o.z);
-      if (d < bestD) { bestD = d; slot = i; }
-    }
-    const origin = delveOrigin(delve.index, slot);
     const run = this.sim.delveRun;
-    const modules = (run?.modules?.length
+    const modules = (run?.delveId === delve.id && run.modules.length
       ? run.modules
       : defaultDelveModules(delve.id)) as DelveModuleId[];
-    // Slot origin is the delve door; modules stack north up to ~300u. The old
-    // 250u z gate never built interiors past the first chamber (finale = void).
+    const slot = run?.delveId === delve.id
+      ? run.slot
+      : delveSlotAt(delve.index, pz, modules);
+    const origin = run?.delveId === delve.id
+      ? run.origin
+      : delveOrigin(delve.index, slot);
+    // Slot origins are 500u apart on z; nearest-slot heuristics mis-pick slot 1+
+    // once the player advances past module 1 (interiors build at the wrong oz).
     if (Math.abs(px - origin.x) >= 120) return;
-    const lastId = modules[modules.length - 1] ?? 'reliquary_sunken_ossuary';
-    const lastLayout = DELVE_MODULE_LAYOUTS[lastId as DelveModuleId];
-    const stackEndZ = origin.z + delveModuleZOffset(modules, modules.length - 1)
-      + (lastLayout?.zMax ?? 61) + 40;
+    const stackEndZ = origin.z + delveModuleStackEndRelZ(modules);
     if (pz < origin.z + DELVE_MODULE_Z_START - 30 || pz > stackEndZ) return;
-    for (let mi = 0; mi < modules.length; mi++) {
-      const moduleId = modules[mi];
-      const key = `delve:${delve.id}:${slot}:m${mi}`;
-      if (this.builtInteriors.has(key) || this.pendingInteriors.has(key)) continue;
-      const zOff = delveModuleZOffset(modules, mi);
-      this.scheduleDelveModuleBuild(key, moduleId, origin.x, origin.z + zOff);
-    }
+    this.buildAllDelveModules(delve.id, slot, origin, modules);
   }
 
   // Outdoor fog presets per biome (high tier eases between them as the

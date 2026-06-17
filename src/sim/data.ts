@@ -278,6 +278,41 @@ export function delveModuleZOffset(modules: readonly string[], moduleIndex: numb
   return z;
 }
 
+/** Relative-z extent of a full module chain from the slot door (matches renderer gate). */
+export function delveModuleStackEndRelZ(modules: readonly string[], margin = 40): number {
+  if (modules.length === 0) return DELVE_MODULE_Z_START + 80 + margin;
+  const lastId = modules[modules.length - 1];
+  const layoutId = (DELVE_MODULES[lastId]?.layout ?? lastId) as DelveModuleId;
+  const layout = DELVE_MODULE_LAYOUTS[layoutId];
+  return delveModuleZOffset(modules, modules.length - 1) + (layout?.zMax ?? 61) + margin;
+}
+
+/** Pick the instance slot whose stacked module band contains world-z. */
+export function delveSlotAt(
+  delveIndex: number,
+  z: number,
+  modules: readonly string[],
+): number {
+  const mods = modules.length > 0
+    ? modules
+    : ['reliquary_sunken_ossuary'];
+  const stackEnd = delveModuleStackEndRelZ(mods);
+  const zMin = DELVE_MODULE_Z_START - 30;
+  for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
+    const o = delveOrigin(delveIndex, i);
+    const relZ = z - o.z;
+    if (relZ >= zMin && relZ <= stackEnd) return i;
+  }
+  let best = 0;
+  let bestD = Infinity;
+  for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
+    const o = delveOrigin(delveIndex, i);
+    const d = Math.abs(z - o.z);
+    if (d < bestD) { bestD = d; best = i; }
+  }
+  return best;
+}
+
 /** Default module chain for a delve when no active run is available. */
 export function defaultDelveModules(delveId: string): string[] {
   const delve = DELVES[delveId];
@@ -301,20 +336,13 @@ export function delveModuleLocal(
 } {
   const delve = delveAt(x);
   const index = delve?.index ?? Math.round((x - DELVE_X_MIN) / 600);
-  let best = 0;
-  let bestD = Infinity;
-  for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
-    const o = delveOrigin(index, i);
-    const d = Math.abs(z - o.z);
-    if (d < bestD) { bestD = d; best = i; }
-  }
-  const slot = delveOrigin(index, best);
-  const ox = slot.x;
-  const slotOz = slot.z;
-  const relZ = z - slotOz;
   const mods = modules.length > 0
     ? modules
     : (delve ? defaultDelveModules(delve.id) : ['reliquary_sunken_ossuary']);
+  const slot = delveOrigin(index, delveSlotAt(index, z, mods));
+  const ox = slot.x;
+  const slotOz = slot.z;
+  const relZ = z - slotOz;
   let zCursor = DELVE_MODULE_Z_START;
   for (let i = 0; i < mods.length; i++) {
     const len = delveModuleFootprint(mods[i]);

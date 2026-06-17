@@ -46,6 +46,8 @@ export interface DuelInfo {
 export interface DelveRunInfo {
   delveId: string;
   tierId: string;
+  slot: number;
+  origin: { x: number; z: number };
   moduleIndex: number;
   moduleCount: number;
   modules: string[];
