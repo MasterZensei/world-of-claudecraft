@@ -22,6 +22,7 @@ import {
   ZONE3_QUESTS, ZONE3_QUEST_ORDER, ZONE3_ROADS, ZONE3_ZONE,
 } from './content/zone3';
 import { DUNGEON_DEFS, DUNGEON_MOBS } from './content/dungeons';
+import { DUNGEON_WALL_HW, DUNGEON_WALL_X } from './dungeon_layout';
 import { WARLOCK_PET_MOBS } from './content/warlock_pets';
 import { GROUND_PICKUP_LINES } from './content/ground_pickup_lines';
 import {
@@ -210,7 +211,7 @@ export function arenaOrigin(slot: number): { x: number; z: number } {
 }
 
 export function isArenaPos(x: number): boolean {
-  return x >= ARENA_X_MIN && x < DELVE_X_MIN;
+  return x >= ARENA_X_MIN && x < DELVE_BAND_X_MIN;
 }
 
 // Nearest arena instance origin to a far-off position, matched by z-band (the
@@ -232,18 +233,24 @@ export function arenaOriginAt(z: number): { x: number; z: number; slot: number }
 // ---------------------------------------------------------------------------
 
 export const DELVE_X_MIN = 3600;
+// Each delve room is centred at DELVE_X_MIN + index*600. The room's west wall
+// sits at instance-local x = -(DUNGEON_WALL_X + DUNGEON_WALL_HW) = -24, i.e.
+// world-x = DELVE_X_MIN - 24 = 3576 for slot 0. We extend the delve band 1 u
+// further west (3575) to give isDelvePos a safe margin over the full footprint,
+// ensuring the west half of the room is never misclassified as arena.
+export const DELVE_BAND_X_MIN = DELVE_X_MIN - (DUNGEON_WALL_X + DUNGEON_WALL_HW + 1);
 export const DELVE_SLOT_COUNT = 6;
-export const DELVE_MODULE_GAP = 20;
+export const DELVE_MODULE_GAP = 16;
 export const DELVE_MODULE_Z_START = 8;
 const DELVE_Z0 = -1250;
-const DELVE_SLOT_SPACING = 500;
+const DELVE_SLOT_SPACING = 620; // covers 110u×4 rooms + 16u×3 gaps + 40u margin ≈ 536u
 
 export function delveOrigin(delveIndex: number, slot: number): { x: number; z: number } {
   return { x: DELVE_X_MIN + delveIndex * 600, z: DELVE_Z0 + slot * DELVE_SLOT_SPACING };
 }
 
 export function isDelvePos(x: number): boolean {
-  return x >= DELVE_X_MIN;
+  return x >= DELVE_BAND_X_MIN;
 }
 
 export function delveAt(x: number): DelveDef | null {
@@ -284,7 +291,7 @@ export function delveModuleStackEndRelZ(modules: readonly string[], margin = 40)
   const lastId = modules[modules.length - 1];
   const layoutId = (DELVE_MODULES[lastId]?.layout ?? lastId) as DelveModuleId;
   const layout = DELVE_MODULE_LAYOUTS[layoutId];
-  return delveModuleZOffset(modules, modules.length - 1) + (layout?.zMax ?? 61) + margin;
+  return delveModuleZOffset(modules, modules.length - 1) + (layout?.zMax ?? 91) + margin;
 }
 
 /** Pick the instance slot whose stacked module band contains world-z. */

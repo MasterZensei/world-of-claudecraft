@@ -8,7 +8,12 @@ import {
   delveOrigin,
   delveSlotAt,
   DELVE_MODULE_Z_START,
+  DELVE_MODULES,
 } from '../src/sim/data';
+import {
+  clampChaseCameraInModule,
+  DUNGEON_WALK_HALF_X,
+} from '../src/sim/dungeon_layout';
 import { DELVE_MODULE_LAYOUTS, type DelveModuleId } from '../src/sim/delve_layout';
 
 const FOUR_MODULE_RUN: DelveModuleId[] = [
@@ -57,5 +62,90 @@ describe('delve slot detection', () => {
     expect(loc.moduleIndex).toBe(3);
     expect(loc.moduleId).toBe('reliquary_finale');
     expect(loc.oz).toBe(origin.z + zBase);
+  });
+});
+
+describe('delve walkable bounds vs render floor', () => {
+  it('module 0 floor grid covers the inner walkable half-width', () => {
+    // KayKit floor tiles span x -24..24; global dungeon walkable band is |x| < 22.
+    // Delve rooms use wallX=25 (walkable 24u) but the global constant stays 22.
+    expect(DUNGEON_WALK_HALF_X).toBe(22);
+    const layout = DELVE_MODULE_LAYOUTS.reliquary_sunken_ossuary;
+    expect(layout.zMax - layout.zMin).toBe(110);
+  });
+});
+
+describe('pressure plate slot positions', () => {
+  // Helpers: pillar and tomb positions are the definitive source of truth from
+  // the layout data, so this test stays robust to coordinate tweaks.
+  function nearPillar(layout: (typeof DELVE_MODULE_LAYOUTS)[keyof typeof DELVE_MODULE_LAYOUTS], px: number, pz: number): boolean {
+    return layout.pillars.some((p) => Math.abs(p.x - px) < 1.5 && Math.abs(p.z - pz) < 1.5);
+  }
+  function nearTomb(layout: (typeof DELVE_MODULE_LAYOUTS)[keyof typeof DELVE_MODULE_LAYOUTS], px: number, pz: number): boolean {
+    return layout.tombs.some((t) => Math.abs(t.x - px) < 2.5 && Math.abs(t.z - pz) < 2.5);
+  }
+  function nearDais(layout: (typeof DELVE_MODULE_LAYOUTS)[keyof typeof DELVE_MODULE_LAYOUTS], px: number, pz: number): boolean {
+    return Math.hypot(px - layout.dais.x, pz - layout.dais.z) < layout.dais.r - 1;
+  }
+
+  it('reliquary_sunken_ossuary: pressure plate slots land on clear floor', () => {
+    const mod = DELVE_MODULES['reliquary_sunken_ossuary'];
+    const layout = DELVE_MODULE_LAYOUTS['reliquary_sunken_ossuary'];
+    const ppSlots = mod.interactableSlots.filter((s) => s.variants.includes('pressure_plate'));
+    expect(ppSlots.length).toBeGreaterThan(0);
+    for (const slot of ppSlots) {
+      expect(nearPillar(layout, slot.x, slot.z)).toBe(false);
+      expect(nearTomb(layout, slot.x, slot.z)).toBe(false);
+    }
+  });
+
+  it('reliquary_finale: pressure plate slot lands on clear floor in front of dais', () => {
+    const mod = DELVE_MODULES['reliquary_finale'];
+    const layout = DELVE_MODULE_LAYOUTS['reliquary_finale'];
+    const ppSlots = mod.interactableSlots.filter((s) => s.variants.includes('pressure_plate'));
+    expect(ppSlots.length).toBeGreaterThan(0);
+    for (const slot of ppSlots) {
+      expect(nearPillar(layout, slot.x, slot.z)).toBe(false);
+      expect(nearTomb(layout, slot.x, slot.z)).toBe(false);
+      // plate must be before the dais back (not inside the dais circle)
+      expect(nearDais(layout, slot.x, slot.z)).toBe(false);
+      // must be within the module footprint
+      expect(slot.z).toBeGreaterThan(layout.zMin);
+      expect(slot.z).toBeLessThan(layout.zMax);
+    }
+  });
+});
+
+describe('delve chase camera clamp', () => {
+  it('parks the lens on the center-aisle side at the right wall', () => {
+    const origin = delveOrigin(0, 0);
+    const zBase = delveModuleZOffset(FOUR_MODULE_RUN, 0);
+    const layout = DELVE_MODULE_LAYOUTS.reliquary_sunken_ossuary;
+    const ox = origin.x;
+    const oz = origin.z + zBase;
+    const camDist = 12;
+    const camPitch = 0.32;
+    const horizOrbit = camDist * Math.cos(camPitch);
+    const px = ox + 20;
+    const pz = oz + 20;
+    const { cx, cz } = clampChaseCameraInModule(
+      px + horizOrbit, pz, px, pz, ox, oz, layout, 2, camDist, camPitch,
+    );
+    expect(cx).toBeLessThanOrEqual(px - horizOrbit + 0.01);
+    expect(cx).toBeGreaterThan(ox);
+    expect(cz).toBeGreaterThanOrEqual(oz + layout.zMin + 2);
+    expect(cz).toBeLessThanOrEqual(oz + layout.zMax - 2);
+  });
+
+  it('module 0 floor span covers the right aisle at delve origin', () => {
+    const origin = delveOrigin(0, 0);
+    const zBase = delveModuleZOffset(FOUR_MODULE_RUN, 0);
+    const oz = origin.z + zBase;
+    const layout = DELVE_MODULE_LAYOUTS.reliquary_sunken_ossuary;
+    const rightAisleX = origin.x + DUNGEON_WALK_HALF_X - 2;
+    const loc = delveModuleLocal(rightAisleX, oz + 20, FOUR_MODULE_RUN);
+    expect(loc.moduleIndex).toBe(0);
+    expect(loc.oz).toBe(oz);
+    expect(layout.zMax - layout.zMin).toBe(110);
   });
 });

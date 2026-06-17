@@ -17,16 +17,21 @@ import {
   type TalentAllocation, type TalentModifiers, type SavedLoadout, type Role,
 } from './content/talents';
 import { Rng } from './rng';
+import {
+  ANTE_TO_TIER, ANTE_TO_PAGES, ANTE_TO_TRIES, generateLockPages, stepLock, visibleCells,
+  type Ante, type LockSession, type PickAction,
+} from './lockpick';
+import { lockpickPresetFor, LOCKPICK_TIER_REWARD, delveChestItemsForTier } from './content/delves/lockpick_tiers';
 import { SpatialGrid } from './spatial';
 import {
   HEAL_THREAT_FACTOR, MELEE_SWITCH_MULT, RANGED_SWITCH_MULT,
   TAUNT_FORCE_SECONDS, addThreat, clearThreat, stealthDetectionRadius, threatEntries, threatModifier, topThreatValue,
 } from './threat';
 import { groundHeight, WATER_LEVEL } from './world';
-import type { DelveCompanionInfo, DelveRunInfo, LeaderboardEntry } from '../world_api';
+import type { DelveCompanionInfo, DelveRunInfo, LeaderboardEntry, LockpickView } from '../world_api';
 import {
   AbilityDef, AbilityEffect, Aura, AuraKind, CAST_PUSHBACK_SEC, CHANNEL_PUSHBACK_FRACTION, CONSUME_DURATION,
-  CONSUME_TICKS, CrowdControlDrCategory, DT, DelveDef, DelveModuleDef, DelveRun, Entity, EquipSlot, FISHING_CAST_ID, FISHING_CAST_TIME, GCD,
+  CONSUME_TICKS, CrowdControlDrCategory, DT, DelveDef, DelveModuleDef, DelveObjectState, DelveRun, Entity, EquipSlot, FISHING_CAST_ID, FISHING_CAST_TIME, GCD,
   INTERACT_RANGE, InvSlot, LootEntry, LootSlot, MELEE_RANGE, MAX_LEVEL, MobFamily, MobTemplate,
   MoveInput, OverheadEmoteId, PetMode, PlayerClass, QuestProgress, QuestState, RUN_SPEED, SimConfig, SimEvent, TURN_SPEED, Vec3,
   angleTo, armorReduction, dist2d, emptyMoveInput, isConsuming, meleeMissChance, mobXpValue, normAngle,
@@ -645,6 +650,9 @@ export class Sim {
           badAirTimer: 0,
           companionBarks: [],
           exitPortalOpen: false,
+          rewardChestId: null,
+          surfaceExitId: null,
+          lockpick: null,
         });
       }
     }
@@ -3481,9 +3489,9 @@ export class Sim {
     if (e.kind === 'mob') {
       const template = MOBS[e.templateId];
       const run = this.delveRunForMob(e.id);
-      if (run && template && DELVES[run.delveId]?.bosses.includes(template.id) && !run.completed) {
+      if (run && template && DELVES[run.delveId]?.bosses.includes(template.id) && !run.completed && !run.objective.complete) {
         run.objective.complete = true;
-        this.completeDelve(run);
+        this.onDelveBossDefeated(run);
       }
       if (run && run.affixes.includes('restless_graves') && template && !template.boss && !template.elite) {
         run.restlessPending.push({ at: this.time + 3, x: e.pos.x, z: e.pos.z, mobId: 'reliquary_bonewalker' });
@@ -7591,8 +7599,27 @@ export class Sim {
   }
 
   private resolveMove(nx: number, nz: number, r: number, e: Entity): { x: number; z: number } {
-    const modules = (isDelvePos(nx) || isDelvePos(e.pos.x)) ? this.delveRunForEntity(e)?.modules : undefined;
-    return resolvePosition(this.cfg.seed, nx, nz, r, modules);
+    const isDelve = isDelvePos(nx) || isDelvePos(e.pos.x);
+    const run = isDelve ? this.delveRunForEntity(e) : undefined;
+    let { x, z } = resolvePosition(this.cfg.seed, nx, nz, r, run?.modules);
+    // Closed portcullis doors block the full walkable aisle until all plates are triggered.
+    if (run) {
+      for (const id of run.objectIds) {
+        const state = run.objectState[id];
+        if (!state || state.kind !== 'locked_door' || state.open) continue;
+        const door = this.entities.get(id);
+        if (!door) continue;
+        const hw = 14, hd = 1.2; // spans full walkable aisle (|x|<14), thin in z
+        const dx = x - door.pos.x, dz = z - door.pos.z;
+        const ox = Math.abs(dx) - hw - r;
+        const oz = Math.abs(dz) - hd - r;
+        if (ox < 0 && oz < 0) {
+          if (ox > oz) x = door.pos.x + Math.sign(dx || 1) * (hw + r);
+          else z = door.pos.z + Math.sign(dz || 1) * (hd + r);
+        }
+      }
+    }
+    return { x, z };
   }
 
   delveModuleEntry(run: DelveRun): Vec3 {
@@ -7756,6 +7783,8 @@ export class Sim {
     run.companionBarks = [];
     run.companion = undefined;
     run.exitPortalOpen = false;
+    run.rewardChestId = null;
+    run.surfaceExitId = null;
     run.objective = { kind: delve.objective, counts: [0], complete: false };
     const origin = this.delveOriginOf(run);
     run.origin = { x: origin.x, z: origin.z };
@@ -7780,6 +7809,8 @@ export class Sim {
     run.objectState = {};
     run.raiseDeadChannel = null;
     run.exitPortalOpen = false;
+    run.rewardChestId = null;
+    run.surfaceExitId = null;
 
     const moduleId = run.modules[run.moduleIndex];
     const mod = DELVE_MODULES[moduleId];
@@ -7805,7 +7836,8 @@ export class Sim {
       run.mobIds.push(mob.id);
     }
     this.spawnDelveInteractables(run, mod, zBase);
-    if (run.moduleIndex < run.modules.length - 1) this.spawnDelveModuleExit(run, mod, zBase);
+    const isFinale = mod.id === delve.finaleModuleId || run.moduleIndex >= run.modules.length - 1;
+    if (!isFinale) this.spawnDelveModuleExit(run, mod, zBase);
     this.emitDelveModuleEnter(run, mod);
     if (run.companion) {
       const companion = this.entities.get(run.companion.entityId);
@@ -7819,6 +7851,7 @@ export class Sim {
   }
 
   private freeDelveRun(run: DelveRun): void {
+    this.abandonLockpick(run);
     if (run.companion) this.despawnDelveCompanion(run);
     for (const id of run.mobIds) {
       if (!this.entities.has(id)) continue;
@@ -7851,6 +7884,9 @@ export class Sim {
     run.companionBarks = [];
     run.companion = undefined;
     run.exitPortalOpen = false;
+    run.rewardChestId = null;
+    run.surfaceExitId = null;
+    run.lockpick = null;
   }
 
   private updateDelveRuns(): void {
@@ -7907,6 +7943,87 @@ export class Sim {
       this.emit({ type: 'log', text: `${delve.name} run failed.`, color: '#f66', pid });
     }
     this.freeDelveRun(run);
+  }
+
+  private onDelveBossDefeated(run: DelveRun): void {
+    // Guard against double-spawn (e.g. if called twice due to a race)
+    if (run.rewardChestId !== null) return;
+    const delve = DELVES[run.delveId];
+    const moduleId = run.modules[run.moduleIndex] as DelveModuleId;
+    if (moduleId !== delve.finaleModuleId) return;
+    const layout = DELVE_MODULE_LAYOUTS[moduleId];
+    const zBase = this.delveModuleZOffset(run);
+    const dais = layout?.dais ?? { x: 0, z: 52 };
+    // Centre aisle, south of the dais — clear of the north sealed passage at zMax-6.
+    const chestLocalZ = dais.z - 9;
+    const chestPos = this.groundPos(run.origin.x, run.origin.z + zBase + chestLocalZ);
+    // Drop any stale module_exit (same z as dais / north passage) before placing the chest.
+    for (const id of [...run.objectIds]) {
+      if (run.objectState[id]?.kind !== 'module_exit') continue;
+      this.dropEntity(id);
+      run.objectIds = run.objectIds.filter((oid) => oid !== id);
+      delete run.objectState[id];
+    }
+    const chest = this.createDelveObject(run, 'locked_chest', chestPos);
+    chest.facing = Math.PI;
+    chest.prevFacing = Math.PI;
+    run.rewardChestId = chest.id;
+    run.objectState[chest.id].attemptAvailable = true;
+    if (!run.partyKey) return;
+    for (const pid of this.partyMembersForKey(run.partyKey)) {
+      this.emit({
+        type: 'log',
+        text: 'The boss falls. A warded reliquary chest rises on the dais — pick its lock to claim your spoils.',
+        color: '#8f8',
+        pid,
+      });
+    }
+  }
+
+  private grantDelveRewards(run: DelveRun): void {
+    if (run.completed) return;
+    run.completed = true;
+    const delve = DELVES[run.delveId];
+    const members = run.partyKey ? this.partyMembersForKey(run.partyKey) : [];
+    for (const pid of members) {
+      const meta = this.players.get(pid);
+      if (!meta) continue;
+      this.refreshDelveDaily(meta);
+      const clearKey = `${run.delveId}:${run.tierId}`;
+      const firstClear = !meta.delveDaily.firstClearXp.has(clearKey);
+      const xp = firstClear ? delve.baseRewards.firstClearXp : delve.baseRewards.repeatClearXp;
+      if (firstClear) meta.delveDaily.firstClearXp.add(clearKey);
+      meta.delveDaily.markClears += 1;
+      meta.delveMarks += 1;
+      meta.delveClears[clearKey] = (meta.delveClears[clearKey] ?? 0) + 1;
+      this.grantXp(xp, meta);
+      const copper = this.rng.int(delve.baseRewards.copperMin, delve.baseRewards.copperMax);
+      meta.copper += copper;
+      this.restorePetFromDelveStash(pid);
+      this.emit({ type: 'delveComplete', delveId: run.delveId, tierId: run.tierId, pid });
+    }
+  }
+
+  private openDelveSurfaceExit(run: DelveRun): void {
+    if (run.surfaceExitId !== null) return;
+    const moduleId = run.modules[run.moduleIndex] as DelveModuleId;
+    const layout = DELVE_MODULE_LAYOUTS[moduleId];
+    const zBase = this.delveModuleZOffset(run);
+    const dais = layout?.dais ?? { x: 0, z: 52 };
+    const exitLocalZ = Math.min(layout.zMax - 2, dais.z + 6);
+    const exitPos = this.groundPos(run.origin.x + dais.x, run.origin.z + zBase + exitLocalZ);
+    const exitObj = this.createDelveObject(run, 'surface_exit', exitPos);
+    run.objectState[exitObj.id].open = true;
+    run.surfaceExitId = exitObj.id;
+    if (!run.partyKey) return;
+    for (const pid of this.partyMembersForKey(run.partyKey)) {
+      this.emit({
+        type: 'log',
+        text: 'A stairway to the surface opens. Press F at the stairs to leave.',
+        color: '#8cf',
+        pid,
+      });
+    }
   }
 
   private completeDelve(run: DelveRun): void {
@@ -7991,11 +8108,15 @@ export class Sim {
         spawned.push({ kind: variant, id: obj.id });
       }
     }
-    const plate = spawned.find((s) => s.kind === 'pressure_plate');
-    const door = spawned.find((s) => s.kind === 'locked_door');
-    if (plate && door) {
-      run.objectState[plate.id].linkIds = [door.id];
+    // Link every pressure plate in this module to every locked door.
+    // A door only opens once ALL plates that reference it are triggered.
+    const plates = spawned.filter((s) => s.kind === 'pressure_plate');
+    const doors = spawned.filter((s) => s.kind === 'locked_door');
+    for (const door of doors) {
       run.objectState[door.id].open = false;
+    }
+    for (const plate of plates) {
+      run.objectState[plate.id].linkIds = doors.map((d) => d.id);
     }
   }
 
@@ -8006,15 +8127,19 @@ export class Sim {
       cracked_grave: 'Cracked Grave',
       destructible_wall: 'Cracked Wall',
       module_exit: 'Sealed Passage',
+      reward_chest: 'Reliquary Chest',
+      locked_chest: 'Warded Reliquary Chest',
+      surface_exit: 'Ascend to the Surface',
     };
     const maxHp = kind === 'destructible_wall' ? 80 : 1;
     const obj = createGroundObject(this.nextId++, '', names[kind] ?? kind, pos);
     obj.templateId = `delve_${kind}`;
     obj.maxHp = maxHp;
     obj.hp = maxHp;
-    obj.lootable = kind === 'cracked_grave' || kind === 'locked_door' || kind === 'destructible_wall' || kind === 'module_exit';
+    obj.lootable = kind === 'cracked_grave' || kind === 'destructible_wall' || kind === 'module_exit';
+    const startOpen = kind !== 'locked_door' && kind !== 'locked_chest';
+    run.objectState[obj.id] = { kind, triggered: false, hp: maxHp, maxHp, linkIds: [], open: startOpen };
     run.objectIds.push(obj.id);
-    run.objectState[obj.id] = { kind, triggered: false, hp: maxHp, maxHp, linkIds: [], open: kind !== 'locked_door' };
     this.addEntity(obj);
     return obj;
   }
@@ -8148,16 +8273,31 @@ export class Sim {
         const p = this.entities.get(pid);
         if (!p || p.dead || dist2d(p.pos, plate.pos) > DELVE_PLATE_RADIUS) continue;
         state.triggered = true;
+        // Switch the visual to the triggered (green) variant — renderer rebuilds the view.
+        plate.templateId = 'delve_pressure_plate_triggered';
+        // Open each linked door only when ALL plates referencing it are triggered.
         for (const linkId of state.linkIds) {
           const linked = run.objectState[linkId];
-          if (linked) linked.open = true;
+          if (!linked || linked.kind !== 'locked_door' || linked.open) continue;
+          const allTriggered = run.objectIds.every((oid) => {
+            const s = run.objectState[oid];
+            if (!s || s.kind !== 'pressure_plate') return true;
+            if (!s.linkIds.includes(linkId)) return true;
+            return s.triggered;
+          });
+          if (!allTriggered) continue;
+          linked.open = true;
+          const doorEnt = this.entities.get(linkId);
+          if (doorEnt) this.dropEntity(linkId);
+          for (const party of this.partyMembersForKey(run.partyKey)) {
+            this.emit({
+              type: 'log',
+              text: 'A mechanism clicks open nearby. A passage opens to the north — find the exit portal ahead.',
+              color: '#cc9',
+              pid: party,
+            });
+          }
         }
-        this.emit({
-          type: 'log',
-          text: 'A mechanism clicks open nearby. A passage opens to the north — find the exit portal ahead.',
-          color: '#cc9',
-          pid,
-        });
         break;
       }
     }
@@ -8336,7 +8476,7 @@ export class Sim {
         const healed = Math.min(target.maxHp - target.hp, 8 + rank * 4);
         target.hp += healed;
         this.emit({ type: 'heal', targetId: target.id, amount: healed });
-        this.emit({ type: 'spellfx', sourceId: companion.id, targetId: target.id, school: 'holy', fx: 'heal' });
+        this.emit({ type: 'spellfx', sourceId: companion.id, targetId: target.id, school: 'holy', fx: 'tick' });
       }
     }
     if (combatTarget) return;
@@ -8398,7 +8538,368 @@ export class Sim {
       this.advanceDelveModule(run);
       return;
     }
+    if (state.kind === 'locked_chest') {
+      if (dist2d(r.e.pos, obj.pos) > DELVE_PLATE_RADIUS + 2) {
+        this.error(r.meta.entityId, 'Move closer to the chest.');
+        return;
+      }
+      if (state.looted) {
+        this.emit({ type: 'log', text: 'The chest is empty.', color: '#aaa', pid: r.meta.entityId });
+        return;
+      }
+      if (!state.attemptAvailable) {
+        this.error(r.meta.entityId, "The lock is jammed beyond picking — clear the delve again for another attempt.");
+        return;
+      }
+      if (run.lockpick && run.lockpick.state === 'IN_PROGRESS') {
+        // Someone is already picking it (single interactor, v1).
+        if (run.lockpick.ownerId !== r.meta.entityId) {
+          this.error(r.meta.entityId, 'Someone is already working the lock.');
+        }
+        return;
+      }
+      // Open the ante selector on the client; no session yet.
+      this.emit({ type: 'lockpickOffer', objectId, pid: r.meta.entityId });
+      return;
+    }
+    if (state.kind === 'reward_chest') {
+      if (dist2d(r.e.pos, obj.pos) > DELVE_PLATE_RADIUS + 2) {
+        this.error(r.meta.entityId, 'Move closer to the chest.');
+        return;
+      }
+      if (state.open && state.triggered) {
+        this.emit({ type: 'log', text: 'The chest is empty.', color: '#aaa', pid: r.meta.entityId });
+        return;
+      }
+      this.grantDelveRewards(run);
+      state.triggered = true;
+      state.open = true;
+      obj.name = 'Opened Chest';
+      this.openDelveSurfaceExit(run);
+      return;
+    }
+    if (state.kind === 'surface_exit') {
+      if (!state.open) {
+        this.error(r.meta.entityId, 'The way out is not yet open.');
+        return;
+      }
+      if (dist2d(r.e.pos, obj.pos) > DELVE_EXIT_PORTAL_RADIUS + 2) {
+        this.error(r.meta.entityId, 'Move closer to the stairs.');
+        return;
+      }
+      const delve = DELVES[run.delveId];
+      const members = run.partyKey ? this.partyMembersForKey(run.partyKey) : [];
+      for (const pid of members) {
+        this.restorePetFromDelveStash(pid);
+        this.ejectToDelveDoor(pid, delve);
+      }
+      this.freeDelveRun(run);
+      return;
+    }
     this.error(r.meta.entityId, 'Nothing happens.');
+  }
+
+  // -------------------------------------------------------------------------
+  // Lockpicking minigame ("Tumbler's Path") — server-authoritative. The client
+  // submits one action enum per step; the sim owns the lock, validates every
+  // step, and grants loot only on a server-side SUCCESS. The full lock layout is
+  // never serialized — only visibleCells() inside the fog window is emitted.
+  // -------------------------------------------------------------------------
+
+  /** Resolve the locked-chest object + run for an acting player, with all the
+   * proximity/eligibility guards. Returns null (after emitting an error) on any
+   * failure. */
+  private resolveLockChest(objectId: number, pid?: number):
+    | { r: { e: Entity; meta: PlayerMeta }; run: DelveRun; state: DelveObjectState; obj: Entity }
+    | null {
+    const r = this.resolve(pid);
+    if (!r) return null;
+    let run = this.delveRunForPlayer(r.meta.entityId);
+    if (!run) run = this.delveRuns.find((d) => d.partyKey !== null && d.objectIds.includes(objectId)) ?? null;
+    if (!run) { this.error(r.meta.entityId, 'You are not in a delve.'); return null; }
+    const state = run.objectState[objectId];
+    const obj = this.entities.get(objectId);
+    if (!state || !obj || state.kind !== 'locked_chest') { this.error(r.meta.entityId, 'You cannot pick that.'); return null; }
+    if (dist2d(r.e.pos, obj.pos) > DELVE_PLATE_RADIUS + 2) { this.error(r.meta.entityId, 'Move closer to the chest.'); return null; }
+    return { r, run, state, obj };
+  }
+
+  /** Start a lockpicking attempt: commit an ante (1/2/3 lives = loot tier). */
+  lockpickEngage(objectId: number, ante: Ante, pid?: number): void {
+    const got = this.resolveLockChest(objectId, pid);
+    if (!got) return;
+    const { r, run, state } = got;
+    if (ante !== 1 && ante !== 2 && ante !== 3) { this.error(r.meta.entityId, 'Choose 1, 2, or 3 picks.'); return; }
+    if (state.looted) { this.emit({ type: 'log', text: 'The chest is empty.', color: '#aaa', pid: r.meta.entityId }); return; }
+    if (!state.attemptAvailable) { this.error(r.meta.entityId, "The lock is jammed beyond picking — clear the delve again for another attempt."); return; }
+    if (run.lockpick && run.lockpick.state === 'IN_PROGRESS') { this.error(r.meta.entityId, 'Someone is already working the lock.'); return; }
+
+    const tier = lockpickPresetFor(run.tierId);
+    const baseSeed = (run.seed ^ (objectId * 0x9e3779b1)) >>> 0;
+    const triesTotal = ANTE_TO_TRIES[ante];
+    const pages = generateLockPages(baseSeed, tier, ANTE_TO_PAGES[ante]);
+    const spec = pages[0];
+    const session: LockSession = {
+      sessionId: `lp_${objectId}_${run.seed >>> 0}`,
+      chestId: objectId,
+      ownerId: r.meta.entityId,
+      baseSeed,
+      pages,
+      pageIndex: 0,
+      ante,
+      lootTier: ANTE_TO_TIER[ante],
+      col: 0,
+      row: spec.startRow,
+      triesLeft: triesTotal,
+      triesTotal,
+      state: 'IN_PROGRESS',
+      lastActionTick: this.tickCount,
+    };
+    run.lockpick = session;
+    this.emit({
+      type: 'lockpickSession',
+      sessionId: session.sessionId,
+      objectId,
+      w: spec.tier.cols,
+      h: spec.tier.rows,
+      col: session.col,
+      row: session.row,
+      page: 1,
+      pageCount: pages.length,
+      tries: session.triesLeft,
+      triesTotal: session.triesTotal,
+      lootTier: session.lootTier,
+      allowed: spec.tier.allowedActions,
+      visible: visibleCells(spec, session.col, spec.tier.visibilityWindow),
+      pid: r.meta.entityId,
+    });
+  }
+
+  /** Submit one pick action on the player's active attempt. Abort ends it
+   * (preserving the chest). `sessionId`, when supplied (server path), is checked
+   * for staleness; offline play omits it and acts on the one live session. */
+  lockpickAction(action: PickAction, pid?: number, sessionId?: string): void {
+    const r = this.resolve(pid);
+    if (!r) return;
+    const run = this.delveRunForPlayer(r.meta.entityId);
+    const session = run?.lockpick ?? null;
+    if (!run || !session) { this.error(r.meta.entityId, 'No lock attempt in progress.'); return; }
+    if (sessionId !== undefined && session.sessionId !== sessionId) { this.error(r.meta.entityId, 'No lock attempt in progress.'); return; }
+    if (session.ownerId !== r.meta.entityId) { this.error(r.meta.entityId, 'That is not your lock.'); return; }
+    if (session.state !== 'IN_PROGRESS') return;
+
+    if (action === 'abort') { this.lockpickAbort(r.meta.entityId, session.sessionId); return; }
+    let spec = session.pages[session.pageIndex];
+    if (!spec.tier.allowedActions.includes(action)) { this.error(r.meta.entityId, 'That tool slips off this lock.'); return; }
+    session.lastActionTick = this.tickCount;
+
+    const step = stepLock(spec, session.col, session.row, action);
+    let result = step.result;
+    if (result === 'slip' || result === 'bind' || result === 'trap') {
+      // The try failed. Burn one try; if any remain, reset to a fresh board so
+      // the player can try again. Only when tries run out does the chest jam.
+      result = this.lockpickBurnTry(session);
+      spec = session.pages[session.pageIndex];
+    } else {
+      session.col = step.col;
+      session.row = step.row;
+      if (result === 'success' && session.pageIndex < session.pages.length - 1) {
+        // Page seated but more remain — roll onto the next lock board.
+        session.pageIndex += 1;
+        spec = session.pages[session.pageIndex];
+        session.col = 0;
+        session.row = spec.startRow;
+        result = 'pageCleared';
+      }
+    }
+
+    this.emit({
+      type: 'lockpickStep',
+      sessionId: session.sessionId,
+      col: session.col,
+      row: session.row,
+      page: session.pageIndex + 1,
+      pageCount: session.pages.length,
+      tries: session.triesLeft,
+      triesTotal: session.triesTotal,
+      result,
+      visible: visibleCells(spec, session.col, spec.tier.visibilityWindow),
+      pid: r.meta.entityId,
+    });
+
+    if (result === 'success') { this.lockpickSucceed(run, session); }
+    else if (result === 'fail') { this.lockpickFail(run, session); }
+  }
+
+  /** A try failed (slip/bind/trap or timeout). Consume one try; if any remain,
+   * regenerate a fresh page set and reset to the start, returning 'retry'.
+   * Otherwise return 'fail' (caller jams the chest). */
+  private lockpickBurnTry(session: LockSession): 'retry' | 'fail' {
+    session.triesLeft -= 1;
+    if (session.triesLeft <= 0) return 'fail';
+    // Fresh boards each try so a failed run can't simply be memorized.
+    const triesUsed = session.triesTotal - session.triesLeft;
+    const seed = (session.baseSeed ^ (triesUsed * 0x85ebca6b)) >>> 0;
+    session.pages = generateLockPages(seed, session.pages[0].tier, session.pages.length);
+    session.pageIndex = 0;
+    session.col = 0;
+    session.row = session.pages[0].startRow;
+    return 'retry';
+  }
+
+  /** Client-reported per-page timeout: counts as a failed try. */
+  lockpickTimeout(pid?: number, sessionId?: string): void {
+    const r = this.resolve(pid);
+    if (!r) return;
+    const run = this.delveRunForPlayer(r.meta.entityId);
+    const session = run?.lockpick ?? null;
+    if (!run || !session || session.ownerId !== r.meta.entityId) return;
+    if (sessionId !== undefined && session.sessionId !== sessionId) return;
+    if (session.state !== 'IN_PROGRESS') return;
+
+    const result = this.lockpickBurnTry(session);
+    const spec = session.pages[session.pageIndex];
+    this.emit({
+      type: 'lockpickStep',
+      sessionId: session.sessionId,
+      col: session.col,
+      row: session.row,
+      page: session.pageIndex + 1,
+      pageCount: session.pages.length,
+      tries: session.triesLeft,
+      triesTotal: session.triesTotal,
+      result,
+      visible: visibleCells(spec, session.col, spec.tier.visibilityWindow),
+      pid: r.meta.entityId,
+    });
+    if (result === 'fail') this.lockpickFail(run, session);
+  }
+
+  lockpickAbort(pid?: number, sessionId?: string): void {
+    const r = this.resolve(pid);
+    if (!r) return;
+    const run = this.delveRunForPlayer(r.meta.entityId);
+    const session = run?.lockpick ?? null;
+    if (!run || !session || session.ownerId !== r.meta.entityId) return;
+    if (sessionId !== undefined && session.sessionId !== sessionId) return;
+    session.state = 'ABANDONED';
+    run.lockpick = null;
+    // ABANDONED preserves the attempt (disconnect-friendly): attemptAvailable stays true.
+    this.emit({ type: 'lockpickEnd', sessionId: session.sessionId, outcome: 'abandoned', pid: r.meta.entityId });
+  }
+
+  /** Claim item loot from an opened delve chest (shown on the loot overlay). */
+  collectDelveChestLoot(chestId: number, pid?: number): void {
+    const r = this.resolve(pid);
+    if (!r) return;
+    const run = this.delveRunForPlayer(r.meta.entityId);
+    if (!run) return;
+    const state = run.objectState[chestId];
+    const obj = this.entities.get(chestId);
+    if (!state || state.kind !== 'locked_chest' || !state.pendingLoot?.length) {
+      this.error(r.meta.entityId, 'There is nothing left to take.');
+      return;
+    }
+    if (!obj || dist2d(r.e.pos, obj.pos) > DELVE_PLATE_RADIUS + 2) {
+      this.error(r.meta.entityId, 'Move closer to the chest.');
+      return;
+    }
+    for (const slot of state.pendingLoot) {
+      this.addItem(slot.itemId, slot.count, r.meta.entityId);
+    }
+    state.pendingLoot = [];
+  }
+
+  /** Tear down any active lockpick session on a run (player left / disconnected). */
+  private abandonLockpick(run: DelveRun): void {
+    const session = run.lockpick;
+    if (!session || session.state !== 'IN_PROGRESS') return;
+    session.state = 'ABANDONED';
+    run.lockpick = null;
+    this.emit({ type: 'lockpickEnd', sessionId: session.sessionId, outcome: 'abandoned', pid: session.ownerId });
+  }
+
+  private lockpickSucceed(run: DelveRun, session: LockSession): void {
+    session.state = 'SUCCESS';
+    const state = run.objectState[session.chestId];
+    const obj = this.entities.get(session.chestId);
+    const items = delveChestItemsForTier(session.lootTier);
+    if (state) {
+      state.looted = true;
+      state.open = true;
+      state.triggered = true;
+      state.attemptAvailable = false;
+      state.lootedTier = session.lootTier;
+      state.pendingLoot = items.map((s) => ({ ...s }));
+    }
+    if (obj) {
+      obj.name = 'Opened Chest';
+      obj.templateId = 'delve_reward_chest';
+    }
+    this.grantDelveRewards(run);
+    this.grantLockpickBonus(run, session.lootTier);
+    this.openDelveSurfaceExit(run);
+    this.emit({ type: 'delveChestLoot', chestId: session.chestId, items, pid: session.ownerId });
+    this.emit({ type: 'lockpickEnd', sessionId: session.sessionId, outcome: 'success', lootTier: session.lootTier, pid: session.ownerId });
+    run.lockpick = null;
+  }
+
+  private lockpickFail(run: DelveRun, session: LockSession): void {
+    session.state = 'FAILED';
+    const state = run.objectState[session.chestId];
+    if (state) state.attemptAvailable = false; // chest lost — re-clear the delve
+    this.emit({ type: 'lockpickEnd', sessionId: session.sessionId, outcome: 'fail', pid: session.ownerId });
+    if (run.partyKey) {
+      for (const pid of this.partyMembersForKey(run.partyKey)) {
+        this.emit({ type: 'log', text: 'The last pick snaps. The lock jams — the chest is lost unless you clear the delve again.', color: '#f88', pid });
+      }
+    }
+    run.lockpick = null;
+  }
+
+  /** Loot-tier bonus on top of the base delve chest rewards (marks + copper). */
+  private grantLockpickBonus(run: DelveRun, tier: 'premium' | 'medium' | 'low'): void {
+    const reward = LOCKPICK_TIER_REWARD[tier];
+    const delve = DELVES[run.delveId];
+    const members = run.partyKey ? this.partyMembersForKey(run.partyKey) : [];
+    const baseCopper = Math.round((delve.baseRewards.copperMin + delve.baseRewards.copperMax) / 2);
+    const bonusCopper = Math.round(baseCopper * (reward.copperMult - 1));
+    for (const pid of members) {
+      const meta = this.players.get(pid);
+      if (!meta) continue;
+      meta.delveMarks += reward.bonusMarks;
+      meta.copper += bonusCopper;
+      const parts: string[] = [];
+      if (reward.bonusMarks > 0) parts.push(`${reward.bonusMarks} extra Delve Mark${reward.bonusMarks === 1 ? '' : 's'}`);
+      if (bonusCopper > 0) parts.push(`${bonusCopper}c`);
+      const detail = parts.length ? ` (+${parts.join(', ')})` : '';
+      this.emit({ type: 'log', text: `The lock yields! ${tier[0].toUpperCase() + tier.slice(1)} spoils${detail}.`, color: '#fd8', pid });
+    }
+  }
+
+  /** Read-only projection of the active lockpick attempt for IWorld (offline). */
+  lockpickViewFor(pid?: number): LockpickView | null {
+    const r = this.resolve(pid);
+    if (!r) return null;
+    const run = this.delveRunForPlayer(r.meta.entityId);
+    const s = run?.lockpick ?? null;
+    if (!s || s.state !== 'IN_PROGRESS' || s.ownerId !== r.meta.entityId) return null;
+    const spec = s.pages[s.pageIndex];
+    return {
+      sessionId: s.sessionId,
+      objectId: s.chestId,
+      w: spec.tier.cols,
+      h: spec.tier.rows,
+      col: s.col,
+      row: s.row,
+      page: s.pageIndex + 1,
+      pageCount: s.pages.length,
+      tries: s.triesLeft,
+      triesTotal: s.triesTotal,
+      lootTier: s.lootTier,
+      allowed: spec.tier.allowedActions.slice(),
+      visible: visibleCells(spec, s.col, spec.tier.visibilityWindow),
+    };
   }
 
   companionUpgrade(companionId: string, pid?: number): void {
@@ -8487,6 +8988,10 @@ export class Sim {
 
   get companionState(): DelveCompanionInfo | null {
     return this.delveCompanionWire(this.primaryId);
+  }
+
+  get lockpickState(): LockpickView | null {
+    return this.lockpickViewFor(this.primaryId);
   }
 
   get delveMarks(): number {

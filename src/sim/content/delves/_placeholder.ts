@@ -38,7 +38,7 @@ const PLACEHOLDER_SPAWNS = {
 
     { mobId: 'crypt_shambler', x: 2, z: 26 },
 
-  ] as const,
+  ],
 
 };
 

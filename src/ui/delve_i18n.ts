@@ -11,6 +11,7 @@ const delveUiEnRaw = {  board: {
     openDelve: 'Collapsed Reliquary',
     openDelveAria: 'Open Delve Board from {name}',
     marks: 'Delve Marks: {count}',
+    minLevel: 'Requires Level {level}',
     tier: {
       normal: 'Normal',
       heroic: 'Heroic',

@@ -1,4 +1,5 @@
 import { OVERHEAD_EMOTE_IDS, type DelveObjectiveState, type Entity, type EquipSlot, type InvSlot, type MoveInput, type OverheadEmoteId, type PetMode, type PlayerClass, type QuestProgress, type QuestState, type ResourceType } from './sim/types';
+import type { Ante, LootTier, PickAction, VisibleCell } from './sim/lockpick';
 import type { ResolvedAbility } from './sim/sim';
 import type { TalentAllocation, SavedLoadout, Role } from './sim/content/talents';
 
@@ -55,6 +56,24 @@ export interface DelveRunInfo {
   affixes: string[];
   completed: boolean;
   exitPortalOpen: boolean;
+}
+
+// Render-safe projection of an active lockpicking attempt. Only ever holds cells
+// inside the fog window — the full lock layout never reaches the client.
+export interface LockpickView {
+  sessionId: string;
+  objectId: number;
+  w: number;
+  h: number;
+  col: number;
+  row: number;
+  page: number; // 1-based current page
+  pageCount: number; // total pages for this ante (premium 3 / medium 2 / low 1)
+  tries: number; // tries remaining (this one included)
+  triesTotal: number; // tries granted by the difficulty (easy 3 / medium 2 / hard 1)
+  lootTier: LootTier;
+  allowed: Exclude<PickAction, 'abort'>[];
+  visible: VisibleCell[];
 }
 
 export interface DelveCompanionInfo {
@@ -312,6 +331,14 @@ export interface IWorld {
   leaveDelve(): void;
   delveInteract(objectId: number): void;
   companionUpgrade(companionId: string): void;
+  // Lockpicking minigame. The client renders only lockpickState (fog-windowed)
+  // and submits intents; the server owns the lock and all outcomes.
+  lockpickState: LockpickView | null;
+  lockpickEngage(objectId: number, ante: Ante): void;
+  lockpickAction(action: PickAction): void;
+  lockpickAbort(): void;
+  lockpickTimeout(): void;
+  collectDelveChestLoot(chestId: number): void;
   delveRun: DelveRunInfo | null;
   companionState: DelveCompanionInfo | null;
   delveMarks: number;

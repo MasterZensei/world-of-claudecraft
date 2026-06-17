@@ -677,13 +677,22 @@ async function startGame(world: IWorld, offlineSim: Sim | null, online: ClientWo
     let bestCorpse: number | null = null, bestCorpseD = INTERACT_RANGE;
     let bestObj: number | null = null, bestObjD = INTERACT_RANGE;
     let bestNpc: number | null = null, bestNpcD = INTERACT_RANGE + 1;
+    // Delve interactables (warded chest, cracked grave, sealed/tombstone passage,
+    // surface stairs) are driven through delveInteract, not the generic pickup
+    // path — the sim owns their per-object proximity + state gating and the
+    // lockpick offer. Selected a touch wider than INTERACT_RANGE so the sim can
+    // emit its precise "move closer to the chest/passage" hint.
+    let bestDelve: number | null = null, bestDelveD = INTERACT_RANGE + 1;
     for (const e of world.entities.values()) {
       const d = dist2d(p.pos, e.pos);
       if (e.kind === 'mob' && e.lootable && d < bestCorpseD) { bestCorpse = e.id; bestCorpseD = d; }
-      if (e.kind === 'object' && e.lootable && d < bestObjD) { bestObj = e.id; bestObjD = d; }
+      if (e.kind === 'object' && e.templateId?.startsWith('delve_')) {
+        if (d < bestDelveD) { bestDelve = e.id; bestDelveD = d; }
+      } else if (e.kind === 'object' && e.lootable && d < bestObjD) { bestObj = e.id; bestObjD = d; }
       if (e.kind === 'npc' && d < bestNpcD) { bestNpc = e.id; bestNpcD = d; }
     }
     if (bestCorpse !== null) { world.lootCorpse(bestCorpse); return; }
+    if (bestDelve !== null) { world.delveInteract(bestDelve); return; }
     if (bestObj !== null) {
       const obj = world.entities.get(bestObj)!;
       if (obj.templateId === 'dungeon_door' && obj.dungeonId) { world.enterDungeon(obj.dungeonId); return; }

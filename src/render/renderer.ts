@@ -9,7 +9,7 @@ import {
   delveModuleZOffset, delveSlotAt,
   DELVE_MODULE_Z_START, isArenaPos, isDelvePos, dungeonAt,
 } from '../sim/data';
-import { ARENA_LAYOUT, DUNGEON_WALL_X } from '../sim/dungeon_layout';
+import { ARENA_LAYOUT, clampChaseCameraInModule, DUNGEON_WALL_X } from '../sim/dungeon_layout';
 import { DELVE_MODULE_LAYOUTS, type DelveModuleId } from '../sim/delve_layout';
 import { cameraOcclusion } from '../sim/colliders';
 import type { BiomeId } from '../sim/types';
@@ -20,6 +20,7 @@ import { buildProps } from './props';
 import { plankTexture, sparkleTexture } from './textures';
 import { DungeonInteriors, ensureDungeonAssets } from './dungeon';
 import { buildDelveModule } from './delve_interiors';
+import { buildDelveChestMesh } from './delve_chest';
 import { ensureDelveInteriorKit } from './interior_kit';
 import { buildGroundQuestObject } from './quest_objects';
 import { Vfx } from './vfx';
@@ -131,6 +132,7 @@ interface EntityView {
   nameplateHpWidth: string;
   sparkle?: THREE.Sprite; // ground objects
   objectMesh?: THREE.Object3D;
+  objectTemplateId?: string;
   portal?: THREE.Mesh; // dungeon door swirl
   delveGlow?: THREE.PointLight; // delve tombstone passage
   objectCasters: THREE.Object3D[]; // object-view shadow meshes, distance-gated
@@ -728,6 +730,183 @@ export class Renderer {
       sparkle.position.y = 2.35;
       group.add(sparkle);
       objectMesh = body!;
+    } else if (e.kind === 'object' && (e.templateId === 'delve_reward_chest' || e.templateId === 'delve_locked_chest')) {
+      const locked = e.templateId === 'delve_locked_chest';
+      const chest = buildDelveChestMesh(locked);
+      body = chest.group;
+      height = chest.height;
+      const chestLight = new THREE.PointLight(locked ? 0xc9a878 : 0xffd060, locked ? 2.4 : 3.5, 10, 2);
+      chestLight.position.set(0, height * 0.85, 0);
+      body!.add(chestLight);
+      if (!this.sparkleMat) {
+        this.sparkleMat = new THREE.SpriteMaterial({ map: sparkleTexture(), transparent: true, depthWrite: false });
+        if (!this.lowGfx) this.sparkleMat.color.setScalar(SPARKLE_BOOST);
+      }
+      sparkle = new THREE.Sprite(this.sparkleMat);
+      sparkle.scale.set(0.9, 0.9, 1);
+      sparkle.position.y = height + 0.35;
+      sparkle.visible = !locked;
+      group.add(sparkle);
+      objectMesh = body!;
+    } else if (e.kind === 'object' && e.templateId === 'delve_surface_exit') {
+      // "Ascend to the Surface" — ascending stairway portal: warm red archway
+      // distinct from the sealed module_exit tombstone and the overworld dungeon arch.
+      body = new THREE.Group();
+      height = 3.8;
+      this.doorStoneMat ??= new THREE.MeshLambertMaterial({ color: 0x5a5a62 });
+      const stone = this.doorStoneMat;
+      // two flanking pillars
+      for (const sx of [-0.9, 0.9]) {
+        const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3.2, 0.5), stone);
+        pillar.position.set(sx, 1.6, 0);
+        pillar.castShadow = true;
+        body!.add(pillar);
+      }
+      // lintel
+      const lintel = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.5, 0.55), stone);
+      lintel.position.set(0, 3.35, 0);
+      lintel.castShadow = true;
+      body!.add(lintel);
+      // ascending steps up to the threshold (3 steps read as "climb up")
+      for (let s = 0; s < 3; s++) {
+        const stepW = 2.0 - s * 0.25;
+        const stepH = 0.3 + s * 0.3;
+        const stepMesh = new THREE.Mesh(new THREE.BoxGeometry(stepW, stepH, 0.5), stone);
+        stepMesh.position.set(0, stepH / 2, -0.55 - s * 0.5);
+        body!.add(stepMesh);
+      }
+      // portal disc in the archway — warm amber/red for "surface / daylight"
+      const exitPortalMat = new THREE.MeshBasicMaterial({
+        color: 0xff9a3c, transparent: true, opacity: 0.52, side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending, depthWrite: false,
+      });
+      if (!this.lowGfx) exitPortalMat.color.multiplyScalar(PORTAL_BOOST);
+      portal = new THREE.Mesh(new THREE.CircleGeometry(1.22, 20), exitPortalMat);
+      portal.position.y = 1.82;
+      portal.scale.set(1, 1.2, 1);
+      body!.add(portal);
+      const exitGlow = new THREE.PointLight(0xff8c2a, 8, 14, 2);
+      exitGlow.position.y = 2.0;
+      body!.add(exitGlow);
+      objectMesh = body!;
+    } else if (e.kind === 'object' && e.templateId === 'delve_locked_door') {
+      // Gothic iron portcullis blocking the aisle until both pressure plates are activated.
+      // Stone jamb pillars flank the opening; vertical bars + crossbeams fill the gate.
+      body = new THREE.Group();
+      height = 6.5;
+      this.doorStoneMat ??= new THREE.MeshLambertMaterial({ color: 0x5a5a62 });
+      const ironMat = new THREE.MeshLambertMaterial({ color: 0x232326, emissive: 0x0a0a12, emissiveIntensity: 0.5 });
+      // Flanking stone jamb pillars (visual frame; side walls provide the lateral block)
+      for (const sx of [-12, 12]) {
+        const jamb = new THREE.Mesh(new THREE.BoxGeometry(2.2, 7.2, 1.6), this.doorStoneMat!);
+        jamb.position.set(sx, 3.6, 0);
+        jamb.castShadow = true;
+        body!.add(jamb);
+      }
+      // Vertical portcullis bars spanning the gap between the jambs
+      for (let bx = -10; bx <= 10; bx += 2.2) {
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(0.32, 6.4, 0.32), ironMat);
+        bar.position.set(bx, 3.2, 0);
+        bar.castShadow = true;
+        body!.add(bar);
+      }
+      // Horizontal crossbeams
+      for (const y of [1.2, 3.6, 5.8]) {
+        const beam = new THREE.Mesh(new THREE.BoxGeometry(22, 0.45, 0.38), ironMat);
+        beam.position.set(0, y, 0);
+        beam.castShadow = true;
+        body!.add(beam);
+      }
+      // Pointed bar tips along the top crossbeam
+      for (let bx = -10; bx <= 10; bx += 2.2) {
+        const tip = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.7, 0.28), ironMat);
+        tip.position.set(bx, 6.4, 0);
+        tip.rotation.z = Math.PI / 4; // slight diagonal gives a spear-tip silhouette
+        body!.add(tip);
+      }
+      // Faint amber lock-rune glow at the central latch
+      if (!this.lowGfx) {
+        const lockGlow = new THREE.PointLight(0xcc6600, 5, 9, 2);
+        lockGlow.position.set(0, 3.2, 0.6);
+        body!.add(lockGlow);
+      }
+      objectMesh = body!;
+    } else if (e.kind === 'object' && e.templateId === 'delve_pressure_plate') {
+      // A low, flush flagstone trigger plate: a stone frame around a slightly
+      // sunken inner slab, with faint rune-glow grooves so it reads as "step here".
+      body = new THREE.Group();
+      height = 0.4;
+      this.doorStoneMat ??= new THREE.MeshLambertMaterial({ color: 0x5a5a62 });
+      const frame = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.18, 2.0), this.doorStoneMat);
+      frame.position.y = 0.09;
+      frame.receiveShadow = true;
+      body!.add(frame);
+      const innerMat = new THREE.MeshLambertMaterial({ color: 0x3a3038, emissive: 0x884418, emissiveIntensity: 0.5 });
+      const inner = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.12, 1.5), innerMat);
+      inner.position.y = 0.11;
+      body!.add(inner);
+      // rune cross-grooves glowing warm amber
+      const grooveMat = new THREE.MeshBasicMaterial({ color: 0xffa83c });
+      if (!this.lowGfx) grooveMat.color.multiplyScalar(1.4);
+      for (const rot of [0, Math.PI / 2]) {
+        const groove = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.02, 0.1), grooveMat);
+        groove.position.y = 0.18;
+        groove.rotation.y = rot;
+        body!.add(groove);
+      }
+      objectMesh = body!;
+    } else if (e.kind === 'object' && e.templateId === 'delve_pressure_plate_triggered') {
+      // Triggered state: same frame geometry but inner slab glows green.
+      body = new THREE.Group();
+      height = 0.4;
+      this.doorStoneMat ??= new THREE.MeshLambertMaterial({ color: 0x5a5a62 });
+      const tFrame = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.18, 2.0), this.doorStoneMat!);
+      tFrame.position.y = 0.09;
+      tFrame.receiveShadow = true;
+      body!.add(tFrame);
+      const tInnerMat = new THREE.MeshLambertMaterial({ color: 0x1a4a22, emissive: 0x44bb44, emissiveIntensity: 0.9 });
+      const tInner = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.12, 1.5), tInnerMat);
+      tInner.position.y = 0.11;
+      body!.add(tInner);
+      const tGrooveMat = new THREE.MeshBasicMaterial({ color: 0x88ff88 });
+      for (const rot of [0, Math.PI / 2]) {
+        const groove = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.02, 0.1), tGrooveMat);
+        groove.position.y = 0.18;
+        groove.rotation.y = rot;
+        body!.add(groove);
+      }
+      if (!this.lowGfx) {
+        const glow = new THREE.PointLight(0x44ff44, 3.5, 7, 2);
+        glow.position.y = 0.3;
+        body!.add(glow);
+      }
+      objectMesh = body!;
+    } else if (e.kind === 'object' && e.templateId === 'delve_cracked_grave') {
+      // A broken burial slab: a low sarcophagus box with a cracked, shoved-aside
+      // lid and a sickly green soul-light leaking from the gap (raise-dead font).
+      body = new THREE.Group();
+      height = 1.3;
+      this.doorStoneMat ??= new THREE.MeshLambertMaterial({ color: 0x5a5a62 });
+      const tomb = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.95, 2.4), this.doorStoneMat);
+      tomb.position.y = 0.48;
+      tomb.castShadow = true;
+      body!.add(tomb);
+      const lidMat = new THREE.MeshLambertMaterial({ color: 0x4c4c54 });
+      // lid shoved off-centre and tilted, leaving a gap the glow seeps through
+      const lid = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.2, 1.5), lidMat);
+      lid.position.set(0.18, 1.02, -0.35);
+      lid.rotation.set(0.06, 0, 0.04);
+      lid.castShadow = true;
+      body!.add(lid);
+      const soulMat = new THREE.MeshBasicMaterial({ color: 0x6affae, transparent: true, opacity: 0.6 });
+      if (!this.lowGfx) soulMat.color.multiplyScalar(1.5);
+      const soul = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.06, 0.7), soulMat);
+      soul.position.set(-0.1, 0.98, 0.55);
+      body!.add(soul);
+      const graveGlow = new THREE.PointLight(0x55ff9a, 2.6, 7, 2);
+      graveGlow.position.set(0, 1.1, 0.4);
+      body!.add(graveGlow);
+      objectMesh = body!;
     } else if (e.kind === 'object' && (e.templateId === 'dungeon_door' || e.templateId === 'dungeon_exit')) {
       // dungeon doorway: stone arch with a swirling portal
       const entering = e.templateId === 'dungeon_door';
@@ -858,6 +1037,7 @@ export class Renderer {
       nameplateDisplay: 'none', nameplateTransform: '', nameplateSig: '', nameplateHpWidth: '',
       objectCasters, shadowOn: true, isFar: false, lastOverheadEmoteKey: null,
       lastX: e.pos.x, lastZ: e.pos.z, skin: e.skin,
+      objectTemplateId: e.kind === 'object' ? (e.templateId ?? '') : undefined,
       loco: newLocoTrack(),
     });
   }
@@ -1163,6 +1343,11 @@ export class Renderer {
     for (const [id, v] of this.views) {
       const e = sim.entities.get(id);
       if (!e) continue;
+      if (e.kind === 'object' && v.objectTemplateId !== undefined && v.objectTemplateId !== (e.templateId ?? '')) {
+        this.removeView(id);
+        this.createView(e);
+        continue;
+      }
       // form swaps (polymorph sheep, druid forms) — computed up front because
       // the shadow gates below must not run the base rig's proxy under a form
       const polyed = e.auras.some((a) => a.kind === 'polymorph');
@@ -1503,9 +1688,9 @@ export class Renderer {
       const loc = delveModuleLocal(px, pz, modules);
       const layout = DELVE_MODULE_LAYOUTS[loc.moduleId as DelveModuleId]
         ?? DELVE_MODULE_LAYOUTS.reliquary_sunken_ossuary;
-      const m = 2;
-      cx = Math.min(Math.max(cx, loc.ox - DUNGEON_WALL_X + m), loc.ox + DUNGEON_WALL_X - m);
-      cz = Math.min(Math.max(cz, loc.oz + layout.zMin + m), loc.oz + layout.zMax - m);
+      ({ cx, cz } = clampChaseCameraInModule(
+        cx, cz, px, pz, loc.ox, loc.oz, layout, 2, this.camDist, this.camPitch,
+      ));
     }
     // Camera collision: pull the cam in to the surface of any building/object
     // between the player's head and the desired position so it never sits

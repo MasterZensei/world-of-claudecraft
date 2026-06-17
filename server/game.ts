@@ -42,6 +42,9 @@ const WIRE_CACHE_SWEEP_TICKS = 1200;
 const EVENT_RADIUS = 90;
 const AUTOSAVE_SECONDS = 30;
 const SAVE_CONCURRENCY = 4;
+// Valid lockpicking action enums accepted from the client (anti-cheat: reject
+// anything else before it reaches the Sim).
+const LOCKPICK_ACTIONS = new Set(['hardSet', 'set', 'steady', 'ease', 'drop', 'abort']);
 const CHAT_RATE_BURST = 5;
 const CHAT_RATE_REFILL_PER_SECOND = 1 / 3; // sustained 20 messages/minute
 const CHAT_RATE_ERROR_COOLDOWN_SECONDS = 4;
@@ -1027,6 +1030,33 @@ export class GameServer {
       case 'companion_upgrade': {
         if (typeof msg.companionId !== 'string') break;
         sim.companionUpgrade(msg.companionId, pid);
+        break;
+      }
+      case 'lockpick_engage': {
+        if (typeof msg.objectId !== 'number') break;
+        if (msg.ante !== 1 && msg.ante !== 2 && msg.ante !== 3) break;
+        sim.lockpickEngage(msg.objectId, msg.ante, pid);
+        break;
+      }
+      case 'lockpick_action': {
+        if (!LOCKPICK_ACTIONS.has(msg.action)) break;
+        const sid = typeof msg.sid === 'string' ? msg.sid : undefined;
+        sim.lockpickAction(msg.action, pid, sid);
+        break;
+      }
+      case 'lockpick_abort': {
+        const sid = typeof msg.sid === 'string' ? msg.sid : undefined;
+        sim.lockpickAbort(pid, sid);
+        break;
+      }
+      case 'lockpick_timeout': {
+        const sid = typeof msg.sid === 'string' ? msg.sid : undefined;
+        sim.lockpickTimeout(pid, sid);
+        break;
+      }
+      case 'collect_delve_chest_loot': {
+        if (typeof msg.objectId !== 'number') break;
+        sim.collectDelveChestLoot(msg.objectId, pid);
         break;
       }
     }

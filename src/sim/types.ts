@@ -1,5 +1,7 @@
 // Core shared types for the simulation. The sim layer has zero DOM/rendering deps.
 
+import type { LootTier, StepResult, VisibleCell, PickAction, LockSession } from './lockpick';
+
 export const TICK_RATE = 20; // sim ticks per second
 export const DT = 1 / TICK_RATE;
 export const RUN_SPEED = 7; // yards/sec, classic run speed
@@ -378,6 +380,7 @@ export interface ZonePropsDef {
   ruinRings: { x: number; z: number; ringR: number; columns: number }[];
   fences: { x1: number; z1: number; x2: number; z2: number }[];
   graveyards: { x: number; z: number }[]; // 6-headstone cluster anchor
+  delveMarkers?: { x: number; z: number; label: string }[];
 }
 
 export function emptyZoneProps(): ZonePropsDef {
@@ -608,6 +611,15 @@ export type SimEvent = { pid?: number } & (
   | { type: 'delveComplete'; delveId: string; tierId: string }
   | { type: 'delveFailed'; delveId: string; tierId: string }
   | { type: 'companionBark'; barkId: string; pid?: number }
+  // Lockpicking minigame ("Tumbler's Path"). All personal (pid-scoped). The sim
+  // emits structured data only — the client builds every visible string. Cells
+  // are always limited to the fog window (anti-cheat: the full lock is never
+  // serialized).
+  | { type: 'lockpickOffer'; objectId: number }
+  | { type: 'lockpickSession'; sessionId: string; objectId: number; w: number; h: number; col: number; row: number; page: number; pageCount: number; tries: number; triesTotal: number; lootTier: LootTier; allowed: Exclude<PickAction, 'abort'>[]; visible: VisibleCell[] }
+  | { type: 'lockpickStep'; sessionId: string; col: number; row: number; page: number; pageCount: number; tries: number; triesTotal: number; result: StepResult; visible: VisibleCell[] }
+  | { type: 'lockpickEnd'; sessionId: string; outcome: 'success' | 'fail' | 'abandoned'; lootTier?: LootTier }
+  | { type: 'delveChestLoot'; chestId: number; items: { itemId: string; count: number }[] }
 );
 
 export interface MoveInput {
@@ -947,6 +959,12 @@ export interface DelveRun {
   companionBarks: string[];
   /** True when the current module exit portal is active (trash cleared + plate if any). */
   exitPortalOpen: boolean;
+  /** Entity id of the reward chest spawned after the finale boss dies, or null if not yet spawned. */
+  rewardChestId: number | null;
+  /** Entity id of the surface-exit portal spawned after the chest is opened, or null if not yet opened. */
+  surfaceExitId: number | null;
+  /** Active lockpicking attempt on the finale chest (single interactor, v1), or null. In-memory only. */
+  lockpick: LockSession | null;
 }
 
 export interface DelveDailyState {
@@ -976,6 +994,14 @@ export interface DelveObjectState {
   maxHp: number;
   linkIds: number[];
   open: boolean;
+  // Lockpick chest gating (kind === 'locked_chest'). attemptAvailable is granted
+  // when the chest spawns (boss defeated) and consumed on a SUCCESS or FAILED
+  // attempt — a FAILED chest can only be retried by re-clearing the delve.
+  attemptAvailable?: boolean;
+  looted?: boolean;
+  lootedTier?: LootTier;
+  /** Item slots waiting on the post-unlock loot screen. */
+  pendingLoot?: { itemId: string; count: number }[];
 }
 
 export interface DelveRaiseDeadChannel {
