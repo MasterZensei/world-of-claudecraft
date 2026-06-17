@@ -9,6 +9,8 @@ export const DELVE_COMPANIONS: Record<string, DelveCompanionDef> = {
   },
 };
 
+export const COMPANION_TESSA = DELVE_COMPANIONS.companion_tessa;
+
 /** Rank-up costs (rank 1 is free at intro). */
 export const COMPANION_UPGRADE_COSTS: Record<number, { marks: number; copper: number }> = {
   2: { marks: 4, copper: 20 },
