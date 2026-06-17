@@ -68,7 +68,7 @@ export function loadGltf(url: string): Promise<GLTF> {
   let p = gltfCache.get(resolved);
   if (!p) {
     const startedAt = assetLoadStarted();
-    p = scheduleLoad(gltfQueue, () => new Promise<GLTF>((resolve, reject) => {
+    const load = scheduleLoad(gltfQueue, () => new Promise<GLTF>((resolve, reject) => {
       loader().load(resolved, (gltf) => {
         recordAssetLoad('gltf', resolved, startedAt);
         resolve(gltf);
@@ -77,6 +77,15 @@ export function loadGltf(url: string): Promise<GLTF> {
         reject(new Error(`asset load failed: ${url} (missing file or bad GLB)`));
       });
     }));
+    // A transient failure (cold load, dev-proxy 502) MUST NOT poison the cache:
+    // a rejected promise cached here would make every later loadGltf await the
+    // same rejection forever (dungeon/delve rooms then render as a black void
+    // with no retry). Evict on reject so a later call re-fetches — mirrors
+    // releaseGltf's "a later loadGltf would simply re-fetch".
+    p = load.catch((err) => {
+      if (gltfCache.get(resolved) === p) gltfCache.delete(resolved);
+      throw err;
+    });
     gltfCache.set(resolved, p);
   }
   return p;

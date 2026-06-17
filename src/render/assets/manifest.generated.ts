@@ -96,6 +96,7 @@ export const MEDIA_ASSETS: Record<string, string> =
   "models/dungeon/sword_shield_broken.glb": "/media/models/dungeon/sword_shield_broken.77b626bd0f1b.glb",
   "models/dungeon/table_long_broken.glb": "/media/models/dungeon/table_long_broken.e8b0525420de.glb",
   "models/dungeon/torch_mounted.glb": "/media/models/dungeon/torch_mounted.65981b684ec5.glb",
+  "models/dungeon/treasure_chest_open.glb": "/media/models/dungeon/treasure_chest_open.373d16f26697.glb",
   "models/dungeon/trunk_large_A.glb": "/media/models/dungeon/trunk_large_A.4ec71eebdd43.glb",
   "models/dungeon/wall.glb": "/media/models/dungeon/wall.cfe55eb2f708.glb",
   "models/dungeon/wall_arched.glb": "/media/models/dungeon/wall_arched.e7b58b28b816.glb",

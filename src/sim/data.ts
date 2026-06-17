@@ -5,7 +5,7 @@
 // and owns the world-layout constants.
 
 import type {
-  CampDef, DungeonDef, GroundObjectDef, ItemDef, MobTemplate, NpcDef,
+  CampDef, DelveDef, DelveModuleDef, DungeonDef, GroundObjectDef, ItemDef, MobTemplate, NpcDef,
   PlayerClass, QuestDef, QuestState, ZoneDef, ZonePropsDef,
 } from './types';
 import { BASE_ITEMS } from './content/items';
@@ -22,12 +22,23 @@ import {
   ZONE3_QUESTS, ZONE3_QUEST_ORDER, ZONE3_ROADS, ZONE3_ZONE,
 } from './content/zone3';
 import { DUNGEON_DEFS, DUNGEON_MOBS } from './content/dungeons';
+import { DUNGEON_WALL_HW, DUNGEON_WALL_X } from './dungeon_layout';
 import { WARLOCK_PET_MOBS } from './content/warlock_pets';
 import { GROUND_PICKUP_LINES } from './content/ground_pickup_lines';
 import {
   TEMPLE_CAMPS, TEMPLE_DUNGEON_DEFS, TEMPLE_DUNGEON_MOBS, TEMPLE_ITEMS, TEMPLE_MOBS,
   TEMPLE_NPCS, TEMPLE_OBJECTS, TEMPLE_PROPS, TEMPLE_QUEST_ORDER, TEMPLE_QUESTS,
 } from './content/temple';
+import {
+  BROTHER_HALVEN,
+  COLLAPSED_RELIQUARY_DELVE,
+  COLLAPSED_RELIQUARY_MODULES,
+  DELVE_MOBS,
+} from './content/delves';
+import {
+  PLACEHOLDER_DELVE, PLACEHOLDER_DELVE_MODULES, PLACEHOLDER_DELVE_MOBS,
+} from './content/delves/_placeholder';
+import { DELVE_MODULE_LAYOUTS, delveModuleSpan, type DelveModuleId } from './delve_layout';
 
 function mergeItems(...parts: Record<string, ItemDef>[]): Record<string, ItemDef> {
   const merged = Object.assign({}, ...parts);
@@ -43,7 +54,7 @@ export { CLASSES, ABILITIES, abilitiesKnownAt } from './content/classes';
 export type { ClassDef } from './content/classes';
 // Re-export content shapes so existing `from './data'` imports keep working.
 export type {
-  BiomeId, CampDef, DungeonDef, DungeonSpawn, GroundObjectDef, NpcDef, ZoneDef, ZonePropsDef,
+  BiomeId, CampDef, DelveDef, DungeonDef, DungeonSpawn, GroundObjectDef, NpcDef, ZoneDef, ZonePropsDef,
 } from './types';
 
 // ---------------------------------------------------------------------------
@@ -55,10 +66,12 @@ export const ITEMS: Record<string, ItemDef> = mergeItems(BASE_ITEMS, ZONE2_ITEMS
 export const MOBS: Record<string, MobTemplate> = {
   ...ZONE1_MOBS, ...ZONE2_MOBS, ...ZONE3_MOBS, ...DUNGEON_MOBS,
   ...WARLOCK_PET_MOBS, ...TEMPLE_MOBS, ...TEMPLE_DUNGEON_MOBS,
+  ...DELVE_MOBS, ...PLACEHOLDER_DELVE_MOBS,
 };
 
 export const NPCS: Record<string, NpcDef> = {
   ...ZONE1_NPCS, ...ZONE2_NPCS, ...ZONE3_NPCS, ...TEMPLE_NPCS,
+  brother_halven: BROTHER_HALVEN,
 };
 
 export const QUESTS: Record<string, QuestDef> = {
@@ -198,7 +211,7 @@ export function arenaOrigin(slot: number): { x: number; z: number } {
 }
 
 export function isArenaPos(x: number): boolean {
-  return x >= ARENA_X_MIN;
+  return x >= ARENA_X_MIN && x < DELVE_BAND_X_MIN;
 }
 
 // Nearest arena instance origin to a far-off position, matched by z-band (the
@@ -213,6 +226,157 @@ export function arenaOriginAt(z: number): { x: number; z: number; slot: number }
   const o = arenaOrigin(best);
   return { x: o.x, z: o.z, slot: best };
 }
+
+// ---------------------------------------------------------------------------
+// Delves — private party instances past the arena x-band (see docs/prd/delves.md).
+// DELVE_X_MIN must stay above ARENA_X_MIN (2800) and ARENA_X (3000).
+// ---------------------------------------------------------------------------
+
+export const DELVE_X_MIN = 3600;
+// Each delve room is centred at DELVE_X_MIN + index*600. The room's west wall
+// sits at instance-local x = -(DUNGEON_WALL_X + DUNGEON_WALL_HW) = -24, i.e.
+// world-x = DELVE_X_MIN - 24 = 3576 for slot 0. We extend the delve band 1 u
+// further west (3575) to give isDelvePos a safe margin over the full footprint,
+// ensuring the west half of the room is never misclassified as arena.
+export const DELVE_BAND_X_MIN = DELVE_X_MIN - (DUNGEON_WALL_X + DUNGEON_WALL_HW + 1);
+export const DELVE_SLOT_COUNT = 6;
+export const DELVE_MODULE_GAP = 16;
+export const DELVE_MODULE_Z_START = 8;
+const DELVE_Z0 = -1250;
+const DELVE_SLOT_SPACING = 620; // covers 110u×4 rooms + 16u×3 gaps + 40u margin ≈ 536u
+
+export function delveOrigin(delveIndex: number, slot: number): { x: number; z: number } {
+  return { x: DELVE_X_MIN + delveIndex * 600, z: DELVE_Z0 + slot * DELVE_SLOT_SPACING };
+}
+
+export function isDelvePos(x: number): boolean {
+  return x >= DELVE_BAND_X_MIN;
+}
+
+export function delveAt(x: number): DelveDef | null {
+  if (!isDelvePos(x)) return null;
+  const index = Math.round((x - DELVE_X_MIN) / 600);
+  return DELVE_LIST.find((d) => d.index === index) ?? null;
+}
+
+export const DELVES: Record<string, DelveDef> = {
+  [COLLAPSED_RELIQUARY_DELVE.id]: COLLAPSED_RELIQUARY_DELVE,
+  [PLACEHOLDER_DELVE.id]: PLACEHOLDER_DELVE,
+};
+export const DELVE_LIST: DelveDef[] = Object.values(DELVES).sort((a, b) => a.index - b.index);
+export const DELVE_MODULES: Record<string, DelveModuleDef> = {
+  ...COLLAPSED_RELIQUARY_MODULES,
+  ...PLACEHOLDER_DELVE_MODULES,
+};
+
+function delveModuleFootprint(moduleId: string): number {
+  const mod = DELVE_MODULES[moduleId];
+  const layoutId = (mod?.layout ?? moduleId) as DelveModuleId;
+  if (DELVE_MODULE_LAYOUTS[layoutId]) return delveModuleSpan(layoutId);
+  return mod?.length ?? 50;
+}
+
+/** World-z offset of a delve module within its instance slot (matches Sim). */
+export function delveModuleZOffset(modules: readonly string[], moduleIndex: number): number {
+  let z = DELVE_MODULE_Z_START;
+  for (let i = 0; i < moduleIndex; i++) {
+    z += delveModuleFootprint(modules[i]) + DELVE_MODULE_GAP;
+  }
+  return z;
+}
+
+/** Relative-z extent of a full module chain from the slot door (matches renderer gate). */
+export function delveModuleStackEndRelZ(modules: readonly string[], margin = 40): number {
+  if (modules.length === 0) return DELVE_MODULE_Z_START + 80 + margin;
+  const lastId = modules[modules.length - 1];
+  const layoutId = (DELVE_MODULES[lastId]?.layout ?? lastId) as DelveModuleId;
+  const layout = DELVE_MODULE_LAYOUTS[layoutId];
+  return delveModuleZOffset(modules, modules.length - 1) + (layout?.zMax ?? 91) + margin;
+}
+
+/** Pick the instance slot whose stacked module band contains world-z. */
+export function delveSlotAt(
+  delveIndex: number,
+  z: number,
+  modules: readonly string[],
+): number {
+  const mods = modules.length > 0
+    ? modules
+    : ['reliquary_sunken_ossuary'];
+  const stackEnd = delveModuleStackEndRelZ(mods);
+  const zMin = DELVE_MODULE_Z_START - 30;
+  for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
+    const o = delveOrigin(delveIndex, i);
+    const relZ = z - o.z;
+    if (relZ >= zMin && relZ <= stackEnd) return i;
+  }
+  let best = 0;
+  let bestD = Infinity;
+  for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
+    const o = delveOrigin(delveIndex, i);
+    const d = Math.abs(z - o.z);
+    if (d < bestD) { bestD = d; best = i; }
+  }
+  return best;
+}
+
+/** Default module chain for a delve when no active run is available. */
+export function defaultDelveModules(delveId: string): string[] {
+  const delve = DELVES[delveId];
+  if (!delve) return ['reliquary_sunken_ossuary'];
+  const count = delve.moduleCount[0] ?? delve.modules.length;
+  return [...delve.modules.slice(0, count), delve.finaleModuleId];
+}
+
+/** Map world position to the active delve module band (instance-local coords). */
+export function delveModuleLocal(
+  x: number,
+  z: number,
+  modules: readonly string[],
+): {
+  ox: number;
+  oz: number;
+  moduleIndex: number;
+  moduleId: string;
+  localX: number;
+  localZ: number;
+} {
+  const delve = delveAt(x);
+  const index = delve?.index ?? Math.round((x - DELVE_X_MIN) / 600);
+  const mods = modules.length > 0
+    ? modules
+    : (delve ? defaultDelveModules(delve.id) : ['reliquary_sunken_ossuary']);
+  const slot = delveOrigin(index, delveSlotAt(index, z, mods));
+  const ox = slot.x;
+  const slotOz = slot.z;
+  const relZ = z - slotOz;
+  let zCursor = DELVE_MODULE_Z_START;
+  for (let i = 0; i < mods.length; i++) {
+    const len = delveModuleFootprint(mods[i]);
+    if (relZ < zCursor + len || i === mods.length - 1) {
+      return {
+        ox,
+        oz: slotOz + zCursor,
+        moduleIndex: i,
+        moduleId: mods[i],
+        localX: x - ox,
+        localZ: relZ - zCursor,
+      };
+    }
+    zCursor += len + DELVE_MODULE_GAP;
+  }
+  const last = mods[mods.length - 1];
+  return {
+    ox,
+    oz: slotOz + zCursor,
+    moduleIndex: mods.length - 1,
+    moduleId: last,
+    localX: x - ox,
+    localZ: relZ - zCursor,
+  };
+}
+
+export { DELVE_AFFIXES, DELVE_COMPANIONS, COMPANION_UPGRADE_COSTS } from './content/delves';
 
 // Legacy aliases for the Hollow Crypt (tests + scripts reference these).
 export const CRYPT_DOOR_POS = DUNGEONS.hollow_crypt.doorPos;

@@ -26,7 +26,7 @@ import {
   t,
   type TranslationKey,
 } from "../src/ui/i18n";
-import { ABILITIES, CLASSES, DUNGEONS, ITEMS, MOBS, NPCS, QUESTS, ZONES } from "../src/sim/data";
+import { ABILITIES, CLASSES, DELVES, DUNGEONS, ITEMS, MOBS, NPCS, QUESTS, ZONES } from "../src/sim/data";
 import {
   assertEntityTranslationsReady,
   entityTranslationFallbackLog,
@@ -452,6 +452,9 @@ describe("i18n Localization Key Coverage", () => {
     if (entry.kind === "dungeon") {
       return { kind: "dungeon", id: entry.id, field: entry.field as "name" | "enterText" | "leaveText" };
     }
+    if (entry.kind === "delve") {
+      return { kind: "delve", id: entry.id, field: entry.field as "name" | "enterText" | "leaveText" };
+    }
     throw new Error(`Unexpected Phase 9 entity kind: ${entry.kind}`);
   }
 
@@ -755,7 +758,8 @@ describe("i18n Localization Key Coverage", () => {
       + Object.values(QUESTS).reduce((sum, quest) => sum + quest.objectives.length, 0)
       + (ZONES.length * 2)
       + ZONES.reduce((sum, zone) => sum + zone.pois.length, 0)
-      + (Object.keys(DUNGEONS).length * 3);
+      + (Object.keys(DUNGEONS).length * 3)
+      + (Object.keys(DELVES).length * 3);
     expect(phaseNineEntries).toHaveLength(expectedPhaseNineCount);
 
     for (const lang of supportedLanguages) {

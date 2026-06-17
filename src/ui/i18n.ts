@@ -1,3 +1,4 @@
+import { delvePhase4Extra } from './delve_i18n';
 import { phase9 } from './phase9_i18n';
 
 type Prev = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -9716,6 +9717,7 @@ const DROWNED_MOB_IDS = [
   "choirmother_selthe", "drowned_templeguard", "drowned_votary", "glimmermere_wader", "glimmerscale_lurker", "moonspawn", "pale_choir_acolyte", "pearlguard_sentinel", "sethrael_palecoil", "warlock_imp", "warlock_voidwalker", "ysolei"
 ] as const;
 
+
 const phase11ExtraEn = {
     abilities: abilityTranslations([
       ["bear_charge", "Bear Charge", "Charge an enemy, generating 9 rage and stunning it for 1 sec. 8-25 yd range. Bear Form only."],
@@ -11069,15 +11071,17 @@ export const en = {
   ...phase8.en,
   ...phase9.en,
   ...phase11.en,
+  delveUi: delvePhase4Extra.en.delveUi,
   entities: {
     ...phase8.en.entities,
     ...phase9.en.entities,
     abilities: { ...phase8.en.entities.abilities, ...phase11Extra.en.abilities },
     items: { ...phase8.en.entities.items, ...phase11Entities.en.items, ...phase11Extra.en.items },
-    mobs: { ...phase9.en.entities.mobs, ...phase11Entities.en.mobs, ...phase11Extra.en.mobs },
-    npcs: { ...phase9.en.entities.npcs, ...phase11Extra.en.npcs },
+    mobs: { ...phase9.en.entities.mobs, ...delvePhase4Extra.en.mobs, ...phase11Entities.en.mobs, ...phase11Extra.en.mobs },
+    npcs: { ...phase9.en.entities.npcs, ...phase11Extra.en.npcs, ...delvePhase4Extra.en.npcs },
     quests: { ...phase9.en.entities.quests, ...phase11Entities.en.quests, ...phase11Extra.en.quests },
     dungeons: { ...phase9.en.entities.dungeons, ...phase11Extra.en.dungeons },
+    delves: delvePhase4Extra.en.delves,
   },
 };
 
@@ -11223,15 +11227,17 @@ export const es: typeof en = {
   ...phase8.es,
   ...phase9.es,
   ...phase11.es,
+  delveUi: delvePhase4Extra.es.delveUi,
   entities: {
     ...phase8.es.entities,
     ...phase9.es.entities,
     abilities: { ...phase8.es.entities.abilities, ...phase11Extra.es.abilities },
     items: { ...phase8.es.entities.items, ...phase11Entities.es.items, ...phase11Extra.es.items },
-    mobs: { ...phase9.es.entities.mobs, ...phase11Entities.es.mobs, ...phase11Extra.es.mobs },
-    npcs: { ...phase9.es.entities.npcs, ...phase11Extra.es.npcs },
+    mobs: { ...phase9.es.entities.mobs, ...delvePhase4Extra.es.mobs, ...phase11Entities.es.mobs, ...phase11Extra.es.mobs },
+    npcs: { ...phase9.es.entities.npcs, ...phase11Extra.es.npcs, ...delvePhase4Extra.es.npcs },
     quests: { ...phase9.es.entities.quests, ...phase11Entities.es.quests, ...phase11Extra.es.quests },
     dungeons: { ...phase9.es.entities.dungeons, ...phase11Extra.es.dungeons },
+    delves: delvePhase4Extra.es.delves,
   },
 };
 
@@ -11377,15 +11383,17 @@ export const es_ES: typeof en = {
   ...phase8.es_ES,
   ...phase9.es_ES,
   ...phase11.es_ES,
+  delveUi: delvePhase4Extra.es_ES.delveUi,
   entities: {
     ...phase8.es_ES.entities,
     ...phase9.es_ES.entities,
     abilities: { ...phase8.es_ES.entities.abilities, ...phase11Extra.es_ES.abilities },
     items: { ...phase8.es_ES.entities.items, ...phase11Entities.es_ES.items, ...phase11Extra.es_ES.items },
-    mobs: { ...phase9.es_ES.entities.mobs, ...phase11Entities.es_ES.mobs, ...phase11Extra.es_ES.mobs },
-    npcs: { ...phase9.es_ES.entities.npcs, ...phase11Extra.es_ES.npcs },
+    mobs: { ...phase9.es_ES.entities.mobs, ...delvePhase4Extra.es_ES.mobs, ...phase11Entities.es_ES.mobs, ...phase11Extra.es_ES.mobs },
+    npcs: { ...phase9.es_ES.entities.npcs, ...phase11Extra.es_ES.npcs, ...delvePhase4Extra.es_ES.npcs },
     quests: { ...phase9.es_ES.entities.quests, ...phase11Entities.es_ES.quests, ...phase11Extra.es_ES.quests },
     dungeons: { ...phase9.es_ES.entities.dungeons, ...phase11Extra.es_ES.dungeons },
+    delves: delvePhase4Extra.es_ES.delves,
   },
 };
 
@@ -11531,15 +11539,17 @@ export const fr_FR: typeof en = {
   ...phase8.fr_FR,
   ...phase9.fr_FR,
   ...phase11.fr_FR,
+  delveUi: delvePhase4Extra.fr_FR.delveUi,
   entities: {
     ...phase8.fr_FR.entities,
     ...phase9.fr_FR.entities,
     abilities: { ...phase8.fr_FR.entities.abilities, ...phase11Extra.fr_FR.abilities },
     items: { ...phase8.fr_FR.entities.items, ...phase11Entities.fr_FR.items, ...phase11Extra.fr_FR.items },
-    mobs: { ...phase9.fr_FR.entities.mobs, ...phase11Entities.fr_FR.mobs, ...phase11Extra.fr_FR.mobs },
-    npcs: { ...phase9.fr_FR.entities.npcs, ...phase11Extra.fr_FR.npcs },
+    mobs: { ...phase9.fr_FR.entities.mobs, ...delvePhase4Extra.fr_FR.mobs, ...phase11Entities.fr_FR.mobs, ...phase11Extra.fr_FR.mobs },
+    npcs: { ...phase9.fr_FR.entities.npcs, ...phase11Extra.fr_FR.npcs, ...delvePhase4Extra.fr_FR.npcs },
     quests: { ...phase9.fr_FR.entities.quests, ...phase11Entities.fr_FR.quests, ...phase11Extra.fr_FR.quests },
     dungeons: { ...phase9.fr_FR.entities.dungeons, ...phase11Extra.fr_FR.dungeons },
+    delves: delvePhase4Extra.fr_FR.delves,
   },
 };
 
@@ -11685,15 +11695,17 @@ export const fr_CA: typeof en = {
   ...phase8.fr_CA,
   ...phase9.fr_CA,
   ...phase11.fr_CA,
+  delveUi: delvePhase4Extra.fr_CA.delveUi,
   entities: {
     ...phase8.fr_CA.entities,
     ...phase9.fr_CA.entities,
     abilities: { ...phase8.fr_CA.entities.abilities, ...phase11Extra.fr_CA.abilities },
     items: { ...phase8.fr_CA.entities.items, ...phase11Entities.fr_CA.items, ...phase11Extra.fr_CA.items },
-    mobs: { ...phase9.fr_CA.entities.mobs, ...phase11Entities.fr_CA.mobs, ...phase11Extra.fr_CA.mobs },
-    npcs: { ...phase9.fr_CA.entities.npcs, ...phase11Extra.fr_CA.npcs },
+    mobs: { ...phase9.fr_CA.entities.mobs, ...delvePhase4Extra.fr_CA.mobs, ...phase11Entities.fr_CA.mobs, ...phase11Extra.fr_CA.mobs },
+    npcs: { ...phase9.fr_CA.entities.npcs, ...phase11Extra.fr_CA.npcs, ...delvePhase4Extra.fr_CA.npcs },
     quests: { ...phase9.fr_CA.entities.quests, ...phase11Entities.fr_CA.quests, ...phase11Extra.fr_CA.quests },
     dungeons: { ...phase9.fr_CA.entities.dungeons, ...phase11Extra.fr_CA.dungeons },
+    delves: delvePhase4Extra.fr_CA.delves,
   },
 };
 
@@ -11839,15 +11851,17 @@ export const en_CA: typeof en = {
   ...phase8.en_CA,
   ...phase9.en_CA,
   ...phase11.en_CA,
+  delveUi: delvePhase4Extra.en_CA.delveUi,
   entities: {
     ...phase8.en_CA.entities,
     ...phase9.en_CA.entities,
     abilities: { ...phase8.en_CA.entities.abilities, ...phase11Extra.en_CA.abilities },
     items: { ...phase8.en_CA.entities.items, ...phase11Entities.en_CA.items, ...phase11Extra.en_CA.items },
-    mobs: { ...phase9.en_CA.entities.mobs, ...phase11Entities.en_CA.mobs, ...phase11Extra.en_CA.mobs },
-    npcs: { ...phase9.en_CA.entities.npcs, ...phase11Extra.en_CA.npcs },
+    mobs: { ...phase9.en_CA.entities.mobs, ...delvePhase4Extra.en_CA.mobs, ...phase11Entities.en_CA.mobs, ...phase11Extra.en_CA.mobs },
+    npcs: { ...phase9.en_CA.entities.npcs, ...phase11Extra.en_CA.npcs, ...delvePhase4Extra.en_CA.npcs },
     quests: { ...phase9.en_CA.entities.quests, ...phase11Entities.en_CA.quests, ...phase11Extra.en_CA.quests },
     dungeons: { ...phase9.en_CA.entities.dungeons, ...phase11Extra.en_CA.dungeons },
+    delves: delvePhase4Extra.en_CA.delves,
   },
 };
 
@@ -11993,15 +12007,17 @@ export const it_IT: typeof en = {
   ...phase8.it_IT,
   ...phase9.it_IT,
   ...phase11.it_IT,
+  delveUi: delvePhase4Extra.it_IT.delveUi,
   entities: {
     ...phase8.it_IT.entities,
     ...phase9.it_IT.entities,
     abilities: { ...phase8.it_IT.entities.abilities, ...phase11Extra.it_IT.abilities },
     items: { ...phase8.it_IT.entities.items, ...phase11Entities.it_IT.items, ...phase11Extra.it_IT.items },
-    mobs: { ...phase9.it_IT.entities.mobs, ...phase11Entities.it_IT.mobs, ...phase11Extra.it_IT.mobs },
-    npcs: { ...phase9.it_IT.entities.npcs, ...phase11Extra.it_IT.npcs },
+    mobs: { ...phase9.it_IT.entities.mobs, ...delvePhase4Extra.it_IT.mobs, ...phase11Entities.it_IT.mobs, ...phase11Extra.it_IT.mobs },
+    npcs: { ...phase9.it_IT.entities.npcs, ...phase11Extra.it_IT.npcs, ...delvePhase4Extra.it_IT.npcs },
     quests: { ...phase9.it_IT.entities.quests, ...phase11Entities.it_IT.quests, ...phase11Extra.it_IT.quests },
     dungeons: { ...phase9.it_IT.entities.dungeons, ...phase11Extra.it_IT.dungeons },
+    delves: delvePhase4Extra.it_IT.delves,
   },
 };
 
@@ -12147,15 +12163,17 @@ export const de_DE: typeof en = {
   ...phase8.de_DE,
   ...phase9.de_DE,
   ...phase11.de_DE,
+  delveUi: delvePhase4Extra.de_DE.delveUi,
   entities: {
     ...phase8.de_DE.entities,
     ...phase9.de_DE.entities,
     abilities: { ...phase8.de_DE.entities.abilities, ...phase11Extra.de_DE.abilities },
     items: { ...phase8.de_DE.entities.items, ...phase11Entities.de_DE.items, ...phase11Extra.de_DE.items },
-    mobs: { ...phase9.de_DE.entities.mobs, ...phase11Entities.de_DE.mobs, ...phase11Extra.de_DE.mobs },
-    npcs: { ...phase9.de_DE.entities.npcs, ...phase11Extra.de_DE.npcs },
+    mobs: { ...phase9.de_DE.entities.mobs, ...delvePhase4Extra.de_DE.mobs, ...phase11Entities.de_DE.mobs, ...phase11Extra.de_DE.mobs },
+    npcs: { ...phase9.de_DE.entities.npcs, ...phase11Extra.de_DE.npcs, ...delvePhase4Extra.de_DE.npcs },
     quests: { ...phase9.de_DE.entities.quests, ...phase11Entities.de_DE.quests, ...phase11Extra.de_DE.quests },
     dungeons: { ...phase9.de_DE.entities.dungeons, ...phase11Extra.de_DE.dungeons },
+    delves: delvePhase4Extra.de_DE.delves,
   },
 };
 
@@ -12301,15 +12319,17 @@ export const zh_CN: typeof en = {
   ...phase8.zh_CN,
   ...phase9.zh_CN,
   ...phase11.zh_CN,
+  delveUi: delvePhase4Extra.zh_CN.delveUi,
   entities: {
     ...phase8.zh_CN.entities,
     ...phase9.zh_CN.entities,
     abilities: { ...phase8.zh_CN.entities.abilities, ...phase11Extra.zh_CN.abilities },
     items: { ...phase8.zh_CN.entities.items, ...phase11Entities.zh_CN.items, ...phase11Extra.zh_CN.items },
-    mobs: { ...phase9.zh_CN.entities.mobs, ...phase11Entities.zh_CN.mobs, ...phase11Extra.zh_CN.mobs },
-    npcs: { ...phase9.zh_CN.entities.npcs, ...phase11Extra.zh_CN.npcs },
+    mobs: { ...phase9.zh_CN.entities.mobs, ...delvePhase4Extra.zh_CN.mobs, ...phase11Entities.zh_CN.mobs, ...phase11Extra.zh_CN.mobs },
+    npcs: { ...phase9.zh_CN.entities.npcs, ...phase11Extra.zh_CN.npcs, ...delvePhase4Extra.zh_CN.npcs },
     quests: { ...phase9.zh_CN.entities.quests, ...phase11Entities.zh_CN.quests, ...phase11Extra.zh_CN.quests },
     dungeons: { ...phase9.zh_CN.entities.dungeons, ...phase11Extra.zh_CN.dungeons },
+    delves: delvePhase4Extra.zh_CN.delves,
   },
 };
 
@@ -12455,15 +12475,17 @@ export const zh_TW: typeof en = {
   ...phase8.zh_TW,
   ...phase9.zh_TW,
   ...phase11.zh_TW,
+  delveUi: delvePhase4Extra.zh_TW.delveUi,
   entities: {
     ...phase8.zh_TW.entities,
     ...phase9.zh_TW.entities,
     abilities: { ...phase8.zh_TW.entities.abilities, ...phase11Extra.zh_TW.abilities },
     items: { ...phase8.zh_TW.entities.items, ...phase11Entities.zh_TW.items, ...phase11Extra.zh_TW.items },
-    mobs: { ...phase9.zh_TW.entities.mobs, ...phase11Entities.zh_TW.mobs, ...phase11Extra.zh_TW.mobs },
-    npcs: { ...phase9.zh_TW.entities.npcs, ...phase11Extra.zh_TW.npcs },
+    mobs: { ...phase9.zh_TW.entities.mobs, ...delvePhase4Extra.zh_TW.mobs, ...phase11Entities.zh_TW.mobs, ...phase11Extra.zh_TW.mobs },
+    npcs: { ...phase9.zh_TW.entities.npcs, ...phase11Extra.zh_TW.npcs, ...delvePhase4Extra.zh_TW.npcs },
     quests: { ...phase9.zh_TW.entities.quests, ...phase11Entities.zh_TW.quests, ...phase11Extra.zh_TW.quests },
     dungeons: { ...phase9.zh_TW.entities.dungeons, ...phase11Extra.zh_TW.dungeons },
+    delves: delvePhase4Extra.zh_TW.delves,
   },
 };
 
@@ -12609,15 +12631,17 @@ export const ko_KR: typeof en = {
   ...phase8.ko_KR,
   ...phase9.ko_KR,
   ...phase11.ko_KR,
+  delveUi: delvePhase4Extra.ko_KR.delveUi,
   entities: {
     ...phase8.ko_KR.entities,
     ...phase9.ko_KR.entities,
     abilities: { ...phase8.ko_KR.entities.abilities, ...phase11Extra.ko_KR.abilities },
     items: { ...phase8.ko_KR.entities.items, ...phase11Entities.ko_KR.items, ...phase11Extra.ko_KR.items },
-    mobs: { ...phase9.ko_KR.entities.mobs, ...phase11Entities.ko_KR.mobs, ...phase11Extra.ko_KR.mobs },
-    npcs: { ...phase9.ko_KR.entities.npcs, ...phase11Extra.ko_KR.npcs },
+    mobs: { ...phase9.ko_KR.entities.mobs, ...delvePhase4Extra.ko_KR.mobs, ...phase11Entities.ko_KR.mobs, ...phase11Extra.ko_KR.mobs },
+    npcs: { ...phase9.ko_KR.entities.npcs, ...phase11Extra.ko_KR.npcs, ...delvePhase4Extra.ko_KR.npcs },
     quests: { ...phase9.ko_KR.entities.quests, ...phase11Entities.ko_KR.quests, ...phase11Extra.ko_KR.quests },
     dungeons: { ...phase9.ko_KR.entities.dungeons, ...phase11Extra.ko_KR.dungeons },
+    delves: delvePhase4Extra.ko_KR.delves,
   },
 };
 
@@ -12763,15 +12787,17 @@ export const ja_JP: typeof en = {
   ...phase8.ja_JP,
   ...phase9.ja_JP,
   ...phase11.ja_JP,
+  delveUi: delvePhase4Extra.ja_JP.delveUi,
   entities: {
     ...phase8.ja_JP.entities,
     ...phase9.ja_JP.entities,
     abilities: { ...phase8.ja_JP.entities.abilities, ...phase11Extra.ja_JP.abilities },
     items: { ...phase8.ja_JP.entities.items, ...phase11Entities.ja_JP.items, ...phase11Extra.ja_JP.items },
-    mobs: { ...phase9.ja_JP.entities.mobs, ...phase11Entities.ja_JP.mobs, ...phase11Extra.ja_JP.mobs },
-    npcs: { ...phase9.ja_JP.entities.npcs, ...phase11Extra.ja_JP.npcs },
+    mobs: { ...phase9.ja_JP.entities.mobs, ...delvePhase4Extra.ja_JP.mobs, ...phase11Entities.ja_JP.mobs, ...phase11Extra.ja_JP.mobs },
+    npcs: { ...phase9.ja_JP.entities.npcs, ...phase11Extra.ja_JP.npcs, ...delvePhase4Extra.ja_JP.npcs },
     quests: { ...phase9.ja_JP.entities.quests, ...phase11Entities.ja_JP.quests, ...phase11Extra.ja_JP.quests },
     dungeons: { ...phase9.ja_JP.entities.dungeons, ...phase11Extra.ja_JP.dungeons },
+    delves: delvePhase4Extra.ja_JP.delves,
   },
 };
 
@@ -12917,15 +12943,17 @@ export const pt_BR: typeof en = {
   ...phase8.pt_BR,
   ...phase9.pt_BR,
   ...phase11.pt_BR,
+  delveUi: delvePhase4Extra.pt_BR.delveUi,
   entities: {
     ...phase8.pt_BR.entities,
     ...phase9.pt_BR.entities,
     abilities: { ...phase8.pt_BR.entities.abilities, ...phase11Extra.pt_BR.abilities },
     items: { ...phase8.pt_BR.entities.items, ...phase11Entities.pt_BR.items, ...phase11Extra.pt_BR.items },
-    mobs: { ...phase9.pt_BR.entities.mobs, ...phase11Entities.pt_BR.mobs, ...phase11Extra.pt_BR.mobs },
-    npcs: { ...phase9.pt_BR.entities.npcs, ...phase11Extra.pt_BR.npcs },
+    mobs: { ...phase9.pt_BR.entities.mobs, ...delvePhase4Extra.pt_BR.mobs, ...phase11Entities.pt_BR.mobs, ...phase11Extra.pt_BR.mobs },
+    npcs: { ...phase9.pt_BR.entities.npcs, ...phase11Extra.pt_BR.npcs, ...delvePhase4Extra.pt_BR.npcs },
     quests: { ...phase9.pt_BR.entities.quests, ...phase11Entities.pt_BR.quests, ...phase11Extra.pt_BR.quests },
     dungeons: { ...phase9.pt_BR.entities.dungeons, ...phase11Extra.pt_BR.dungeons },
+    delves: delvePhase4Extra.pt_BR.delves,
   },
 };
 
@@ -13071,15 +13099,17 @@ export const ru_RU: typeof en = {
   ...phase8.ru_RU,
   ...phase9.ru_RU,
   ...phase11.ru_RU,
+  delveUi: delvePhase4Extra.ru_RU.delveUi,
   entities: {
     ...phase8.ru_RU.entities,
     ...phase9.ru_RU.entities,
     abilities: { ...phase8.ru_RU.entities.abilities, ...phase11Extra.ru_RU.abilities },
     items: { ...phase8.ru_RU.entities.items, ...phase11Entities.ru_RU.items, ...phase11Extra.ru_RU.items },
-    mobs: { ...phase9.ru_RU.entities.mobs, ...phase11Entities.ru_RU.mobs, ...phase11Extra.ru_RU.mobs },
-    npcs: { ...phase9.ru_RU.entities.npcs, ...phase11Extra.ru_RU.npcs },
+    mobs: { ...phase9.ru_RU.entities.mobs, ...delvePhase4Extra.ru_RU.mobs, ...phase11Entities.ru_RU.mobs, ...phase11Extra.ru_RU.mobs },
+    npcs: { ...phase9.ru_RU.entities.npcs, ...phase11Extra.ru_RU.npcs, ...delvePhase4Extra.ru_RU.npcs },
     quests: { ...phase9.ru_RU.entities.quests, ...phase11Entities.ru_RU.quests, ...phase11Extra.ru_RU.quests },
     dungeons: { ...phase9.ru_RU.entities.dungeons, ...phase11Extra.ru_RU.dungeons },
+    delves: delvePhase4Extra.ru_RU.delves,
   },
 };
 

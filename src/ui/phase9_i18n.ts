@@ -1187,7 +1187,7 @@ const esData: LocaleData = {
     'Filacteria ritual', 'Sigilo del Gravewyrm', 'Brasas benditas', 'Fragmento de llave del santuario',
   ],
   zones: [
-    ['Valle de Eastbrook', 'Busca al mariscal Redbrook en la ciudad: tiene trabajo para ti.', ['Eastbrook', 'Senda de lobos', 'Prado de jabalíes', 'Lago Espejo', 'Webwood', 'Mina de cobre', 'Campamento bandido', 'Capilla caída']],
+    ['Valle de Eastbrook', 'Busca al mariscal Redbrook en la ciudad: tiene trabajo para ti.', ['Eastbrook', 'Senda de lobos', 'Prado de jabalíes', 'Lago Espejo', 'Webwood', 'Mina de cobre', 'Campamento bandido', 'Capilla caída', 'Colina del Relicario']],
     ['Ciénaga de Mirefen', 'Preséntate ante el guardián Fenwick en la puerta de Fenbridge.', ['Fenbridge', 'Juncos de merodeadores', 'Bajíos de Deepfen', 'Matorral de viudas', 'Capilla ahogada', 'Túmulos trol', 'Campamento Gravecaller', 'El Bastión Sumergido']],
     ['Alturas de Thornpeak', 'La capitana Thessaly sostiene el muro de Highwatch a duras penas.', ['Highwatch', 'Cresta del acechador', 'Madrigueras Deeprock', 'Colinas ogro', 'Campamento de guerra de Drogmar', 'Stormcrag', 'El Glimmermere', 'Tiendas del Culto del Wyrm', 'Campos de aparecidos', 'Santuario del Gravewyrm']],
   ],
@@ -1254,7 +1254,7 @@ const frData: LocaleData = {
     'Braises bénies', 'Éclat de clé du sanctuaire',
   ],
   zones: [
-    ["Val d'Eastbrook", 'Trouvez le maréchal Redbrook en ville: il a du travail pour vous.', ['Eastbrook', 'Piste des loups', 'Pré aux sangliers', 'Lac Miroir', 'Webwood', 'Mine de cuivre', 'Camp des bandits', 'Chapelle tombée']],
+    ["Val d'Eastbrook", 'Trouvez le maréchal Redbrook en ville: il a du travail pour vous.', ['Eastbrook', 'Piste des loups', 'Pré aux sangliers', 'Lac Miroir', 'Webwood', 'Mine de cuivre', 'Camp des bandits', 'Chapelle tombée', 'Colline du Reliquaire']],
     ['Marais de Mirefen', 'Présentez-vous au gardien Fenwick à la porte de Fenbridge.', ['Fenbridge', 'Roseaux des rôdeurs', 'Hauts-fonds de Deepfen', 'Fourré des veuves', 'Chapelle noyée', 'Tertres trolls', 'Campement Gravecaller', 'Le Bastion englouti']],
     ['Hauteurs de Thornpeak', 'La capitaine Thessaly tient le mur de Highwatch, à peine.', ['Highwatch', 'Crête du traqueur', 'Terriers de Deeprock', 'Contreforts ogres', 'Camp de guerre de Drogmar', 'Stormcrag', 'Le Glimmermere', 'Tentes du Culte du Wyrm', 'Champs des revenants', 'Sanctuaire du Gravewyrm']],
   ],
@@ -1321,7 +1321,7 @@ const deData: LocaleData = {
     'Rituelles Seelengefäß', 'Gravewyrm-Siegel', 'Gesegnete Glut', 'Heiligtums-Schlüsselsplitter',
   ],
   zones: [
-    ['Eastbrook-Tal', 'Suche Marschall Redbrook in der Stadt: Er hat Arbeit für dich.', ['Eastbrook', 'Wolfslauf', 'Eberwiese', 'Spiegelsee', 'Webwood', 'Kupfermine', 'Banditenlager', 'Gefallene Kapelle']],
+    ['Eastbrook-Tal', 'Suche Marschall Redbrook in der Stadt: Er hat Arbeit für dich.', ['Eastbrook', 'Wolfslauf', 'Eberwiese', 'Spiegelsee', 'Webwood', 'Kupfermine', 'Banditenlager', 'Gefallene Kapelle', 'Heiligtumshügel']],
     ['Mirefen-Moor', 'Melde dich bei Wärter Fenwick am Tor von Fenbridge.', ['Fenbridge', 'Pirscher-Schilf', 'Deepfen-Untiefen', 'Witwendickicht', 'Ertrunkene Kapelle', 'Trollhügel', 'Gravecaller-Lager', 'Die versunkene Bastion']],
     ['Thornpeak-Höhen', 'Hauptmann Thessaly hält die Mauer von Highwatch, gerade so.', ['Highwatch', 'Pirschergrat', 'Deeprock-Baue', 'Ogervorberge', 'Drogmars Kriegslager', 'Stormcrag', 'Der Glimmermere', 'Wyrmkult-Zelte', 'Wiedergängerfelder', 'Gravewyrm-Heiligtum']],
   ],
@@ -1389,7 +1389,7 @@ const itData: LocaleData = {
     'Filatterio rituale', 'Sigillo del Gravewyrm', 'Braci benedette', 'Frammento di chiave del santuario',
   ],
   zones: [
-    ['Valle di Eastbrook', 'Cerca il maresciallo Redbrook in città: ha lavoro per te.', ['Eastbrook', 'Sentiero dei lupi', 'Prato dei cinghiali', 'Lago Specchio', 'Webwood', 'Miniera di rame', 'Campo dei banditi', 'Cappella caduta']],
+    ['Valle di Eastbrook', 'Cerca il maresciallo Redbrook in città: ha lavoro per te.', ['Eastbrook', 'Sentiero dei lupi', 'Prato dei cinghiali', 'Lago Specchio', 'Webwood', 'Miniera di rame', 'Campo dei banditi', 'Cappella caduta', 'Collina del Reliquario']],
     ['Palude di Mirefen', 'Presentati al custode Fenwick al cancello di Fenbridge.', ['Fenbridge', 'Canne dei predatori', 'Bassifondi di Deepfen', 'Folto delle vedove', 'Cappella annegata', 'Tumuli troll', 'Campo Gravecaller', 'Il Bastione Sommerso']],
     ['Alture di Thornpeak', 'Il capitano Thessaly tiene a stento il muro di Highwatch.', ['Highwatch', 'Cresta del braccatore', 'Tane di Deeprock', 'Colline degli ogre', 'Campo di guerra di Drogmar', 'Stormcrag', 'Il Glimmermere', 'Tende del Culto del Wyrm', 'Campi dei revenant', 'Santuario del Gravewyrm']],
   ],
@@ -1449,7 +1449,7 @@ const zhCnData: LocaleData = {
     '墓龙徽记', '祝福余烬', '圣所钥匙碎片',
   ],
   zones: [
-    ['东溪谷', '去镇上找雷德布鲁克元帅，他有任务交给你。', ['东溪', '狼径', '野猪草地', '镜湖', '网木林', '铜矿坑', '强盗营地', '倒塌礼拜堂']],
+    ['东溪谷', '去镇上找雷德布鲁克元帅，他有任务交给你。', ['东溪', '狼径', '野猪草地', '镜湖', '网木林', '铜矿坑', '强盗营地', '倒塌礼拜堂', '圣所遗址丘']],
     ['泥沼湿地', '到芬桥大门向守望者芬威克报到。', ['芬桥', '潜伏者芦苇地', '深沼浅滩', '寡妇灌木丛', '溺没礼拜堂', '巨魔坟丘', '唤墓者营地', '沉没堡垒']],
     ['荆峰高地', '瑟萨莉队长勉强守住高望城墙。', ['高望', '潜猎者山脊', '深岩洞穴', '食人魔山麓', '德罗格玛战争营地', '风暴岩', '微光湖', '龙教帐篷', '亡魂战场', '墓龙圣所']],
   ],
@@ -1511,7 +1511,7 @@ const zhTwData: LocaleData = {
     '卡茲克斯的心裂片', '龍教命令', '儀式護命匣', '墓龍徽記', '祝福餘燼', '聖所鑰匙碎片',
   ],
   zones: [
-    ['東溪谷', '去鎮上找雷德布魯克元帥，他有任務交給你。', ['東溪', '狼徑', '野豬草地', '鏡湖', '網木林', '銅礦坑', '強盜營地', '倒塌禮拜堂']],
+    ['東溪谷', '去鎮上找雷德布魯克元帥，他有任務交給你。', ['東溪', '狼徑', '野豬草地', '鏡湖', '網木林', '銅礦坑', '強盜營地', '倒塌禮拜堂', '聖所遺址丘']],
     ['泥沼濕地', '到芬橋大門向守望者芬威克報到。', ['芬橋', '潛伏者蘆葦地', '深沼淺灘', '寡婦灌木叢', '溺沒禮拜堂', '巨魔墳丘', '喚墓者營地', '沉沒堡壘']],
     ['荊峰高地', '瑟薩莉隊長勉強守住高望城牆。', ['高望', '潛獵者山脊', '深岩洞穴', '食人魔山麓', '德羅格瑪戰爭營地', '風暴岩', '微光湖', '龍教帳篷', '亡魂戰場', '墓龍聖所']],
   ],
@@ -1576,7 +1576,7 @@ const koData: LocaleData = {
     '고룡교단 명령서', '의식 성물함', '무덤고룡 인장', '축복받은 불씨', '성소 열쇠 조각',
   ],
   zones: [
-    ['이스트브룩 골짜기', '마을의 레드브룩 원수를 찾아가십시오. 그가 당신에게 맡길 일이 있습니다.', ['이스트브룩', '늑대길', '멧돼지 초원', '거울호수', '그물나무숲', '구리 광산', '도적 야영지', '무너진 예배당']],
+    ['이스트브룩 골짜기', '마을의 레드브룩 원수를 찾아가십시오. 그가 당신에게 맡길 일이 있습니다.', ['이스트브룩', '늑대길', '멧돼지 초원', '거울호수', '그물나무숲', '구리 광산', '도적 야영지', '무너진 예배당', '성소 폐허 언덕']],
     ['마이어펜 습지', '펜브리지 문에서 감시관 펜윅에게 보고하십시오.', ['펜브리지', '배회자 갈대밭', '딥펜 얕은 물', '과부거미 덤불', '가라앉은 예배당', '트롤 봉분', '무덤부름 야영지', '가라앉은 요새']],
     ['쏜피크 고지', '테살리 대장이 간신히 하이워치 성벽을 지키고 있습니다.', ['하이워치', '추적자 산등성이', '딥록 굴', '오우거 구릉', '드로그마르 전쟁 야영지', '스톰크래그', '글리머미어', '고룡교단 천막', '망령 들판', '무덤고룡 성소']],
   ],
@@ -1643,7 +1643,7 @@ const jaData: LocaleData = {
     '聖所の鍵片',
   ],
   zones: [
-    ['イーストブルック渓谷', '町のレッドブルック元帥を訪ねてください。あなたに頼みたい仕事があります。', ['イーストブルック', '狼の道', '猪の草地', '鏡の湖', 'ウェブウッド', '銅鉱山', '盗賊の野営地', '倒れた礼拝堂']],
+    ['イーストブルック渓谷', '町のレッドブルック元帥を訪ねてください。あなたに頼みたい仕事があります。', ['イーストブルック', '狼の道', '猪の草地', '鏡の湖', 'ウェブウッド', '銅鉱山', '盗賊の野営地', '倒れた礼拝堂', '聖遺物の丘']],
     ['マイアフェン湿地', 'フェンブリッジの門で番人フェンウィックに報告してください。', ['フェンブリッジ', '徘徊者の葦原', 'ディープフェンの浅瀬', '寡婦蜘蛛の茂み', '沈んだ礼拝堂', 'トロルの塚', 'グレイブコーラーの野営地', '沈んだ砦']],
     ['ソーンピーク高地', 'テサリー隊長がかろうじてハイウォッチの壁を保っています。', ['ハイウォッチ', '追跡者の尾根', 'ディープロックの巣穴', 'オーガの丘陵', 'ドログマーの戦営', 'ストームクラッグ', 'グリマーミア', 'ワーム教団の天幕', '亡霊の野', '墓ワームの聖所']],
   ],
@@ -1712,7 +1712,7 @@ const ptData: LocaleData = {
     'Filactério ritual', 'Sigilo do Gravewyrm', 'Brasas abençoadas', 'Fragmento de chave do santuário',
   ],
   zones: [
-    ['Vale de Eastbrook', 'Procure o marechal Redbrook na cidade: ele tem trabalho para você.', ['Eastbrook', 'Trilha dos lobos', 'Campo dos javalis', 'Lago Espelho', 'Webwood', 'Mina de cobre', 'Acampamento bandido', 'Capela caída']],
+    ['Vale de Eastbrook', 'Procure o marechal Redbrook na cidade: ele tem trabalho para você.', ['Eastbrook', 'Trilha dos lobos', 'Campo dos javalis', 'Lago Espelho', 'Webwood', 'Mina de cobre', 'Acampamento bandido', 'Capela caída', 'Colina do Relicário']],
     ['Pântano de Mirefen', 'Apresente-se ao guardião Fenwick no portão de Fenbridge.', ['Fenbridge', 'Juncos dos espreitadores', 'Baixios de Deepfen', 'Matagal das viúvas', 'Capela afogada', 'Túmulos troll', 'Acampamento Gravecaller', 'O Bastião Submerso']],
     ['Alturas de Thornpeak', 'A capitã Thessaly mal segura o muro de Highwatch.', ['Highwatch', 'Crista do rastreador', 'Tocas de Deeprock', 'Colinas ogro', 'Acampamento de guerra de Drogmar', 'Stormcrag', 'O Glimmermere', 'Tendas do Culto do Wyrm', 'Campos de revenantes', 'Santuário do Gravewyrm']],
   ],
@@ -1780,7 +1780,7 @@ const ruData: LocaleData = {
     'Ритуальная филактерия', 'Сигил Могильного Вирма', 'Благословенные угли', 'Осколок ключа святилища',
   ],
   zones: [
-    ['Истврукская долина', 'Найдите в городе маршала Редбрука: у него есть для вас работа.', ['Истврук', 'Волчья тропа', 'Кабанья поляна', 'Зеркальное озеро', 'Вебвуд', 'Медный рудник', 'Лагерь бандитов', 'Павшая часовня']],
+    ['Истврукская долина', 'Найдите в городе маршала Редбрука: у него есть для вас работа.', ['Истврук', 'Волчья тропа', 'Кабанья поляна', 'Зеркальное озеро', 'Вебвуд', 'Медный рудник', 'Лагерь бандитов', 'Павшая часовня', 'Холм Реликвария']],
     ['Мирефенская топь', 'Доложите стражу Фенвику у ворот Фенбриджа.', ['Фенбридж', 'Камыши хищников', 'Отмели Глубокой Топи', 'Вдовья чаща', 'Утонувшая часовня', 'Курганы троллей', 'Лагерь Могильного Зова', 'Затонувший бастион']],
     ['Терновые высоты', 'Капитан Тессали едва удерживает стену Хайвотча.', ['Хайвотч', 'Хребет охотника', 'Норы Глубокоскалья', 'Огрские предгорья', 'Военный лагерь Дрогмара', 'Грозовой Утес', 'Глиммермир', 'Шатры Культа Вирма', 'Поля ревенантов', 'Святилище Могильного Вирма']],
   ],
