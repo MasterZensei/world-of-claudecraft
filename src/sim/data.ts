@@ -37,6 +37,9 @@ import {
   COLLAPSED_RELIQUARY_MODULES,
   DELVE_MOBS,
 } from './content/delves';
+// Delve affix/companion catalogs are consumed by the Sim delve engine; re-export
+// them here so sim.ts imports the whole delve data surface from one module.
+export { DELVE_AFFIXES, DELVE_COMPANIONS, COMPANION_UPGRADE_COSTS } from './content/delves';
 import {
   PLACEHOLDER_DELVE, PLACEHOLDER_DELVE_MODULES, PLACEHOLDER_DELVE_MOBS,
 } from './content/delves/_placeholder';
@@ -248,11 +251,14 @@ export const CRYPT_SPAWNS = DUNGEONS.hollow_crypt.spawns;
 // DELVE_X_MIN must stay above ARENA_X_MIN (4000) and ARENA_X (4200).
 // ---------------------------------------------------------------------------
 
-export const DELVE_X_MIN = 3600;
+// 4800 sits clear of the v0.10.0 layout: dungeons end at ARENA_X_MIN (4000) and
+// the arena pit is centred at ARENA_X (4200, ~±22u footprint). The delve band's
+// west edge (DELVE_BAND_X_MIN ≈ 4776) leaves a comfortable margin past the arena.
+export const DELVE_X_MIN = 4800;
 // Each delve room is centred at DELVE_X_MIN + index*600. The room's west wall
 // sits at instance-local x = -(DUNGEON_WALL_X + DUNGEON_WALL_HW) = -24, i.e.
-// world-x = DELVE_X_MIN - 24 = 3576 for slot 0. We extend the delve band 1 u
-// further west (3575) to give isDelvePos a safe margin over the full footprint,
+// world-x = DELVE_X_MIN - 24 = 4776 for slot 0. We extend the delve band 1 u
+// further west (4775) to give isDelvePos a safe margin over the full footprint,
 // ensuring the west half of the room is never misclassified as arena.
 export const DELVE_BAND_X_MIN = DELVE_X_MIN - (DUNGEON_WALL_X + DUNGEON_WALL_HW + 1);
 export const DELVE_SLOT_COUNT = 6;
@@ -372,7 +378,7 @@ export function delveModuleLocal(
     if (relZ < zCursor + len || i === mods.length - 1) {
       return {
         ox,
-        oz: slotOz,
+        oz: slotOz + zCursor,
         moduleIndex: i,
         moduleId: mods[i],
         localX: x - ox,
@@ -381,5 +387,13 @@ export function delveModuleLocal(
     }
     zCursor += len + DELVE_MODULE_GAP;
   }
-  return { ox, oz: slotOz, moduleIndex: 0, moduleId: mods[0], localX: x - ox, localZ: relZ - DELVE_MODULE_Z_START };
+  const last = mods[mods.length - 1];
+  return {
+    ox,
+    oz: slotOz + zCursor,
+    moduleIndex: mods.length - 1,
+    moduleId: last,
+    localX: x - ox,
+    localZ: relZ - zCursor,
+  };
 }

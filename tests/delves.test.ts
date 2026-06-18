@@ -142,7 +142,7 @@ describe('delve spatial band', () => {
     // Rooms are 48 u wide, centred at DELVE_X_MIN. The west wall sits at
     // world-x ≈ 3576 (slot 0). Before DELVE_BAND_X_MIN, x < DELVE_X_MIN was
     // classified as isArenaPos, yanking the camera ~574 u west to arena (x≈3000).
-    const origin = delveOrigin(0, 0); // { x: 3600, z: ... }
+    const origin = delveOrigin(0, 0); // { x: DELVE_X_MIN, z: ... }
 
     // West half of the room must still be a delve pos
     expect(isDelvePos(origin.x - 2)).toBe(true);   // 3598 — exact repro coordinate
@@ -162,13 +162,13 @@ describe('delve spatial band', () => {
     expect(isDelvePos(DELVE_BAND_X_MIN - 1) && isArenaPos(DELVE_BAND_X_MIN - 1)).toBe(false);
 
     // delveAt resolves correctly across the whole west half of the room
-    expect(delveAt(origin.x - 2)?.index).toBe(0);    // 3598
-    expect(delveAt(origin.x - 24)?.index).toBe(0);   // 3576
-    expect(delveAt(origin.x)?.index).toBe(0);         // 3600
+    expect(delveAt(origin.x - 2)?.index).toBe(0);    // DELVE_X_MIN - 2
+    expect(delveAt(origin.x - 24)?.index).toBe(0);   // west wall outer face
+    expect(delveAt(origin.x)?.index).toBe(0);         // room centre
 
-    // Arena still classifies correctly
-    expect(isArenaPos(3000)).toBe(true);
-    expect(isDelvePos(3000)).toBe(false);
+    // Arena still classifies correctly (arena instances live at ARENA_X = 4200)
+    expect(isArenaPos(ARENA_X)).toBe(true);
+    expect(isDelvePos(ARENA_X)).toBe(false);
   });
 
 
