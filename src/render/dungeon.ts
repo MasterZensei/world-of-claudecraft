@@ -35,7 +35,7 @@ const FLOOR_CELL = 4; // kit floor tiles are 4x4 at MODULE_SCALE 1
 const FLOOR_Y = -0.05; // tile tops sit 0.05 above origin; sink so tops land at y=0
 const PILLAR_XZ_SCALE = 1.3; // 1.5u kit pillar -> ~1.95u footprint (collider r=1)
 
-type Variant = 'crypt' | 'bastion' | 'sanctum' | 'temple' | 'arena';
+type Variant = 'crypt' | 'bastion' | 'sanctum' | 'temple' | 'arena' | 'delve';
 
 interface TorchColors {
   flame: number;
@@ -51,6 +51,8 @@ const TORCH_COLORS: Record<Variant, TorchColors> = {
   temple: { flame: 0xd9c9ff, emissive: 0x6a4fd0, light: 0xb79cff },
   // the Ashen Coliseum burns warm — amber braziers ringing the fighting sands
   arena: { flame: 0xffb24a, emissive: 0xcc5a14, light: 0xff9a3c },
+  // Delve crypts burn with deep ember-red — hellfire torches, not daylight
+  delve: { flame: 0xff6a4a, emissive: 0xcc2a18, light: 0xff4a3a },
 };
 
 // The Drowned Temple is flooded — a translucent, self-animating water sheet
@@ -186,10 +188,17 @@ function loadModuleAsset(name: string, pack: Pack): Promise<void> {
 }
 
 export function ensureDungeonAssets(): Promise<void> {
+  // A rejected memo MUST NOT poison the session: a single transient GLB load
+  // failure would otherwise leave every later build awaiting a permanently-
+  // rejected promise — the interior never appears and renders as a black void
+  // forever (no retry). Clear the memo on failure so the next call re-fetches.
   dungeonAssetsPromise ??= Promise.all([
     ...KIT_MODELS.map((name) => loadModuleAsset(name, 'kit')),
     ...BITS_MODELS.map((name) => loadModuleAsset(name, 'bits')),
-  ]).then(() => undefined);
+  ]).then(() => undefined).catch((err) => {
+    dungeonAssetsPromise = null;
+    throw err;
+  });
   return dungeonAssetsPromise;
 }
 
@@ -374,12 +383,18 @@ export class DungeonInteriors {
     private fireLights: THREE.PointLight[],
   ) {}
 
-  async buildInterior(interior: string, ox: number, oz: number): Promise<void> {
+  async buildInterior(
+    interior: string,
+    ox: number,
+    oz: number,
+    layoutOverride?: DungeonLayout,
+    variantOverride?: Variant,
+  ): Promise<void> {
     await ensureDungeonAssets();
-    const layout = interior === 'sanctum' ? SANCTUM_LAYOUT
+    const layout = layoutOverride ?? (interior === 'sanctum' ? SANCTUM_LAYOUT
       : interior === 'temple' ? TEMPLE_LAYOUT
-        : interior === 'arena' ? ARENA_LAYOUT : CRYPT_LAYOUT;
-    const variant = this.variantFor(interior, ox);
+        : interior === 'arena' ? ARENA_LAYOUT : CRYPT_LAYOUT);
+    const variant = variantOverride ?? this.variantFor(interior, ox);
     const group = new THREE.Group();
     const p = new Placements();
     const arenaWalls = variant === 'arena' ? this.pendingArenaWalls(layout, ox, oz) : undefined;
@@ -392,6 +407,10 @@ export class DungeonInteriors {
     this.placeDais(group, p, layout, variant);
     this.placeAisleClutter(p, layout, variant);
     this.placeWallDressing(p, layout, variant, arenaWalls);
+    if (variant === 'delve') {
+      this.placeExitStairs(group, p, layout);
+      if (layout.doorZ != null) this.placeEntranceGate(group, p, layout);
+    }
     if (variant === 'temple') {
       this.placeFloodwater(group, layout);
       this.placeAquaticDressing(group, layout);
@@ -565,6 +584,9 @@ export class DungeonInteriors {
       for (let i = 0; i < mats.length; i++) mesh.setMatrixAt(i, mats[i]);
       mesh.instanceMatrix.needsUpdate = true;
       mesh.computeBoundingSphere();
+      // Delve instances sit at x≈3600; per-kind bounds can false-cull when the
+      // chase cam hugs a side wall, so always draw the merged interior batch.
+      mesh.frustumCulled = false;
       mesh.castShadow = !this.lowGfx && CASTER_KINDS.has(kind);
       mesh.receiveShadow = RECEIVER_KINDS.has(kind);
       group.add(mesh);
@@ -643,6 +665,13 @@ export class DungeonInteriors {
         ['floor_dirt_large_rocky', 4], ['grate', 9], ['quad', 25],
       ], t);
     }
+    if (variant === 'delve') {
+      // Collapsed reliquary: heavier cracked stone and loose soil, darker feel.
+      return pickKind([
+        ['floor_tile_large', 38], ['floor_tile_large_rocks', 18], ['floor_dirt_large', 16],
+        ['floor_dirt_large_rocky', 14], ['quad', 14],
+      ], t);
+    }
     return pickKind([
       ['floor_tile_large', 70], ['floor_tile_large_rocks', 6], ['floor_dirt_large', 6],
       ['floor_dirt_large_rocky', 5], ['quad', 13],
@@ -669,6 +698,13 @@ export class DungeonInteriors {
         ['floor_tile_small_weeds_A', 18], ['floor_tile_small_weeds_B', 18], ['floor_tile_small_decorated', 6],
       ], t);
     }
+    if (variant === 'delve') {
+      // Heavy breakage and weed growth between the cracked flagstones.
+      return pickKind([
+        ['floor_tile_small', 20], ['floor_tile_small_broken_A', 28], ['floor_tile_small_broken_B', 28],
+        ['floor_tile_small_weeds_A', 12], ['floor_tile_small_weeds_B', 12],
+      ], t);
+    }
     return pickKind([
       ['floor_tile_small', 40], ['floor_tile_small_broken_A', 18], ['floor_tile_small_broken_B', 18],
       ['floor_tile_small_weeds_A', 7], ['floor_tile_small_weeds_B', 7], ['floor_tile_small_decorated', 10],
@@ -678,8 +714,9 @@ export class DungeonInteriors {
   // 4u tile grid covering the room (x -24..24, z just past both end walls)
   private placeFloor(p: Placements, layout: DungeonLayout, variant: Variant): void {
     const quarter = Math.PI / 2;
+    const floorHw = (layout.wallX ?? DUNGEON_WALL_X) - 1;
     for (let z = layout.zMin - 2; z <= layout.zMax + 2; z += FLOOR_CELL) {
-      for (let x = -22; x <= 22; x += FLOOR_CELL) {
+      for (let x = -floorHw; x <= floorHw; x += FLOOR_CELL) {
         let kind = this.floorKind(variant, hash2(x * 1.31, z));
         if (kind === 'grate' && Math.abs(x) < 4) kind = 'floor_tile_large'; // keep pits off the walk aisle
         if (kind === 'grate') {
@@ -740,7 +777,7 @@ export class DungeonInteriors {
     return pickKind([['banner_thin_white', 6], ['banner_white', 4]], t);
   }
 
-  // Side walls run along z at |x| = DUNGEON_WALL_X (8u modules at scale 2,
+  // Side walls run along z at |x| = wallX (8u modules at scale 2,
   // 2u thick: matches the hw=1 collider slabs); end walls run along x.
   private placeWalls(
     p: Placements,
@@ -748,22 +785,25 @@ export class DungeonInteriors {
     variant: Variant,
     arenaWalls?: PendingArenaWalls,
   ): void {
-    const bannerEvery = variant === 'crypt' ? 4 : 3;
+    const wallX = layout.wallX ?? DUNGEON_WALL_X;
+    const bannerEvery = (variant === 'crypt' || variant === 'delve') ? 4 : 3;
     for (const side of [-1, 1]) {
       const target = arenaWalls ? (side < 0 ? arenaWalls.left.placements : arenaWalls.right.placements) : p;
       const ry = side < 0 ? Math.PI / 2 : -Math.PI / 2; // detail + banners face the room
       let i = 0;
       for (let z = layout.zMin; z <= layout.zMax + 2; z += 8, i++) {
         const kind = this.wallKind(variant, hash2(side * 13.7, z));
-        target.add(kind, side * DUNGEON_WALL_X, 0, z, ry, MODULE_SCALE);
+        target.add(kind, side * wallX, 0, z, ry, MODULE_SCALE);
         if (i % bannerEvery === 2 && kind !== 'wall_archedwindow_gated') {
           target.add(this.bannerKind(variant, hash2(z, side * 7.3)), side * DUNGEON_WALL_X, 0, z, ry, MODULE_SCALE);
         }
       }
     }
+    // End walls tile from -(wallX+1) to +(wallX+1) to close room corners.
+    const endRange = wallX + 1;
     for (const end of [{ z: layout.zMin, ry: 0 }, { z: layout.zMax, ry: Math.PI }]) {
       const target = arenaWalls ? (end.z === layout.zMin ? arenaWalls.front.placements : arenaWalls.back.placements) : p;
-      for (let x = -20; x <= 20; x += 8) {
+      for (let x = -endRange; x <= endRange; x += 8) {
         const kind = this.wallKind(variant, hash2(x, end.z * 3.1));
         target.add(kind, x, 0, end.z, end.ry, MODULE_SCALE);
       }
@@ -897,16 +937,31 @@ export class DungeonInteriors {
       return;
     }
     const quarter = Math.PI / 2;
-    for (let x = -16; x <= 16; x += 4) {
-      for (let z = -16; z <= 16; z += 4) {
-        if (Math.hypot(x, z) > d.r) continue;
-        const rot = Math.floor(hash2(x, z) * 4) * quarter;
-        p.add('floor_foundation_allsides', d.x + x, 0, d.z + z, rot, [1.85, 0.3, 1.85]);
+    if (variant === 'delve') {
+      // Delve boss dais: flat crypt flags (no raised foundation slab or ember glow pool).
+      for (let x = -16; x <= 16; x += 4) {
+        for (let z = -16; z <= 16; z += 4) {
+          if (Math.hypot(x, z) > d.r) continue;
+          const rot = Math.floor(hash2(x, z) * 4) * quarter;
+          const wx = d.x + x;
+          const wz = d.z + z;
+          let kind = this.floorKind(variant, hash2(wx * 1.31, wz));
+          if (kind === 'grate' || kind === 'quad') kind = 'floor_tile_large';
+          p.add(kind, wx, FLOOR_Y, wz, rot);
+        }
       }
+    } else {
+      for (let x = -16; x <= 16; x += 4) {
+        for (let z = -16; z <= 16; z += 4) {
+          if (Math.hypot(x, z) > d.r) continue;
+          const rot = Math.floor(hash2(x, z) * 4) * quarter;
+          p.add('floor_foundation_allsides', d.x + x, 0, d.z + z, rot, [1.85, 0.3, 1.85]);
+        }
+      }
+      // ritual glow pooled on the dais top so the boss stage never reads as a
+      // black slab (torch pillars stop short of the back chamber)
+      this.addTorchGlow(group, d.x, d.z, TORCH_COLORS[variant].light, 0.68, 1.6);
     }
-    // ritual glow pooled on the dais top so the boss stage never reads as a
-    // black slab (torch pillars stop short of the back chamber)
-    this.addTorchGlow(group, d.x, d.z, TORCH_COLORS[variant].light, 0.68, 1.6);
     // rim decor (small, walk-through by design)
     const rim = d.r - 1.6;
     for (let i = 0; i < 6; i++) {
@@ -935,6 +990,19 @@ export class DungeonInteriors {
   // Bone piles / debris strewn along the aisle (legacy deterministic spots)
   private placeAisleClutter(p: Placements, layout: DungeonLayout, variant: Variant): void {
     if (variant === 'arena') return; // the fighting sands stay clear of obstacles
+
+    // Delve: use explicit positions from the layout (collision circles already match)
+    // and place gothic grave-props instead of ribcages.
+    if (variant === 'delve' && layout.clutter && layout.clutter.length > 0) {
+      for (const pt of layout.clutter) {
+        const r = hash2(pt.x, pt.z);
+        const kind = r < 0.33 ? 'gravestone' : r < 0.66 ? 'rubble_half' : 'grave_B';
+        p.add(kind, pt.x, 0, pt.z, r * Math.PI * 2, 1.4);
+        if (r > 0.55) p.add('skull_candle', pt.x + 0.8, 0, pt.z - 1.0, r * 5, 1.2);
+      }
+      return;
+    }
+
     const dense = variant === 'sanctum' || variant === 'temple';
     const count = variant === 'sanctum' ? 14 : variant === 'temple' ? 12 : 10;
     for (let i = 0; i < count; i++) {
@@ -965,13 +1033,14 @@ export class DungeonInteriors {
     variant: Variant,
     arenaWalls?: PendingArenaWalls,
   ): void {
+    const wallX = layout.wallX ?? DUNGEON_WALL_X;
     if (variant === 'arena') {
       // gladiatorial weapon trophies mounted high on the pit's side walls
       for (const z of [layout.zMin + 9, (layout.zMin + layout.zMax) / 2, layout.zMax - 9]) {
         for (const side of [-1, 1]) {
           const target = arenaWalls ? (side < 0 ? arenaWalls.left.placements : arenaWalls.right.placements) : p;
           const kind = hash2(side * 4.2, z) < 0.5 ? 'sword_shield' : 'sword_shield_broken';
-          target.add(kind, side * (DUNGEON_WALL_X - 1.1), 4.4, z, side < 0 ? Math.PI / 2 : -Math.PI / 2, 1.7);
+          target.add(kind, side * (wallX - 1.1), 4.4, z, side < 0 ? Math.PI / 2 : -Math.PI / 2, 1.7);
         }
       }
       return;
@@ -982,12 +1051,14 @@ export class DungeonInteriors {
       : variant === 'temple'
         ? [[-19, -10], [19, 24], [-19, 88], [18, 124]]
         : [[-19, -13], [19, 6], [-18, 70], [19, 108]];
-    for (const [x, z] of rubble) {
-      p.add('rubble_half', x < 0 ? -22 : 22, 0, z, x < 0 ? 0 : Math.PI, 1.1);
+    if (variant !== 'delve') {
+      for (const [x, z] of rubble) {
+        p.add('rubble_half', x < 0 ? -22 : 22, 0, z, x < 0 ? 0 : Math.PI, 1.1);
+      }
     }
 
-    const wallEdge = DUNGEON_WALL_X - 1.6; // just proud of the wall face
-    if (variant === 'crypt') {
+    const wallEdge = wallX - 1.6; // just proud of the wall face
+    if (variant === 'crypt' || variant === 'delve') {
       for (let z = layout.zMin + 26; z < layout.zMax - 8; z += 19) {
         for (const side of [-1, 1]) {
           const r = hash2(side * 5.1, z);
@@ -1042,5 +1113,36 @@ export class DungeonInteriors {
     }
     p.add('gravestone', -3.4, 0.6, layout.dais.z + 4, Math.PI, 1.8);
     p.add('gravestone', 3.4, 0.6, layout.dais.z + 4, Math.PI, 1.8);
+  }
+
+  // Delve-only exit stairway: three stone steps rising toward the back wall
+  // (zMax), centred on the aisle. Gives the "climb out" read the sealed
+  // passage needs and breaks the flat floor at the exit area.
+  private placeExitStairs(group: THREE.Group, p: Placements, layout: DungeonLayout): void {
+    const zBack = layout.zMax;
+    const steps: Array<{ hw: number; y: number; d: number; z: number }> = [
+      { hw: 4.0, y: 0.22, d: 0.45, z: zBack - 3.6 },
+      { hw: 3.0, y: 0.67, d: 0.45, z: zBack - 2.2 },
+      { hw: 2.2, y: 1.15, d: 0.45, z: zBack - 1.0 },
+    ];
+    for (const s of steps) {
+      p.add('floor_foundation_allsides', 0, 0, s.z, 0, [s.hw * 0.54, s.y * 3.35, 0.54]);
+    }
+    this.addTorchGlow(group, 0, zBack - 4.5, TORCH_COLORS.crypt.light, 0.08, 0.9);
+  }
+
+  // Delve entrance gate: a stone archway framing the chamber threshold.
+  // Placed at layout.doorZ on all modules except module 0.
+  private placeEntranceGate(group: THREE.Group, p: Placements, layout: DungeonLayout): void {
+    const z = layout.doorZ!;
+    p.add('wall_pillar', -10, 0, z, Math.PI / 2, MODULE_SCALE);
+    p.add('wall_pillar',  10, 0, z, -Math.PI / 2, MODULE_SCALE);
+    p.add('arch', 0, 0, z, 0, [2.6, 2.0, 2.0]);
+    if (!this.lowGfx) {
+      const light = new THREE.PointLight(0x8855ff, 18, 14, 2);
+      light.position.set(0, 4, z + 1);
+      group.add(light);
+      this.addTorchGlow(group, 0, z, 0x8855ff, 0.08, 0.7);
+    }
   }
 }

@@ -1,10 +1,13 @@
 import {
-  ABILITIES, ARENA_SLOT_COUNT, CAMPS, CLASSES, DUNGEONS, DUNGEON_LIST, DungeonDef, arenaOrigin, dungeonAt,
-  DUNGEON_X_THRESHOLD, GROUND_OBJECTS, GROUP_XP_BONUS, INSTANCE_SLOT_COUNT, isArenaPos,
+  ABILITIES, ARENA_SLOT_COUNT, CAMPS, CLASSES, COMPANION_UPGRADE_COSTS, DELVE_AFFIXES, DELVE_COMPANIONS,
+  DELVE_LIST, DELVE_MODULES, DELVE_MODULE_GAP, DELVE_MODULE_Z_START, DELVES, DELVE_SLOT_COUNT,
+  DUNGEONS, DUNGEON_LIST, DungeonDef, arenaOrigin, delveAt, delveOrigin, delveModuleZOffset, dungeonAt,
+  DUNGEON_X_THRESHOLD, GROUND_OBJECTS, GROUP_XP_BONUS, INSTANCE_SLOT_COUNT, isArenaPos, isDelvePos,
   ITEMS, MOBS, NPCS, PLAYER_START, PROPS, QUESTS, questRewardItemId, abilitiesKnownAt, instanceOrigin,
   DEEPFEN_SHALLOWS_LAKE,
   zoneAt, ZONES, FISHING_TABLES, FISHING_RARE_ID,
 } from './data';
+import { DELVE_MODULE_LAYOUTS, delveModuleEntry as delveLayoutEntry, type DelveModuleId } from './delve_layout';
 import { ARENA_SPAWN_A, ARENA_SPAWN_B, ARENA_SPAWNS_A_2v2, ARENA_SPAWNS_B_2v2 } from './dungeon_layout';
 import { lineOfSightClear, resolveMovement, resolvePosition } from './colliders';
 import { PLAYER_BODY_RADIUS, PLAYER_MAX_CLIMB_SLOPE, PLAYER_SWIM_DEPTH, findPlayerPath } from './pathfind';
@@ -15,6 +18,11 @@ import {
   type TalentAllocation, type TalentModifiers, type SavedLoadout, type Role,
 } from './content/talents';
 import { Rng } from './rng';
+import {
+  ANTE_TO_TIER, ANTE_TO_PAGES, ANTE_TO_TRIES, generateLockPages, stepLock, visibleCells,
+  type Ante, type LockSession, type PickAction,
+} from './lockpick';
+import { lockpickPresetFor, LOCKPICK_TIER_REWARD, delveChestItemsForTier } from './content/delves/lockpick_tiers';
 import { SpatialGrid } from './spatial';
 import {
   HEAL_THREAT_FACTOR, MELEE_SWITCH_MULT, RANGED_SWITCH_MULT,

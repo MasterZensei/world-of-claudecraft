@@ -1,4 +1,5 @@
-import { OVERHEAD_EMOTE_IDS, type ArenaCombatant, type ArenaFormat, type ArenaStanding, type Entity, type EquipSlot, type InvSlot, type MoveInput, type OverheadEmoteId, type PetMode, type PlayerClass, type QuestProgress, type QuestState, type ResourceType } from './sim/types';
+import { OVERHEAD_EMOTE_IDS, type ArenaCombatant, type ArenaFormat, type ArenaStanding, type DelveObjectiveState, type Entity, type EquipSlot, type InvSlot, type MoveInput, type OverheadEmoteId, type PetMode, type PlayerClass, type QuestProgress, type QuestState, type ResourceType } from './sim/types';
+import type { Ante, LootTier, PickAction, VisibleCell } from './sim/lockpick';
 import type { ResolvedAbility } from './sim/sim';
 import type { TalentAllocation, SavedLoadout, Role } from './sim/content/talents';
 
@@ -41,6 +42,52 @@ export interface DuelInfo {
   otherPid: number;
   otherName: string;
   state: 'countdown' | 'active';
+}
+
+export interface DelveRunInfo {
+  delveId: string;
+  tierId: string;
+  slot: number;
+  origin: { x: number; z: number };
+  moduleIndex: number;
+  moduleCount: number;
+  modules: string[];
+  objective: DelveObjectiveState;
+  affixes: string[];
+  completed: boolean;
+  exitPortalOpen: boolean;
+}
+
+// Render-safe projection of an active lockpicking attempt. Only ever holds cells
+// inside the fog window — the full lock layout never reaches the client.
+export interface LockpickView {
+  sessionId: string;
+  objectId: number;
+  w: number;
+  h: number;
+  col: number;
+  row: number;
+  page: number;
+  pageCount: number;
+  tries: number;
+  triesTotal: number;
+  lootTier: LootTier;
+  allowed: Exclude<PickAction, 'abort'>[];
+  visible: VisibleCell[];
+}
+
+export interface DelveCompanionInfo {
+  companionId: string;
+  entityId: number;
+  rank: number;
+  hp: number;
+  maxHp: number;
+}
+
+export interface DelveDailyInfo {
+  date: string;
+  firstClearXp: string[];
+  markClears: number;
 }
 
 export const OVERHEAD_EMOTES = [
@@ -292,6 +339,21 @@ export interface IWorld {
   marketCollect(): void;
   enterDungeon(dungeonId: string): void;
   leaveDungeon(): void;
+  enterDelve(delveId: string, tierId: string): void;
+  leaveDelve(): void;
+  delveInteract(objectId: number): void;
+  companionUpgrade(companionId: string): void;
+  lockpickState: LockpickView | null;
+  lockpickEngage(objectId: number, ante: Ante): void;
+  lockpickAction(action: PickAction): void;
+  lockpickAbort(): void;
+  lockpickTimeout(): void;
+  collectDelveChestLoot(chestId: number): void;
+  delveRun: DelveRunInfo | null;
+  companionState: DelveCompanionInfo | null;
+  delveMarks: number;
+  companionUpgrades: Record<string, number>;
+  delveDaily: DelveDailyInfo;
   // Post-cap progression: the realm-scoped lifetime-XP leaderboard, and the
   // opt-in cosmetic prestige action.
   leaderboard(): Promise<LeaderboardEntry[]>;

@@ -11,6 +11,8 @@ import type { Collider } from './colliders';
 // assume these exact footprints.
 export const DUNGEON_WALL_X = 23; // side wall centreline (|x|)
 export const DUNGEON_WALL_HW = 1; // wall half thickness
+/** Walkable half-width inside side-wall colliders (instance-local x). */
+export const DUNGEON_WALK_HALF_X = DUNGEON_WALL_X - DUNGEON_WALL_HW;
 export const DUNGEON_END_WALL_HW = 24; // front/back wall half width
 export const PILLAR_COLLIDER_R = 1.0; // centre-aisle pillar obstacle radius
 export const TOMB_HW = 1.1; // wall-side obstacle (sarcophagus/cargo) half extents
@@ -45,6 +47,12 @@ export interface DungeonLayout {
   stubs: WallStub[];
   /** boss dais — walkable, deliberately NO collider */
   dais: { x: number; z: number; r: number };
+  /** side wall centre override for wider rooms (defaults to DUNGEON_WALL_X) */
+  wallX?: number;
+  /** entrance archway z position; renderer places gate props here when set */
+  doorZ?: number;
+  /** floor scatter positions — renderer places props here AND collision circles back them */
+  clutter?: GridPoint[];
 }
 
 function grid(zFrom: number, zTo: number, zStep: number, xs: readonly number[]): GridPoint[] {
@@ -155,18 +163,22 @@ export const ARENA_SPAWNS_B_2v2 = [
 /** Interior collision set for a layout, in instance-local coordinates. */
 export function layoutColliders(layout: DungeonLayout): Collider[] {
   const out: Collider[] = [];
+  const wx = layout.wallX ?? DUNGEON_WALL_X;
+  const endHw = wx + 1; // end walls close the corners of the room
   // side walls
-  for (const sx of [-DUNGEON_WALL_X, DUNGEON_WALL_X]) {
+  for (const sx of [-wx, wx]) {
     out.push({ type: 'obb', x: sx, z: layout.sideWallZ, hw: DUNGEON_WALL_HW, hd: layout.sideWallHd, rot: 0 });
   }
   // back wall, then front wall (entrance porch: chase cam fits inside)
-  out.push({ type: 'obb', x: 0, z: layout.zMax, hw: DUNGEON_END_WALL_HW, hd: DUNGEON_WALL_HW, rot: 0 });
-  out.push({ type: 'obb', x: 0, z: layout.zMin, hw: DUNGEON_END_WALL_HW, hd: DUNGEON_WALL_HW, rot: 0 });
+  out.push({ type: 'obb', x: 0, z: layout.zMax, hw: endHw, hd: DUNGEON_WALL_HW, rot: 0 });
+  out.push({ type: 'obb', x: 0, z: layout.zMin, hw: endHw, hd: DUNGEON_WALL_HW, rot: 0 });
   // chamber waists
   for (const s of layout.stubs) out.push({ type: 'obb', x: s.x, z: s.z, hw: s.hw, hd: s.hd, rot: 0 });
   // pillar obstacles
   for (const p of layout.pillars) out.push({ type: 'circle', x: p.x, z: p.z, r: PILLAR_COLLIDER_R });
   // wall-side obstacles (the boss dais is walkable: no collider)
   for (const t of layout.tombs) out.push({ type: 'obb', x: t.x, z: t.z, hw: TOMB_HW, hd: TOMB_HD, rot: 0 });
+  // floor clutter props (small circle per scatter point; renderer places matching props)
+  for (const c of layout.clutter ?? []) out.push({ type: 'circle', x: c.x, z: c.z, r: 0.8 });
   return out;
 }

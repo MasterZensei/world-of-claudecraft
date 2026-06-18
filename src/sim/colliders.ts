@@ -1,7 +1,10 @@
 import { generateDecorations, groundHeight } from './world';
 import {
-  DUNGEON_X_THRESHOLD, INSTANCE_SLOT_COUNT, PROPS, arenaOriginAt, dungeonAt, instanceOrigin, isArenaPos,
+  DELVE_SLOT_COUNT, DELVE_X_MIN, DUNGEON_X_THRESHOLD, INSTANCE_SLOT_COUNT, PROPS,
+  arenaOriginAt, defaultDelveModules, delveAt, delveModuleLocal, delveOrigin, dungeonAt,
+  instanceOrigin, isArenaPos, isDelvePos,
 } from './data';
+import { delveModuleColliders, type DelveModuleId } from './delve_layout';
 import { ARENA_LAYOUT, CRYPT_LAYOUT, SANCTUM_LAYOUT, TEMPLE_LAYOUT, layoutColliders } from './dungeon_layout';
 
 // Static world collision. Prop placement comes from the per-zone content
@@ -254,6 +257,19 @@ function instanceLocal(x: number, z: number): { ox: number; oz: number; interior
   return { ox: o.x, oz: o.z, interior: dungeon?.interior ?? 'crypt' };
 }
 
+function delveInstanceLocal(x: number, z: number): { ox: number; oz: number } {
+  const delve = delveAt(x);
+  const index = delve?.index ?? Math.round((x - DELVE_X_MIN) / 600);
+  let best = 0, bestD = Infinity;
+  for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
+    const o = delveOrigin(index, i);
+    const d = Math.abs(z - o.z);
+    if (d < bestD) { bestD = d; best = i; }
+  }
+  const o = delveOrigin(index, best);
+  return { ox: o.x, oz: o.z };
+}
+
 // Resolve a movement destination against all static geometry. Movers slide
 // along obstacles. `r` is the body radius.
 export function resolvePosition(
@@ -262,7 +278,18 @@ export function resolvePosition(
   z: number,
   r = 0.5,
   ignoreFences = false,
+  delveModules?: readonly string[],
 ): { x: number; z: number } {
+  if (isDelvePos(x)) {
+    const delve = delveAt(x);
+    const mods = delveModules?.length
+      ? delveModules
+      : (delve ? defaultDelveModules(delve.id) : []);
+    const loc = delveModuleLocal(x, z, mods);
+    const colliders = delveModuleColliders(loc.moduleId as DelveModuleId);
+    const local = resolveAgainst(colliders, loc.localX, loc.localZ, r);
+    return { x: local.x + loc.ox, z: local.z + loc.oz };
+  }
   if (isArenaPos(x)) {
     const o = arenaOriginAt(z);
     const local = resolveAgainst(ARENA_COLLIDERS, x - o.x, z - o.z, r, ignoreFences);
@@ -313,11 +340,12 @@ export function resolveMovement(
   toZ: number,
   r = 0.5,
   ignoreFences = false,
+  delveModules?: readonly string[],
 ): { x: number; z: number } {
   const dx = toX - fromX;
   const dz = toZ - fromZ;
   const d = Math.hypot(dx, dz);
-  if (d < 1e-6) return resolvePosition(seed, toX, toZ, r, ignoreFences);
+  if (d < 1e-6) return resolvePosition(seed, toX, toZ, r, ignoreFences, delveModules);
   const steps = Math.max(1, Math.ceil(d / 0.2));
   let x = fromX, z = fromZ;
   for (let i = 1; i <= steps; i++) {
@@ -325,7 +353,7 @@ export function resolveMovement(
     const nextX = fromX + dx * t;
     const nextZ = fromZ + dz * t;
     if (!ignoreFences && crossesFence(x, z, nextX, nextZ, r)) break;
-    const resolved = resolvePosition(seed, nextX, nextZ, r, ignoreFences);
+    const resolved = resolvePosition(seed, nextX, nextZ, r, ignoreFences, delveModules);
     x = resolved.x;
     z = resolved.z;
     if (Math.hypot(x - nextX, z - nextZ) > r * 0.25) {
@@ -437,7 +465,22 @@ export function cameraOcclusion(
   ax: number, ay: number, az: number,
   bx: number, by: number, bz: number,
   pad = 0.35,
+  delveModules?: readonly string[],
 ): number {
+  if (isDelvePos(ax)) {
+    const delve = delveAt(ax);
+    const mods = delveModules?.length
+      ? delveModules
+      : (delve ? defaultDelveModules(delve.id) : []);
+    const loc = delveModuleLocal(ax, az, mods);
+    const colliders = delveModuleColliders(loc.moduleId as DelveModuleId);
+    return sweepColliders(
+      colliders,
+      loc.localX, ay, loc.localZ,
+      bx - loc.ox, by, bz - loc.oz,
+      pad, true,
+    );
+  }
   if (isArenaPos(ax)) {
     const o = arenaOriginAt(az);
     return sweepColliders(ARENA_COLLIDERS, ax - o.x, ay, az - o.z, bx - o.x, by, bz - o.z, pad, true);
