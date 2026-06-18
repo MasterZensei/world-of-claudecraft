@@ -238,8 +238,10 @@ export function generateLockPages(seed: number, tier: LockTierSpec, pageCount: n
   return pages;
 }
 
-/** BFS reachability from (0, startRow) to the bolt seat. Used by the generator
- * assertion and by tests; true for every well-formed spec. */
+/** BFS reachability from (0, startRow) to the bolt seat. Used by tests to verify
+ * solvability; true for every well-formed spec. Solvability is guaranteed
+ * structurally by generateLock (the carved path cell is always retained through
+ * the trim and never trapped), not by a runtime assertion in the generator. */
 export function solveLock(spec: LockSpec): boolean {
   return solveLockPath(spec) !== null;
 }
@@ -327,6 +329,12 @@ export function stepLock(
  * the single source of truth for fog AND the anti-cheat boundary — the server
  * never serializes anything beyond what this returns. A window >= tier.cols
  * reveals the whole board (full-visibility easy locks).
+ *
+ * Ward-traps are deliberately reported as `kind: 'open'`, never `'trap'`: they
+ * "look open but jam on contact" (the heart of the puzzle — the player must read
+ * and thread the true path). stepLock() enforces the jam server-side, so the fog
+ * never telegraphs a trap to the client. The 'trap' CellKind exists only as a
+ * step RESULT (the toast shown after the pick touches one).
  */
 export function visibleCells(spec: LockSpec, col: number, window: number): VisibleCell[] {
   const last = spec.open.length - 1;
@@ -336,8 +344,7 @@ export function visibleCells(spec: LockSpec, col: number, window: number): Visib
     for (const r of spec.open[c]) {
       const kind: CellKind = c === last ? 'seat'
         : spec.gates.includes(c) ? 'gate'
-          : spec.traps?.[c]?.includes(r) ? 'trap'
-            : 'open';
+          : 'open';
       cells.push({ col: c, row: r, kind });
     }
   }

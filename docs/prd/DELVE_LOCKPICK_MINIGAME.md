@@ -66,7 +66,7 @@ delveInteract(objectId, pid)
                                  emit { type: 'lockpickOffer', objectId, tiers, pid }
                                  // (no session yet — player picks an ante first)
 lockpickEngage(objectId, ante, pid)   validate proximity / not looted / attemptAvailable
-                                       generate lock (seed = run.seed ^ objectId), open session
+                                       generate lock (seed = run.seed ^ (objectId * 0x9e3779b1) >>> 0), open session
                                        emit { type: 'lockpickSession', … pid }   // fogged view only
 lockpickAction(sessionId, action, pid) one step; emit { type: 'lockpickStep', … pid }
   … on SUCCESS:                   grantDelveRewards(run) using the tier-keyed loot table;
@@ -136,8 +136,10 @@ clearly-marked TODO to add Mirefen/Thornpeak bands when those delves land. See
 **`src/sim/sim.ts`** — the session state machine as `Sim` methods (mirrors how
 `lootCorpse`, `enterDelve`, `delveInteract` already live here):
 - `lockpickEngage(objectId, ante, pid)` — validate proximity, `attemptAvailable`,
-  not `looted`, valid ante, no live session; `generateLock(run.seed ^ objectId,
-  tierFor(run))`; build `LockSession` with `livesLeft = ante`,
+  not `looted`, valid ante, no live session; `generateLock(run.seed ^ (objectId *
+  0x9e3779b1) >>> 0, tierFor(run))` (objectId is Fibonacci-hashed so sequential
+  per-run chest ids do not yield near-identical boards; matches the per-page
+  derivation in `lockpick.ts`); build `LockSession` with `livesLeft = ante`,
   `lootTier = ANTE_TO_TIER[ante]`; store on `meta.lockpick`; emit `lockpickSession`
   with only the fogged `visibleCells(...)`.
 - `lockpickAction(sessionId, action, pid)` — ownership + rate-limit (≥80 ms via

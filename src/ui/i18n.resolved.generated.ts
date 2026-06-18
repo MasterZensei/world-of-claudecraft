@@ -385,11 +385,14 @@ export const en: EnTranslations = {
       "module": "Module {current} of {total}",
       "affix": "Affixes",
       "complete": "Complete",
-      "marks": "Delve Marks: {count}"
+      "marks": "Delve Marks: {count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "Slay {boss}",
-      "recover_artifact": "Recover the burial ledger"
+      "recover_artifact": "Recover the burial ledger",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "Delve Complete",
@@ -4658,11 +4661,14 @@ export const es: EnTranslations = {
       "module": "Módulo {current} de {total}",
       "affix": "Modificadores",
       "complete": "Completado",
-      "marks": "Marcas de Expedición: {count}"
+      "marks": "Marcas de Expedición: {count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "Da muerte a {boss}",
-      "recover_artifact": "Recupera el registro funerario"
+      "recover_artifact": "Recupera el registro funerario",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "Expedición completada",
@@ -8931,11 +8937,14 @@ export const es_ES: EnTranslations = {
       "module": "Módulo {current} de {total}",
       "affix": "Afijos",
       "complete": "Completada",
-      "marks": "Marcas de Profundidad: {count}"
+      "marks": "Marcas de Profundidad: {count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "Da muerte a {boss}",
-      "recover_artifact": "Recupera el registro funerario"
+      "recover_artifact": "Recupera el registro funerario",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "Profundidad completada",
@@ -13204,11 +13213,14 @@ export const fr_FR: EnTranslations = {
       "module": "Module {current} sur {total}",
       "affix": "Affixes",
       "complete": "Terminé",
-      "marks": "Marques de plongée : {count}"
+      "marks": "Marques de plongée : {count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "Tuer {boss}",
-      "recover_artifact": "Récupérer le registre funéraire"
+      "recover_artifact": "Récupérer le registre funéraire",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "Plongée terminée",
@@ -17477,11 +17489,14 @@ export const fr_CA: EnTranslations = {
       "module": "Module {current} sur {total}",
       "affix": "Affixes",
       "complete": "Terminé",
-      "marks": "Marques d'excavation : {count}"
+      "marks": "Marques d'excavation : {count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "Tuer {boss}",
-      "recover_artifact": "Récupérer le registre funéraire"
+      "recover_artifact": "Récupérer le registre funéraire",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "Excavation terminée",
@@ -21750,11 +21765,14 @@ export const en_CA: EnTranslations = {
       "module": "Module {current} of {total}",
       "affix": "Affixes",
       "complete": "Complete",
-      "marks": "Delve Marks: {count}"
+      "marks": "Delve Marks: {count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "Slay {boss}",
-      "recover_artifact": "Recover the burial ledger"
+      "recover_artifact": "Recover the burial ledger",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "Delve Complete",
@@ -26023,11 +26041,14 @@ export const it_IT: EnTranslations = {
       "module": "Modulo {current} di {total}",
       "affix": "Affissi",
       "complete": "Completata",
-      "marks": "Sigilli d'Incursione: {count}"
+      "marks": "Sigilli d'Incursione: {count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "Uccidi {boss}",
-      "recover_artifact": "Recupera il registro funebre"
+      "recover_artifact": "Recupera il registro funebre",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "Incursione Completata",
@@ -30296,11 +30317,14 @@ export const de_DE: EnTranslations = {
       "module": "Modul {current} von {total}",
       "affix": "Affixe",
       "complete": "Abgeschlossen",
-      "marks": "Tiefgang-Marken: {count}"
+      "marks": "Tiefgang-Marken: {count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "{boss} erschlagen",
-      "recover_artifact": "Bestattungsverzeichnis bergen"
+      "recover_artifact": "Bestattungsverzeichnis bergen",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "Tiefgang abgeschlossen",
@@ -34569,11 +34593,14 @@ export const zh_CN: EnTranslations = {
       "module": "第 {current} / {total} 区",
       "affix": "词缀",
       "complete": "已完成",
-      "marks": "探秘印记：{count}"
+      "marks": "探秘印记：{count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "击杀{boss}",
-      "recover_artifact": "找回葬礼名册"
+      "recover_artifact": "找回葬礼名册",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "探秘完成",
@@ -38842,11 +38869,14 @@ export const zh_TW: EnTranslations = {
       "module": "第 {current} 區，共 {total} 區",
       "affix": "詞綴",
       "complete": "完成",
-      "marks": "秘探印記：{count}"
+      "marks": "秘探印記：{count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "擊殺 {boss}",
-      "recover_artifact": "尋回葬儀名冊"
+      "recover_artifact": "尋回葬儀名冊",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "秘探完成",
@@ -43115,11 +43145,14 @@ export const ko_KR: EnTranslations = {
       "module": "구역 {current}/{total}",
       "affix": "고난 요소",
       "complete": "완료",
-      "marks": "탐굴 증표: {count}"
+      "marks": "탐굴 증표: {count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "{boss} 처치",
-      "recover_artifact": "매장 명부 회수"
+      "recover_artifact": "매장 명부 회수",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "탐굴 완료",
@@ -47388,11 +47421,14 @@ export const ja_JP: EnTranslations = {
       "module": "モジュール {current}/{total}",
       "affix": "アフィックス",
       "complete": "完了",
-      "marks": "デルヴの刻印: {count}"
+      "marks": "デルヴの刻印: {count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "{boss}を討て",
-      "recover_artifact": "埋葬台帳を取り戻せ"
+      "recover_artifact": "埋葬台帳を取り戻せ",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "デルヴ踏破",
@@ -51661,11 +51697,14 @@ export const pt_BR: EnTranslations = {
       "module": "Módulo {current} de {total}",
       "affix": "Afixos",
       "complete": "Concluído",
-      "marks": "Selos de Incursão: {count}"
+      "marks": "Selos de Incursão: {count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "Abata {boss}",
-      "recover_artifact": "Recupere o registro de sepultamentos"
+      "recover_artifact": "Recupere o registro de sepultamentos",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "Incursão Concluída",
@@ -55934,11 +55973,14 @@ export const ru_RU: EnTranslations = {
       "module": "Секция {current} из {total}",
       "affix": "Аффиксы",
       "complete": "Завершено",
-      "marks": "Метки Вылазок: {count}"
+      "marks": "Метки Вылазок: {count}",
+      "exitHintOpen": "Walk into the tombstone passage (north)",
+      "exitHintLocked": "Clear trash mobs to open the passage north"
     },
     "objective": {
       "kill_boss": "Убейте: {boss}",
-      "recover_artifact": "Вернуть погребальную книгу"
+      "recover_artifact": "Вернуть погребальную книгу",
+      "clear_room": "Clear the room"
     },
     "summary": {
       "title": "Вылазка завершена",
@@ -59849,19 +59891,67 @@ export const translations = {
 };
 
 export const pending: Record<string, readonly string[]> = {
-  "es": [],
-  "es_ES": [],
-  "fr_FR": [],
-  "fr_CA": [],
+  "es": [
+    "delveUi.objective.clear_room",
+    "delveUi.tracker.exitHintLocked",
+    "delveUi.tracker.exitHintOpen"
+  ],
+  "es_ES": [
+    "delveUi.objective.clear_room",
+    "delveUi.tracker.exitHintLocked",
+    "delveUi.tracker.exitHintOpen"
+  ],
+  "fr_FR": [
+    "delveUi.objective.clear_room",
+    "delveUi.tracker.exitHintLocked",
+    "delveUi.tracker.exitHintOpen"
+  ],
+  "fr_CA": [
+    "delveUi.objective.clear_room",
+    "delveUi.tracker.exitHintLocked",
+    "delveUi.tracker.exitHintOpen"
+  ],
   "en_CA": [],
-  "it_IT": [],
-  "de_DE": [],
-  "zh_CN": [],
-  "zh_TW": [],
-  "ko_KR": [],
-  "ja_JP": [],
-  "pt_BR": [],
-  "ru_RU": []
+  "it_IT": [
+    "delveUi.objective.clear_room",
+    "delveUi.tracker.exitHintLocked",
+    "delveUi.tracker.exitHintOpen"
+  ],
+  "de_DE": [
+    "delveUi.objective.clear_room",
+    "delveUi.tracker.exitHintLocked",
+    "delveUi.tracker.exitHintOpen"
+  ],
+  "zh_CN": [
+    "delveUi.objective.clear_room",
+    "delveUi.tracker.exitHintLocked",
+    "delveUi.tracker.exitHintOpen"
+  ],
+  "zh_TW": [
+    "delveUi.objective.clear_room",
+    "delveUi.tracker.exitHintLocked",
+    "delveUi.tracker.exitHintOpen"
+  ],
+  "ko_KR": [
+    "delveUi.objective.clear_room",
+    "delveUi.tracker.exitHintLocked",
+    "delveUi.tracker.exitHintOpen"
+  ],
+  "ja_JP": [
+    "delveUi.objective.clear_room",
+    "delveUi.tracker.exitHintLocked",
+    "delveUi.tracker.exitHintOpen"
+  ],
+  "pt_BR": [
+    "delveUi.objective.clear_room",
+    "delveUi.tracker.exitHintLocked",
+    "delveUi.tracker.exitHintOpen"
+  ],
+  "ru_RU": [
+    "delveUi.objective.clear_room",
+    "delveUi.tracker.exitHintLocked",
+    "delveUi.tracker.exitHintOpen"
+  ]
 };
 
 export const en_XA: EnTranslations = {
@@ -60240,11 +60330,14 @@ export const en_XA: EnTranslations = {
       "module": "[Ɱóðúļé {current} óƒ {total}]",
       "affix": "[Áƒƒíẋéš]",
       "complete": "[Çóɱþļéţé]",
-      "marks": "[Ðéļʋé Ɱáŕķš: {count}]"
+      "marks": "[Ðéļʋé Ɱáŕķš: {count}]",
+      "exitHintOpen": "[Ŵáļķ íñţó ţĥé ţóɱƀšţóñé þáššáĝé (ñóŕţĥ)]",
+      "exitHintLocked": "[Çļéáŕ ţŕášĥ ɱóƀš ţó óþéñ ţĥé þáššáĝé ñóŕţĥ]"
     },
     "objective": {
       "kill_boss": "[Šļáý {boss}]",
-      "recover_artifact": "[Ŕéçóʋéŕ ţĥé ƀúŕíáļ ļéðĝéŕ]"
+      "recover_artifact": "[Ŕéçóʋéŕ ţĥé ƀúŕíáļ ļéðĝéŕ]",
+      "clear_room": "[Çļéáŕ ţĥé ŕóóɱ]"
     },
     "summary": {
       "title": "[Ðéļʋé Çóɱþļéţé]",

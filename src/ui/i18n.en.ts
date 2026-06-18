@@ -11956,10 +11956,13 @@ export const en = {
       affix: "Affixes",
       complete: "Complete",
       marks: "Delve Marks: {count}",
+      exitHintOpen: "Walk into the tombstone passage (north)",
+      exitHintLocked: "Clear trash mobs to open the passage north",
     },
     objective: {
       kill_boss: "Slay {boss}",
       recover_artifact: "Recover the burial ledger",
+      clear_room: "Clear the room",
     },
     summary: {
       title: "Delve Complete",

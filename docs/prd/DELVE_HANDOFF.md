@@ -207,8 +207,11 @@ Fixed the 6 `tsc` errors the Brother-move batch introduced; tree is green:
 x ≤ 600        overworld
 600–2799       dungeons (instanceOrigin 0–3 at 900/1500/2100/2700)
 ≥ 4000         arena (ARENA_X = 4200, ARENA_X_MIN = 4000)
-≥ 4800         delves (DELVE_X_MIN); per-slot footprint, walkable ±22, walls ±23
-               west-edge classification guard: DELVE_BAND_X_MIN = 4775
+≥ 4800         delves (DELVE_X_MIN); per-slot footprint. Delve side walls are at
+               instance-local |x| = 25 (delve_layout WALL_X, wider than the crypt
+               kit's 23); collider outer face at |x| = 26 → world-x 4774 (slot 0).
+               west-edge classification guard: DELVE_BAND_X_MIN = 4773 (covers the
+               full footprint incl. the west wall face, 1u margin past 4774)
                (relocated from 3600 in v0.10.0: the arena moved to x=4200)
 
 Brother Halven / Reliquary Hill door: world (-5, -52); leave/eject return z = -56

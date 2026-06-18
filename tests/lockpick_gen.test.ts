@@ -135,4 +135,36 @@ describe('visibleCells — fog boundary (anti-cheat)', () => {
       else expect(cell.kind).toBe('open');
     }
   });
+
+  it('hides ward-traps from the fog: visibleCells never tags a trap, yet stepLock still jams', () => {
+    // The shipped reliquary tiers carry traps (normal 3 / heroic 5). Ward-traps
+    // "look open but jam on contact" — they must NOT be telegraphed across the
+    // anti-cheat boundary, but the server must still jam when the pick touches one.
+    const trapTier: LockTierSpec = {
+      cols: 12, rows: 6, width: 1, gateCount: 2, visibilityWindow: 99, trapCount: 4, allowedActions: ALL_ACTIONS,
+    };
+    let trapsGenerated = 0;
+    let jams = 0;
+    for (const seed of SEEDS.slice(0, 80)) {
+      const spec = generateLock(seed, trapTier);
+      const cells = visibleCells(spec, 0, trapTier.visibilityWindow); // full reveal
+      for (const cell of cells) expect(cell.kind).not.toBe('trap'); // never serialized as a trap
+      for (let c = 1; c < spec.open.length - 1; c++) {
+        for (const r of spec.traps[c] ?? []) {
+          trapsGenerated++;
+          // The trap row is present, disguised as a plain open notch.
+          expect(cells.some((x) => x.col === c && x.row === r && x.kind === 'open')).toBe(true);
+          // Server-side, stepping onto it from a reachable previous row still jams.
+          for (const pr of spec.open[c - 1]) {
+            for (const a of ALL_ACTIONS) {
+              const nr = Math.max(0, Math.min(trapTier.rows - 1, pr + ACTION_DELTA[a]));
+              if (nr === r && stepLock(spec, c - 1, pr, a).result === 'trap') jams++;
+            }
+          }
+        }
+      }
+    }
+    expect(trapsGenerated).toBeGreaterThan(0); // the tier really does generate traps
+    expect(jams).toBeGreaterThan(0);           // and they still jam server-side
+  });
 });

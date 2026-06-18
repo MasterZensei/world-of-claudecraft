@@ -174,7 +174,7 @@ delveDaily: {
 ### 6.7 Tiers & affixes
 
 - **FR-7.1** Normal: base levels, 0 affixes. Heroic: +2 enemy levels, 1 affix from pool, +30% Marks, better loot.
-- **FR-7.2** Optional blessing `chapel_candle` at board: safer run (−15% mob damage, +trap reveal), **−1 Mark** on completion (min 0).
+- **FR-7.2** Optional blessing `chapel_candle` at board: safer run (−15% mob damage, +trap reveal), **−1 Mark** on completion (min 0). *(Not built in v0.10.0: there is no blessing opt-in on `enterDelve`/`enter_delve` and no sim hook; the `chapel_candle` affix def + its `delveUi.blessing.*` copy and HUD color are authored scaffolding, kept and excluded from the affix roll until implemented — same pattern as the unimplemented affixes. Tracked as roadmap.)*
 
 **Heroic affix pool (v1 registry):**
 
@@ -273,7 +273,18 @@ Separate from Hollow Crypt's **Sexton Marrow** and zone 2's **Deacon Voss**.
 1. **Bell Toll** — `stomp` every 12s, 8 yd radius.
 2. **Raise Dead** — at 60% / 30% HP; 5s interrupt on `cracked_grave` object; else `summonAdds` (2). *Shipped: summons `reliquary_funeral_ringer` (the crypt's own undead add); `raised_bonewalker` is a level-18 dungeon mob and is not reused here.*
 
-Heroic: +1 affix; optional `enrage` below 20% HP.
+Heroic: +1 affix; optional `enrage` below 20% HP. *(v0.10.0: `enrage` is gated to Heroic in `updateBossMechanics` — a delve boss on Normal does not enrage; world bosses are unaffected.)*
+
+> **Telegraph wiring status (v0.10.0).** The §7.4 telegraph copy is fully authored
+> as `delveUi.boss.varric.*` keys in every locale, but only a subset is emitted by
+> the sim today: Raise Dead start (`sim.delve.raiseDead`), interrupt-success
+> (`sim.delve.graveFalters`), and interrupt-failure (the
+> `delveUi.boss.varric.raise.interrupt_fail` line, wired in this QA pass). Bell Toll
+> surfaces via the generic boss-stomp log (`{name} unleashes {ability}!`, currently
+> unlocalized — game-wide matcher decision pending). The remaining flavor/telegraph
+> lines (bell emote/warning/impact, raise emote/warning/object, pull/intro/mid60/
+> mid30/defeat) are authored-but-unwired — tracked roadmap; wiring them (with their
+> trigger timing) is a follow-up pass.
 
 **Telegraph i18n keys** (`delveUi.boss.varric.*`):
 

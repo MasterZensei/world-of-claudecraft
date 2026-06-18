@@ -2352,6 +2352,7 @@ const RULES: Rule[] = [
   { re: /^Unknown delve tier\.$/, build: () => t('sim.delve.unknownTier') },
   { re: /^A mechanism clicks open nearby\. A passage opens to the north — find the exit portal ahead\.$/, build: () => t('sim.delve.mechanismOpen') },
   { re: /^The grave rite falters\.$/, build: () => t('sim.delve.graveFalters') },
+  { re: /^The dead answer Deacon Varric's call!$/, build: () => t('delveUi.boss.varric.raise.interrupt_fail') },
   { re: /^The door is already open\.$/, build: () => t('sim.delve.doorAlreadyOpen') },
   { re: /^The boss falls\. A warded reliquary chest rises on the dais — pick its lock to claim your spoils\.$/, build: () => t('sim.delve.bossChest') },
   { re: /^A stairway to the surface opens\. Press F at the stairs to leave\.$/, build: () => t('sim.delve.surfaceStairs') },

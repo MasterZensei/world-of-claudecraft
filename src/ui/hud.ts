@@ -2638,7 +2638,7 @@ export class Hud {
 
   private delveObjectiveLine(run: DelveRunInfo): string {
     const isFinale = run.moduleIndex >= run.moduleCount - 1;
-    if (!isFinale) return 'Clear the room';
+    if (!isFinale) return t('delveUi.objective.clear_room');
     if (run.objective.kind === 'kill_boss') {
       const bossId = DELVES[run.delveId]?.bosses[0] ?? 'deacon_varric';
       return t('delveUi.objective.kill_boss', { boss: mobDisplayName(bossId) });
@@ -2691,9 +2691,9 @@ export class Hud {
     let exitHint = '';
     if (run.moduleIndex < run.moduleCount - 1) {
       if (run.exitPortalOpen) {
-        exitHint = '<div class="dt-obj dt-hint">→ Walk into the tombstone passage (north)</div>';
+        exitHint = `<div class="dt-obj dt-hint">→ ${esc(t('delveUi.tracker.exitHintOpen'))}</div>`;
       } else {
-        exitHint = '<div class="dt-obj dt-hint">Clear trash mobs to open the passage north</div>';
+        exitHint = `<div class="dt-obj dt-hint">${esc(t('delveUi.tracker.exitHintLocked'))}</div>`;
       }
     }
     el.innerHTML = `<div class="dt-header">${esc(t('delveUi.tracker.title'))}</div>`

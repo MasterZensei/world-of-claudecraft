@@ -1745,6 +1745,7 @@ export class GameServer {
 
   private resyncDelves(session: ClientSession): void {
     delete session.lastSent.drun;
+    delete session.lastSent.dcompanion;
     delete session.lastSent.dmarks;
     delete session.lastSent.dcomp;
     delete session.lastSent.delveDaily;

@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { Sim } from '../src/sim/sim';
+import { Sim, DELVE_IMPLEMENTED_AFFIXES } from '../src/sim/sim';
 import { DELVE_MODULE_LAYOUTS } from '../src/sim/delve_layout';
 
 import {
@@ -139,22 +139,23 @@ describe('delve spatial band', () => {
 
 
   it('isDelvePos covers the full room footprint west of DELVE_X_MIN (regression: camera yank bug)', () => {
-    // Rooms are 48 u wide, centred at DELVE_X_MIN (4800). The west wall sits at
-    // world-x ≈ 4776 (slot 0). Before DELVE_BAND_X_MIN, the west half of the room
+    // Rooms are ~50 u wide, centred at DELVE_X_MIN (4800). Delve side walls sit at
+    // instance-local |x| = 25 (delve_layout WALL_X), collider outer face at |x| = 26,
+    // i.e. world-x = 4774 (slot 0). Before DELVE_BAND_X_MIN, the west half of the room
     // was misclassified as isArenaPos, yanking the camera toward the arena band.
     const origin = delveOrigin(0, 0); // { x: DELVE_X_MIN, z: ... }
 
     // West half of the room must still be a delve pos
     expect(isDelvePos(origin.x - 2)).toBe(true);   // 4798 — exact repro coordinate
     expect(isDelvePos(origin.x - 22)).toBe(true);  // walkable west edge
-    expect(isDelvePos(origin.x - 24)).toBe(true);  // wall outer face
+    expect(isDelvePos(origin.x - 26)).toBe(true);  // west wall outer face (4774)
     expect(isDelvePos(origin.x)).toBe(true);        // room centre
     expect(isDelvePos(origin.x + 22)).toBe(true);  // walkable east edge
-    expect(isDelvePos(origin.x + 24)).toBe(true);  // wall outer face east
+    expect(isDelvePos(origin.x + 26)).toBe(true);  // wall outer face east
 
     // isArenaPos must be false for all of the above
     expect(isArenaPos(origin.x - 2)).toBe(false);
-    expect(isArenaPos(origin.x - 24)).toBe(false);
+    expect(isArenaPos(origin.x - 26)).toBe(false);
     expect(isArenaPos(origin.x)).toBe(false);
 
     // Bands are mutually exclusive — no x where both are true
@@ -163,7 +164,7 @@ describe('delve spatial band', () => {
 
     // delveAt resolves correctly across the whole west half of the room
     expect(delveAt(origin.x - 2)?.index).toBe(0);    // DELVE_X_MIN - 2
-    expect(delveAt(origin.x - 24)?.index).toBe(0);   // west wall outer face
+    expect(delveAt(origin.x - 26)?.index).toBe(0);   // west wall outer face (4774)
     expect(delveAt(origin.x)?.index).toBe(0);         // room centre
 
     // Arena still classifies correctly (arena instances live at ARENA_X = 4200)
@@ -185,6 +186,24 @@ describe('delve spatial band', () => {
     expect(isArenaPos(DELVE_BAND_X_MIN)).toBe(false);
     // Keep a real gap between the arena anchor and the delve band.
     expect(DELVE_BAND_X_MIN - ARENA_X).toBeGreaterThanOrEqual(500);
+  });
+
+  it('a character saved inside a delve relogs at the board door, not a dungeon door (FR-1.6)', () => {
+    // Regression: addPlayer's dungeon-sanitization branch ran first for ANY far-off
+    // x (the delve band included). Because dungeonAt() returns null past the arena,
+    // its `?? DUNGEON_LIST[0]` fallback ejected a delve-saved player to a dungeon
+    // door and the delve branch (which never re-fired) was dead code. Delve wins now.
+    const src = makeSim();
+    const state = src.serializeCharacter(src.playerId)!;
+    const origin = delveOrigin(0, 0);
+    state.pos = { x: origin.x, z: origin.z + 20 }; // deep inside delve slot 0
+    const dst = new Sim({ seed: 7, playerClass: 'warrior', autoEquip: true, noPlayer: true });
+    const pid = dst.addPlayer('warrior', 'Relogged', { state });
+    const e = (dst as any).entities.get(pid)!;
+    const door = DELVES.collapsed_reliquary.doorPos; // Brother Halven board door {-5,-52}
+    expect(Math.abs(e.pos.x - door.x)).toBeLessThan(1);      // at the board door (-5), NOT a dungeon door (~80)
+    expect(Math.abs(e.pos.z - (door.z - 4))).toBeLessThan(1); // z-4 eject offset
+    expect(isDelvePos(e.pos.x)).toBe(false);                  // no longer stuck in the delve band
   });
 
   it('enterReliquary places player in delve band near instance origin', () => {
@@ -500,14 +519,32 @@ describe('delve interactables and affixes', () => {
   });
 
   it('rollDelveAffixes only draws implemented affixes (no inert Heroic affix)', () => {
-    const implemented = new Set(['restless_graves', 'bad_air', 'candleblind']);
+    // Import the source-of-truth set rather than a local literal, so the two
+    // can never drift (a hook-less affix added to the constant would still be
+    // caught by that affix's own dedicated hook test, e.g. restless_graves above).
     // Try many seeds; every Heroic roll must be an implemented affix.
     for (let seed = 1; seed <= 200; seed++) {
       const sim = makeSim('warrior', seed);
       enterReliquary(sim, 'heroic');
       const run = sim.delveRunForPlayer(sim.playerId)!;
-      for (const id of run.affixes) expect(implemented.has(id)).toBe(true);
+      for (const id of run.affixes) expect(DELVE_IMPLEMENTED_AFFIXES.has(id)).toBe(true);
       expect(run.affixes.length).toBe(1); // Heroic affixCount = 1
+    }
+  });
+
+  it('Deacon Varric enrages on Heroic but not on Normal (PRD §7.4)', () => {
+    for (const tier of ['normal', 'heroic'] as const) {
+      const sim = makeSim();
+      enterReliquary(sim, tier);
+      const run = sim.delveRunForPlayer(sim.playerId)!;
+      // Register a Varric in this run so delveRunForMob resolves him to its tier.
+      const boss = createMob((sim as any).nextId++, MOBS.deacon_varric, 12, { x: run.origin.x, y: 0, z: run.origin.z });
+      (sim as any).addEntity(boss);
+      run.mobIds.push(boss.id);
+      boss.firedSummons = 2; // skip the Raise Dead / add-summon path; isolate enrage
+      boss.hp = Math.max(1, Math.round(boss.maxHp * 0.1)); // below the 20% enrage threshold
+      (sim as any).updateBossMechanics(boss);
+      expect(boss.enraged).toBe(tier === 'heroic');
     }
   });
 });
@@ -796,11 +833,14 @@ describe('delve reward chest + surface exit flow', () => {
     const heroicTier = delve.tiers.find((t) => t.id === 'heroic');
     const runN = { tierId: 'normal' } as any;
     const runH = { tierId: 'heroic' } as any;
-    // First 3 completions/day (markClears < 3): full Marks (>=1) for both tiers.
+    // First 3 completions/day (markClears < 3): full Marks for both tiers. The
+    // source documents that at a base of 1 Mark the Heroic +30% rewardMult rounds
+    // to no per-clear difference, so BOTH tiers pay exactly 1 here (pin it, so an
+    // accidental Heroic inflation in the free window is caught).
     for (const mc of [0, 1, 2]) {
       meta.delveDaily.markClears = mc;
       expect((sim as any).delveMarkPayout(runN, normalTier, meta)).toBe(1);
-      expect((sim as any).delveMarkPayout(runH, heroicTier, meta)).toBeGreaterThanOrEqual(1);
+      expect((sim as any).delveMarkPayout(runH, heroicTier, meta)).toBe(1);
     }
     // After 3: Heroic 1 guaranteed; Normal 50% (sampling sees both 0 and 1).
     meta.delveDaily.markClears = 3;

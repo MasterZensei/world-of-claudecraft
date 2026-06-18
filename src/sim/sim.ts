@@ -210,7 +210,7 @@ const DELVE_LORE_ORDER = [
 // these so a Heroic run never rolls an inert affix (PRD §6.7 v1 subset). The
 // other registered crypt affixes (grave_tax / unstable_roof / cult_remnants)
 // keep their UI/i18n entries but are excluded from the roll until implemented.
-const DELVE_IMPLEMENTED_AFFIXES = new Set<string>(['restless_graves', 'bad_air', 'candleblind']);
+export const DELVE_IMPLEMENTED_AFFIXES = new Set<string>(['restless_graves', 'bad_air', 'candleblind']);
 const MAX_CLIMB_SLOPE = PLAYER_MAX_CLIMB_SLOPE; // rise/run above which a ground move is blocked (cliffs, world rim)
 
 // How far a mob pulls same-family neighbours into a fight ("social aggro").
@@ -804,13 +804,17 @@ export class Sim {
     // Characters saved inside a dungeon instance rejoin at its entrance —
     // their old instance is gone (or belongs to someone else) by now.
     let savedPos = opts?.state?.pos ?? null;
-    if (savedPos && savedPos.x > DUNGEON_X_THRESHOLD) {
-      const dungeon = dungeonAt(savedPos.x) ?? DUNGEON_LIST[0];
-      savedPos = { x: dungeon.doorPos.x, z: dungeon.doorPos.z - 4 };
-    }
+    // Delve must be checked BEFORE the dungeon branch: dungeonAt() returns null
+    // for any x >= ARENA_X_MIN (which includes the delve band), so the dungeon
+    // branch's `?? DUNGEON_LIST[0]` fallback would otherwise swallow a delve
+    // position and eject the player to a dungeon door instead of the board door
+    // (FR-1.6). The two bands are disjoint, so `else if` keeps dungeon handling intact.
     if (savedPos && isDelvePos(savedPos.x)) {
       const delve = delveAt(savedPos.x) ?? DELVE_LIST[0];
       savedPos = { x: delve.doorPos.x, z: delve.doorPos.z - 4 };
+    } else if (savedPos && savedPos.x > DUNGEON_X_THRESHOLD) {
+      const dungeon = dungeonAt(savedPos.x) ?? DUNGEON_LIST[0];
+      savedPos = { x: dungeon.doorPos.x, z: dungeon.doorPos.z - 4 };
     }
     const startPos = savedPos
       ? this.groundPos(savedPos.x, savedPos.z)
@@ -5779,7 +5783,12 @@ export class Sim {
         this.spawnBossAdds(mob, tmpl.summonAdds.mobId, tmpl.summonAdds.count);
       }
     }
-    if (tmpl.enrage && !mob.enraged && hpFrac <= tmpl.enrage.belowHpPct) {
+    // Delve bosses enrage on Heroic only (PRD delves.md §7.4: "Heroic: optional
+    // enrage below 20% HP"). World bosses have no delve run, so they enrage as
+    // before. Only resolved for enrage-capable templates, so the lookup is rare.
+    const enrageRun = tmpl.enrage ? this.delveRunForMob(mob.id) : null;
+    const enrageAllowed = !enrageRun || enrageRun.tierId === 'heroic';
+    if (tmpl.enrage && enrageAllowed && !mob.enraged && hpFrac <= tmpl.enrage.belowHpPct) {
       mob.enraged = true;
       this.emit({ type: 'aura', targetId: mob.id, name: 'Enrage', gained: true });
       this.emit({ type: 'log', text: `${mob.name} becomes enraged!`, color: '#ff6666', entityId: mob.id });
@@ -10380,7 +10389,12 @@ export class Sim {
     if (channel.remaining > 0) return;
     run.raiseDeadChannel = null;
     const boss = this.entities.get(channel.bossId);
-    if (boss && !boss.dead) this.spawnBossAdds(boss, channel.mobId, channel.count);
+    if (boss && !boss.dead) {
+      this.spawnBossAdds(boss, channel.mobId, channel.count);
+      // Raise Dead resolved uninterrupted (PRD §7.4 telegraph): mirror of the
+      // interrupt-success line emitted from delveInteract on the cracked grave.
+      this.emit({ type: 'log', text: "The dead answer Deacon Varric's call!", color: '#f96', entityId: boss.id });
+    }
   }
 
   private tickDelveBadAir(run: DelveRun): void {

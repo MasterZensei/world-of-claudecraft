@@ -253,14 +253,17 @@ export const CRYPT_SPAWNS = DUNGEONS.hollow_crypt.spawns;
 
 // 4800 sits clear of the v0.10.0 layout: dungeons end at ARENA_X_MIN (4000) and
 // the arena pit is centred at ARENA_X (4200, ~±22u footprint). The delve band's
-// west edge (DELVE_BAND_X_MIN ≈ 4776) leaves a comfortable margin past the arena.
+// west edge (DELVE_BAND_X_MIN = 4773) leaves a comfortable margin past the arena.
 export const DELVE_X_MIN = 4800;
-// Each delve room is centred at DELVE_X_MIN + index*600. The room's west wall
-// sits at instance-local x = -(DUNGEON_WALL_X + DUNGEON_WALL_HW) = -24, i.e.
-// world-x = DELVE_X_MIN - 24 = 4776 for slot 0. We extend the delve band 1 u
-// further west (4775) to give isDelvePos a safe margin over the full footprint,
-// ensuring the west half of the room is never misclassified as arena.
-export const DELVE_BAND_X_MIN = DELVE_X_MIN - (DUNGEON_WALL_X + DUNGEON_WALL_HW + 1);
+// Each delve room is centred at DELVE_X_MIN + index*600. Delve modules use wider
+// side walls than the base crypt kit: the side-wall centre is at instance-local
+// |x| = DELVE_WALL_X (25, mirror of delve_layout.ts WALL_X) and the collider's
+// outer face sits 1u beyond that (|x| = 26), i.e. world-x = DELVE_X_MIN - 26 =
+// 4774 for slot 0. We set the band edge 1u further west again (4773) so
+// isDelvePos covers the ENTIRE room footprint — including the west wall face —
+// and the west half is never misclassified as arena. Still >500u clear of ARENA_X.
+const DELVE_WALL_X = 25; // mirror of delve_layout.ts WALL_X (delve side-wall centre)
+export const DELVE_BAND_X_MIN = DELVE_X_MIN - (DELVE_WALL_X + DUNGEON_WALL_HW + 1);
 export const DELVE_SLOT_COUNT = 6;
 export const DELVE_MODULE_GAP = 16;
 export const DELVE_MODULE_Z_START = 8;
