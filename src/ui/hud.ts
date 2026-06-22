@@ -3283,7 +3283,7 @@ export class Hud {
         const selected = this.selectedDelveTier === tierId ? ' selected' : '';
         return `<button type="button" class="delve-tier-btn${selected}" data-tier-pick="${esc(tierId)}" aria-pressed="${this.selectedDelveTier === tierId}">${esc(label)}</button>`;
       }).join('');
-      body = `<div class="delve-board-greeting">${esc(t('delveUi.npc.halven.greeting'))}</div>`
+      body = `<div class="delve-board-greeting">${esc(t('delveUi.npc.halven.greeting', { playerName: this.sim.player.name }))}</div>`
         + `<div class="delve-tier-row">${tierRow}</div>`
         + `<div class="delve-companion-row"><div class="delve-companion-label">${esc(t('delveUi.board.companion.pick'))}</div>`
         + `<div class="delve-companion-name">${esc(tessaName)} <span class="quest-muted">(${esc(tessaRankLabel)})</span></div>`
