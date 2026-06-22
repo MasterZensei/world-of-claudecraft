@@ -9,17 +9,123 @@
 // Reproducibility is checked by tests/i18n_resolved_equivalence.test.ts.
 
 export const pending: Record<string, readonly string[]> = {
-  "es": [],
-  "es_ES": [],
-  "fr_FR": [],
-  "fr_CA": [],
+  "es": [
+    "delveUi.board.tabDelve",
+    "delveUi.board.tabShop",
+    "delveUi.shop.buy",
+    "delveUi.shop.buyAria",
+    "delveUi.shop.empty",
+    "delveUi.shop.price",
+    "delveUi.shop.reqClears",
+    "delveUi.shop.reqHeroic",
+    "sim.delve.levelRequiredTier",
+    "sim.delve.shopItemLocked",
+    "sim.delve.shopMarksRequired",
+    "sim.delve.shopSealPremiumOnly"
+  ],
+  "es_ES": [
+    "delveUi.board.tabDelve",
+    "delveUi.board.tabShop",
+    "delveUi.shop.buy",
+    "delveUi.shop.buyAria",
+    "delveUi.shop.empty",
+    "delveUi.shop.price",
+    "delveUi.shop.reqClears",
+    "delveUi.shop.reqHeroic",
+    "sim.delve.levelRequiredTier",
+    "sim.delve.shopItemLocked",
+    "sim.delve.shopMarksRequired",
+    "sim.delve.shopSealPremiumOnly"
+  ],
+  "fr_FR": [
+    "delveUi.board.tabDelve",
+    "delveUi.board.tabShop",
+    "delveUi.shop.buy",
+    "delveUi.shop.buyAria",
+    "delveUi.shop.empty",
+    "delveUi.shop.price",
+    "delveUi.shop.reqClears",
+    "delveUi.shop.reqHeroic",
+    "sim.delve.levelRequiredTier",
+    "sim.delve.shopItemLocked",
+    "sim.delve.shopMarksRequired",
+    "sim.delve.shopSealPremiumOnly"
+  ],
+  "fr_CA": [
+    "delveUi.board.tabDelve",
+    "delveUi.board.tabShop",
+    "delveUi.shop.buy",
+    "delveUi.shop.buyAria",
+    "delveUi.shop.empty",
+    "delveUi.shop.price",
+    "delveUi.shop.reqClears",
+    "delveUi.shop.reqHeroic",
+    "sim.delve.levelRequiredTier",
+    "sim.delve.shopItemLocked",
+    "sim.delve.shopMarksRequired",
+    "sim.delve.shopSealPremiumOnly"
+  ],
   "en_CA": [],
-  "it_IT": [],
-  "de_DE": [],
-  "zh_CN": [],
-  "zh_TW": [],
-  "ko_KR": [],
-  "ja_JP": [],
-  "pt_BR": [],
-  "ru_RU": []
+  "it_IT": [
+    "delveUi.board.tabDelve",
+    "delveUi.board.tabShop",
+    "delveUi.shop.buy",
+    "delveUi.shop.buyAria",
+    "delveUi.shop.empty",
+    "delveUi.shop.price",
+    "delveUi.shop.reqClears",
+    "delveUi.shop.reqHeroic",
+    "sim.delve.levelRequiredTier",
+    "sim.delve.shopItemLocked",
+    "sim.delve.shopMarksRequired",
+    "sim.delve.shopSealPremiumOnly"
+  ],
+  "de_DE": [
+    "delveUi.board.tabDelve",
+    "delveUi.board.tabShop",
+    "delveUi.shop.buy",
+    "delveUi.shop.buyAria",
+    "delveUi.shop.empty",
+    "delveUi.shop.price",
+    "delveUi.shop.reqClears",
+    "delveUi.shop.reqHeroic",
+    "sim.delve.levelRequiredTier",
+    "sim.delve.shopItemLocked",
+    "sim.delve.shopMarksRequired",
+    "sim.delve.shopSealPremiumOnly"
+  ],
+  "zh_CN": [
+    "delveUi.board.tabShop",
+    "delveUi.shop.buy"
+  ],
+  "zh_TW": [
+    "delveUi.board.tabShop",
+    "delveUi.shop.buy"
+  ],
+  "ko_KR": [
+    "delveUi.board.tabShop",
+    "delveUi.shop.buy"
+  ],
+  "ja_JP": [
+    "delveUi.board.tabShop",
+    "delveUi.shop.buy"
+  ],
+  "pt_BR": [
+    "delveUi.board.tabDelve",
+    "delveUi.board.tabShop",
+    "delveUi.shop.buy",
+    "delveUi.shop.buyAria",
+    "delveUi.shop.empty",
+    "delveUi.shop.price",
+    "delveUi.shop.reqClears",
+    "delveUi.shop.reqHeroic",
+    "sim.delve.levelRequiredTier",
+    "sim.delve.shopItemLocked",
+    "sim.delve.shopMarksRequired",
+    "sim.delve.shopSealPremiumOnly"
+  ],
+  "ru_RU": [
+    "delveUi.board.tabShop",
+    "delveUi.shop.buy"
+  ]
 };

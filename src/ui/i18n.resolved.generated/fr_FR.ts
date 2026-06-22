@@ -840,6 +840,204 @@ export const fr_FR: EnTranslations = {
     "friends": "Amis et guilde",
     "chat": "Ouvrir le chat"
   },
+  "sim": {
+    "delve": {
+      "cannotEnterNow": "Vous ne pouvez pas entrer dans une plongée pour le moment.",
+      "leaveDungeonFirst": "Quittez d'abord le donjon.",
+      "leaveArenaFirst": "Quittez d'abord l'arène.",
+      "alreadyInDelve": "Vous êtes déjà dans une plongée.",
+      "whileTrading": "Vous ne pouvez pas entrer dans une plongée pendant un échange.",
+      "duringDuel": "Vous ne pouvez pas entrer dans une plongée pendant un duel.",
+      "duringArena": "Vous ne pouvez pas entrer dans une plongée pendant un match d'arène.",
+      "unknownTier": "Palier de plongée inconnu.",
+      "levelRequired": "Vous devez être niveau {level} pour entrer dans {name}.",
+      "levelRequiredTier": "You must be level {level} to enter {name} on {tier}.",
+      "instancesBusy": "Toutes les instances de {name} sont occupées. Réessayez bientôt.",
+      "runFailed": "Plongée {name} échouée.",
+      "complete": "{name} terminée.",
+      "mechanismOpen": "Un mécanisme s'ouvre avec un déclic à proximité. Un passage s'ouvre au nord : trouvez le portail de sortie devant vous.",
+      "raiseDead": "{name} commence à incanter Réveil des morts.",
+      "graveFalters": "Le rite funéraire vacille.",
+      "doorAlreadyOpen": "La porte est déjà ouverte.",
+      "companionRankUp": "{name} atteint le rang {rank}.",
+      "bossChest": "Le boss tombe. Un coffre-reliquaire scellé s'élève sur l'estrade : crochetez sa serrure pour réclamer votre butin.",
+      "surfaceStairs": "Un escalier vers la surface s'ouvre. Appuyez sur F près de l'escalier pour partir.",
+      "moduleEnter": "{name} : {objective}",
+      "tombstoneHint": "Un passage en pierre tombale s'ouvre au nord une fois la salle nettoyée.",
+      "tombstoneOpen": "Un passage scellé en pierre tombale s'ouvre en grinçant au nord. Avancez dedans pour continuer.",
+      "tombstoneInto": "Vous franchissez la pierre tombale pour entrer dans {name}.",
+      "chestEmpty": "Le coffre est vide.",
+      "notInDelve": "Vous n'êtes pas dans une plongée.",
+      "cannotInteract": "Vous ne pouvez pas interagir avec cela.",
+      "tooFar": "Vous êtes trop loin.",
+      "graveSilent": "La tombe est silencieuse pour l'instant.",
+      "doorLocked": "La porte est verrouillée.",
+      "strikeWall": "Frappez le mur pour percer une ouverture.",
+      "nothingHappens": "Rien ne se produit.",
+      "unknownCompanion": "Compagnon inconnu.",
+      "companionMaxRank": "Ce compagnon est déjà entièrement amélioré.",
+      "companionMarksRequired": "Il vous faut {marks} Marques de plongée pour améliorer {name}.",
+      "cannotAffordCompanionUpgrade": "Vous ne pouvez pas vous offrir cette amélioration.",
+      "shopItemLocked": "You have not unlocked that item yet.",
+      "shopMarksRequired": "You need {marks} Delve Marks to buy {name}.",
+      "shopSealPremiumOnly": "This seal yields only to a master's hand — only the Premium ante can open it.",
+      "passageSealed": "Le passage est scellé.",
+      "moveCloserPassage": "Rapprochez-vous du passage.",
+      "moveCloserChest": "Rapprochez-vous du coffre.",
+      "wayOutNotOpen": "La sortie n'est pas encore ouverte.",
+      "moveCloserStairs": "Rapprochez-vous de l'escalier."
+    },
+    "lockpick": {
+      "lockYields": "La serrure cède ! Butin {tier}.",
+      "tierPremium": "Supérieur",
+      "tierMedium": "Moyen",
+      "tierLow": "Modeste",
+      "alreadyInProgress": "Quelqu'un travaille déjà la serrure.",
+      "cannotPickThat": "Vous ne pouvez pas crocheter cela.",
+      "chooseAnte": "Choisissez 1, 2 ou 3 crochets.",
+      "noAttempt": "Aucune tentative de crochetage en cours.",
+      "notYours": "Ce n'est pas votre serrure.",
+      "toolSlips": "Cet outil glisse sur cette serrure.",
+      "lockJammed": "La serrure est bloquée, impossible à crocheter : terminez à nouveau la plongée pour un nouvel essai.",
+      "lastPickSnaps": "Le dernier crochet se brise. La serrure se bloque : le coffre est perdu, à moins de terminer à nouveau la plongée."
+    }
+  },
+  "delveUi": {
+    "board": {
+      "title": "Tableau des plongées",
+      "enter": "Entrer dans la plongée",
+      "enterAria": "Entrer dans {delve} en difficulté {tier}",
+      "openDelve": "Reliquaire effondré",
+      "openDelveAria": "Ouvrir le tableau des plongées depuis {name}",
+      "marks": "Marques de plongée : {count}",
+      "minLevel": "Niveau {level} requis",
+      "tier": {
+        "normal": "Normal",
+        "heroic": "Héroïque"
+      },
+      "companion": {
+        "pick": "Choisir un compagnon",
+        "tessa": "Acolyte Tessa",
+        "rank": "Rang {rank}"
+      },
+      "tabDelve": "Delve",
+      "tabShop": "Shop"
+    },
+    "shop": {
+      "price": "{marks} Marks",
+      "buy": "Buy",
+      "buyAria": "Buy {item} for {marks} Delve Marks",
+      "reqHeroic": "Requires a Heroic clear",
+      "reqClears": "Requires {count} clears",
+      "empty": "Nothing in stock."
+    },
+    "tracker": {
+      "title": "Plongée",
+      "objective": "Objectif",
+      "module": "Module {current} sur {total}",
+      "affix": "Affixes",
+      "complete": "Terminé",
+      "marks": "Marques de plongée : {count}",
+      "exitHintOpen": "Avancez dans le passage en pierre tombale (nord)",
+      "exitHintLocked": "Éliminez les sbires pour ouvrir le passage au nord"
+    },
+    "objective": {
+      "kill_boss": "Tuer {boss}",
+      "recover_artifact": "Récupérer le registre funéraire",
+      "clear_room": "Nettoyer la salle"
+    },
+    "summary": {
+      "title": "Plongée terminée",
+      "marks": "{count} Marques de plongée gagnées",
+      "loreUnlock": "Savoir débloqué : {title}"
+    },
+    "death": {
+      "warning": "Une mort de plus mettra fin à cette plongée."
+    },
+    "run": {
+      "failed": "La plongée a échoué. Vous êtes renvoyé auprès du frère Halven."
+    },
+    "npc": {
+      "halven": {
+        "greeting": "Le reliquaire d'en bas a de nouveau bougé. Nous entendons des chants à travers le sol après minuit, et l'acolyte Tessa jure que l'encre des registres funéraires change d'elle-même. Si tu as assez de courage, {playerName}, prends une chandelle et descends. Ne te fie pas à toutes les voix que tu entendras là en bas. Certaines connaissaient ton nom avant ta naissance."
+      }
+    },
+    "intro": {
+      "normal": "La cage d'escalier est froide et sombre. Des pierres de saint brisées jonchent la descente, et une douce note de cloche flotte dans l'air humide. L'acolyte Tessa murmure : « Le reliquaire ne devrait pas être ouvert aussi profond. Reste près de moi, {playerName}. »",
+      "heroic": "Les portes se referment en gémissant derrière toi. Des noms raclent la pierre comme des ongles. La chandelle de Tessa brûle bleue. « Ils n'appellent plus les morts à présent, {playerName}. Ils répondent à quelque chose. »"
+    },
+    "module": {
+      "reliquary_sunken_ossuary": "L'eau suinte à travers les étagères funéraires, charriant de vieilles cendres en filets d'argent et de noir.",
+      "reliquary_bell_niche": "Des dizaines de clochettes pendent en silence, chacune nouée d'un linceul funéraire.",
+      "reliquary_saintless_hall": "Des statues aux visages burinés par une haine méticuleuse.",
+      "reliquary_finale": "La cloche enfouie sonne une fois sous tes bottes."
+    },
+    "companion": {
+      "barkLine": "{name} : {line}",
+      "tessa": {
+        "combat_start": "Garde ton équilibre, {playerName}. Les morts sont agités ici.",
+        "low_hp": "Respire. Il me reste encore des prières pour toi.",
+        "trap_spotted": "Halte : quelque chose dans le sol se souvient des pas.",
+        "boss_pull": "Cette cloche connaît ton poids, {playerName}. Ne t'agenouille pas.",
+        "completion": "Le registre peut reposer une nuit de plus. Bien joué.",
+        "rank": {
+          "1": "Novice de la chapelle",
+          "2": "Porte-chandelle",
+          "3": "Acolyte du reliquaire",
+          "4": "Témoin de l'appel funèbre",
+          "5": "Gardienne de la chapelle"
+        }
+      }
+    },
+    "boss": {
+      "varric": {
+        "bell": {
+          "emote": "Le diacre Varric empoigne la cloche enfouie des deux mains !",
+          "log": "Le diacre Varric commence à faire sonner la cloche funéraire.",
+          "warning": "Éloignez-vous du diacre Varric !",
+          "impact": "Le glas de la cloche fend le sol de la chambre !",
+          "lesson": "Glas funèbre : un choc au sol toutes les douze secondes. Écartez-vous avant qu'il ne frappe."
+        },
+        "raise": {
+          "emote": "Le diacre Varric appelle des noms depuis les tombes brisées !",
+          "log": "Le diacre Varric commence à incanter Réveil des morts.",
+          "warning": "Arrêtez le rite funéraire !",
+          "object": "La tombe fissurée frémit d'un souffle dérobé.",
+          "interrupt_ok": "Le rite funéraire vacille.",
+          "interrupt_fail": "Les morts répondent à l'appel du diacre Varric !",
+          "lesson": "Interrompez la tombe fissurée en cinq secondes, sinon les morts se lèveront à son appel."
+        },
+        "pull": "Tu foules une poussière sacrée avec un dessein impur. Agenouille-toi, et sois compté.",
+        "intro": "Aucune âme n'est perdue. Seulement égarée.",
+        "mid60": "Le diacre Varric lit les noms du registre avec un triomphe tremblant.",
+        "mid30": "La cloche funéraire répond à chaque nom qu'il prononce.",
+        "defeat": "Non... j'avais les noms... je les avais tous..."
+      }
+    },
+    "lore": {
+      "eastbrook_ledger": "Une page tachée d'eau du registre funéraire d'Eastbrook. Des noms rayés et réécrits d'une main qui n'est pas humaine.",
+      "first_collapse": "Les archives de la chapelle mentionnent le premier affaissement : pierres de saint fendues, étagères inclinées, et une note de cloche entendue depuis le sous-sol.",
+      "gravecaller_mark": "Un sceau gravé dans le bois d'un cercueil : non le sceau de Morthen, mais une marque d'appel funèbre plus ancienne, antérieure à la Crypte creuse.",
+      "bell_below": "Note en marge de Tessa : « Il y a une seconde cloche sous le reliquaire. Elle sonne pour les égarés, non pour les morts. »",
+      "tessa_note": "Bout de papier plié de la main de Tessa : « Si les registres changent pendant que nous sommes en bas, fie-toi à la chandelle, non aux voix. »"
+    },
+    "affix": {
+      "restless_graves": "Tombes agitées",
+      "bad_air": "Air vicié",
+      "candleblind": "Aveugle-chandelle",
+      "old_mechanisms": "Vieux mécanismes",
+      "flooded_paths": "Chemins inondés",
+      "grave_tax": "Tribut funèbre",
+      "unstable_roof": "Plafond instable",
+      "cult_remnants": "Vestiges du culte"
+    },
+    "blessing": {
+      "chapel_candle": "Chandelle de chapelle : une plongée plus sûre, une Marque de moins à la fin."
+    },
+    "chest": {
+      "flavor": "Les morts ont cédé ce dont ils pouvaient se passer."
+    }
+  },
   "fiesta": {
     "bracket": "Fiesta",
     "enterQueue": "Rejoignez la Fiesta !",
@@ -3569,6 +3767,33 @@ export const fr_FR: EnTranslations = {
       "wyrmshadow_talongrips": {
         "name": "Poignes Serre Ombrewyrm"
       },
+      "reliquary_plate_chest": {
+        "name": "Haubert de la garde du reliquaire"
+      },
+      "reliquary_leather_chest": {
+        "name": "Pourpoint du gardien de la poussière"
+      },
+      "reliquary_cloth_chest": {
+        "name": "Linceul du reliquaire"
+      },
+      "reliquary_legs": {
+        "name": "Jambières du caveau"
+      },
+      "reliquary_helm": {
+        "name": "Heaume du guet de l'ossuaire"
+      },
+      "reliquary_shoulder": {
+        "name": "Spallières effritées"
+      },
+      "reliquary_gloves_rog": {
+        "name": "Gantelets du gardien des os"
+      },
+      "deacon_reliquary_helm": {
+        "name": "Heaume du reliquaire du diacre"
+      },
+      "varric_shadow_cowl": {
+        "name": "Cagoule d'ombre de Varric"
+      },
       "the_codfather": {
         "name": "Capitaine brochet"
       },
@@ -3892,6 +4117,30 @@ export const fr_FR: EnTranslations = {
       "brightwood_monarch": {
         "name": "Le Monarque de Brightwood"
       },
+      "reliquary_ledger_wraith": {
+        "name": "Spectre du registre"
+      },
+      "reliquary_funeral_ringer": {
+        "name": "Sonneur funéraire"
+      },
+      "reliquary_gravecall_acolyte": {
+        "name": "Acolyte de l'appel funèbre"
+      },
+      "reliquary_bonewalker": {
+        "name": "Marche-os relevé"
+      },
+      "reliquary_saintless_effigy": {
+        "name": "Effigie sans saint"
+      },
+      "deacon_varric": {
+        "name": "Diacre Varric"
+      },
+      "acolyte_tessa": {
+        "name": "Acolyte Tessa"
+      },
+      "placeholder_boss": {
+        "name": "Gardien de l'épreuve"
+      },
       "elder_bristleback": {
         "name": "Ancien Bristleback"
       },
@@ -4115,6 +4364,11 @@ export const fr_FR: EnTranslations = {
         "name": "Frère Aldric",
         "title": "Prêtre du Val",
         "greeting": "D'un cimetière de chapelle au toit du monde... la piste s'achève ici. Je sens la montagne écouter."
+      },
+      "brother_halven": {
+        "name": "Frère Halven",
+        "title": "Gardien du reliquaire",
+        "greeting": "Le reliquaire d'en bas a de nouveau bougé."
       },
       "tidewatcher_ondrel": {
         "name": "Ondrel Vane",
@@ -5108,6 +5362,9 @@ export const fr_FR: EnTranslations = {
             "label": "Chapelle tombée"
           },
           "8": {
+            "label": "Colline du Reliquaire"
+          },
+          "9": {
             "label": "Clairière de Brightwood"
           }
         }
@@ -5209,6 +5466,18 @@ export const fr_FR: EnTranslations = {
         "name": "Le Temple noyé",
         "enterText": "Tu franchis la porte de lune — l'air se mue en eau froide et en lumière blafarde, et le chant se referme au-dessus de ta tête.",
         "leaveText": "Tu refais surface par la porte de lune dans la nuit de la montagne."
+      }
+    },
+    "delves": {
+      "collapsed_reliquary": {
+        "name": "Le Reliquaire effondré",
+        "enterText": "Vous descendez dans le reliquaire effondré.",
+        "leaveText": "Vous remontez auprès du frère Halven, à la ruine du reliquaire."
+      },
+      "delve_placeholder": {
+        "name": "Crypte d'épreuve peu profonde",
+        "enterText": "Vous descendez dans la crypte d'épreuve peu profonde.",
+        "leaveText": "Vous remontez à la surface."
       }
     }
   },

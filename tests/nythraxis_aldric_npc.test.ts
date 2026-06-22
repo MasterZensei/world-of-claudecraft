@@ -305,6 +305,7 @@ describe('client interaction classification', () => {
     };
     const hud = {
       openLoot: () => {}, openQuestDialog: (id: number) => { opened = id; },
+      openDelveBoard: () => {},
       showError: () => {}, closeContextMenu: () => {},
     };
     handlePickedEntity(world, hud, 9, 2, 10, 20); // right-click, in range

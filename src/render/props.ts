@@ -4,7 +4,7 @@ import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { terrainHeight, WATER_LEVEL } from '../sim/world';
 import { PROPS, WORLD_MIN_Z } from '../sim/data';
 import { hash2 } from '../sim/rng';
-import { GFX, surfaceMat } from './gfx';
+import { GFX, surfaceMat, sharedUniforms } from './gfx';
 import { loadGltf } from './assets/loader';
 import { registerPreload } from './assets/preload';
 
@@ -98,6 +98,12 @@ const PROP_ASSET_DEFS: Record<string, PropAssetDef> = {
   anvil: { url: '/models/props/anvil.glb', kit: 'qprops' },
   weaponStand: { url: '/models/props/weapon_stand.glb', kit: 'qprops' },
   lanternWall: { url: '/models/props/lantern_wall.glb', kit: 'qprops' },
+  // dungeon-kit archway reused inside delve interiors (kept for dungeon.ts)
+  dungeonArch: { url: '/models/dungeon/arch.glb', kit: 'dungeon' },
+  // Meshy-generated portal door used as the overworld Reliquary Hill marker;
+  // has its own backing slab so the animated shader plane sits on the front face.
+  // yaw: Math.PI if the model loads backwards after inspecting in-game.
+  delveEntrance2: { url: '/models/dungeon/delve_entrance_2.glb', kit: 'dungeon' },
 };
 
 type PropKey = keyof typeof PROP_ASSET_DEFS;
@@ -110,6 +116,7 @@ const ACTIVE_PROP_KEYS = new Set<PropKey>(GFX.standardMaterials
     'stand1', 'stand2', 'cart', 'fence', 'bonfire', 'oreRocks',
     'tentOpen', 'tentSmall', 'rockLargeD', 'mushroomRed', 'column', 'columnBroken',
     'dockPlatform', 'rowboat', 'graveRound', 'timberPillar', 'crateWooden', 'barrel',
+    'delveEntrance2', // delve entrance portal — a landmark, so keep it on low gfx too
   ]);
 
 // Headless sim/test imports never fetch; the browser kicks loads immediately.
@@ -312,6 +319,172 @@ type Scale = number | [number, number, number];
 function setScale(o: THREE.Object3D, s: Scale): void {
   if (typeof s === 'number') o.scale.setScalar(s);
   else o.scale.set(s[0], s[1], s[2]);
+}
+
+// ---------------------------------------------------------------------------
+// Delve-mouth portal: a self-animating red "void" sheet that fills the entrance
+// arch, driven by the shared uTime clock (no per-frame JS plumbing — same
+// pattern as the Drowned-Temple water in dungeon.ts). A churning swirl + a
+// global breathing pulse take a deep near-black red up to a hot bright red; the
+// circular alpha mask hides the plane's rectangular edges so it reads as a glowing
+// mouth. On the composer tiers the hot core is pushed past 1.0 (uHdr) so it
+// blooms; on low/headless (no composer) the colour stays saturated so it still
+// reads without bloom.
+// ---------------------------------------------------------------------------
+const DELVE_PORTAL_VERT = /* glsl */ `
+  varying vec2 vUv;
+  varying vec3 vWPos;
+  #include <fog_pars_vertex>
+  void main() {
+    vUv = uv;
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    vWPos = wp.xyz;
+    vec4 mvPosition = viewMatrix * wp;
+    gl_Position = projectionMatrix * mvPosition;
+    #include <fog_vertex>
+  }
+`;
+const DELVE_PORTAL_FRAG = /* glsl */ `
+  uniform float uTime;
+  uniform vec3 uDim;
+  uniform vec3 uBright;
+  uniform float uHdr;
+  varying vec2 vUv;
+  varying vec3 vWPos;
+  #include <common>
+  #include <fog_pars_fragment>
+  void main() {
+    vec2 p = vUv * 2.0 - 1.0; // centre-origin -1..1
+    float r = length(p);
+
+    // spinning vortex: angular phase + time rotates concentric rings inward
+    float angle  = atan(p.y, p.x) / (2.0 * PI); // 0..1 around the disc
+    float vortex = sin((angle + uTime * 0.10) * PI * 12.0 + r * 10.0 - uTime * 2.0) * 0.5 + 0.5;
+
+    // three churning noise layers for organic variation
+    float swirl = sin(p.x * 5.0 + uTime * 1.0)
+                + sin(p.y * 6.0 - uTime * 0.85)
+                + sin((p.x + p.y) * 4.5 + uTime * 0.65);
+    float churn = 0.5 + 0.28 * (swirl / 3.0);
+
+    // slow ominous breathing pulse
+    float pulse = 0.5 + 0.5 * sin(uTime * 0.85);
+
+    // hot crimson outer rim (baked — distinct from the purple mid-zone)
+    vec3 rimCol = vec3(0.85, 0.04, 0.10) * uHdr;
+
+    // zone blending: void core (uDim) → purple swirl (uBright) → crimson rim
+    float toPurple  = smoothstep(0.06, 0.55, r);
+    float toCrimson = smoothstep(0.45, 0.85, r);
+    float ringEnergy = vortex * churn * smoothstep(0.90, 0.05, r);
+
+    vec3 col = uDim;
+    col = mix(col, uBright, toPurple  * (0.55 + 0.45 * ringEnergy));
+    col = mix(col, rimCol,  toCrimson * (0.45 + 0.55 * pulse));
+    col += uBright * smoothstep(0.28, 0.0, r) * 0.6 * uHdr; // purple core bloom
+
+    // fill the whole opening as a dark solid portal; feather only the outer rim
+    vec2 e = abs(p);
+    float fill = (1.0 - smoothstep(0.76, 1.0, e.x)) * (1.0 - smoothstep(0.76, 1.0, e.y));
+    float alpha = fill * (0.93 + 0.07 * pulse);
+
+    gl_FragColor = vec4(col, clamp(alpha, 0.0, 1.0));
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+    #include <fog_fragment>
+  }
+`;
+
+let delvePortalMat: THREE.ShaderMaterial | null = null;
+function delvePortalMaterial(): THREE.ShaderMaterial {
+  if (delvePortalMat) return delvePortalMat;
+  delvePortalMat = new THREE.ShaderMaterial({
+    uniforms: {
+      ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),
+      uTime: sharedUniforms.uTime,
+      uDim: { value: new THREE.Color(0x03000a) },    // near-void purple-black core
+      uBright: { value: new THREE.Color(0x6e0a85) }, // deep purple swirl
+      uHdr: { value: GFX.composer ? 2.8 : 1.0 },
+    },
+    vertexShader: DELVE_PORTAL_VERT,
+    fragmentShader: DELVE_PORTAL_FRAG,
+    transparent: true,
+    depthWrite: false,
+    side: THREE.FrontSide, // only the town-facing front glows; the dark vault sits behind it
+    fog: true,
+  });
+  return delvePortalMat;
+}
+
+// Embers drifting up out of the delve mouth — a deterministic point cloud whose
+// whole motion (rise + sideways waver + life fade) is a function of uTime, so it
+// self-animates with no per-frame JS. Additive + HDR-boosted so it glows and
+// blooms on composer tiers; reads as warm sparks on low too.
+const DELVE_EMBER_VERT = /* glsl */ `
+  uniform float uTime;
+  uniform float uRise;
+  attribute float aPhase;
+  attribute float aSpeed;
+  attribute float aDrift;
+  varying float vLife;
+  void main() {
+    float t = fract(uTime * aSpeed + aPhase); // 0..1 life cycle
+    vLife = t;
+    vec3 pos = position;
+    pos.y += t * uRise;                                  // rise
+    pos.x += sin((t + aPhase) * 6.2831) * aDrift;        // lazy sideways waver
+    vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+    gl_PointSize = (95.0 / max(-mv.z, 1.0)) * (0.45 + 0.55 * sin(t * 3.14159));
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+const DELVE_EMBER_FRAG = /* glsl */ `
+  uniform float uHdr;
+  varying float vLife;
+  void main() {
+    vec2 c = gl_PointCoord - 0.5;
+    float d = length(c);
+    if (d > 0.5) discard;
+    float soft = smoothstep(0.5, 0.0, d);
+    float fade = sin(vLife * 3.14159);                   // fade in then out over life
+    vec3 col = mix(vec3(1.0, 0.16, 0.09), vec3(1.0, 0.5, 0.18), vLife) * uHdr;
+    gl_FragColor = vec4(col, soft * fade * 0.85);
+  }
+`;
+
+function buildDelveEmbers(cx: number, baseY: number, cz: number, halfW: number, riseY: number): THREE.Points {
+  const N = GFX.standardMaterials ? 48 : 28; // lighter on low
+  const positions = new Float32Array(N * 3);
+  const phase = new Float32Array(N);
+  const speed = new Float32Array(N);
+  const drift = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    positions[i * 3] = (hash2(i * 1.7, cx, 0x656d62) - 0.5) * halfW * 2;
+    positions[i * 3 + 1] = hash2(i * 2.3, cz, 0x656d62) * 1.5;       // start low in the mouth
+    positions[i * 3 + 2] = (hash2(i * 3.1, cx + cz, 0x656d62) - 0.5) * 0.6;
+    phase[i] = hash2(i * 4.5, cx, 0x656d62);
+    speed[i] = 0.05 + hash2(i * 5.9, cz, 0x656d62) * 0.09;
+    drift[i] = 0.3 + hash2(i * 6.7, cx, 0x656d62) * 0.7;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('aPhase', new THREE.BufferAttribute(phase, 1));
+  geo.setAttribute('aSpeed', new THREE.BufferAttribute(speed, 1));
+  geo.setAttribute('aDrift', new THREE.BufferAttribute(drift, 1));
+  // motion happens in the shader, so bound it manually or it culls at rest
+  geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, riseY / 2, 0), Math.max(halfW, riseY) + 1.5);
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uTime: sharedUniforms.uTime, uRise: { value: riseY }, uHdr: { value: GFX.composer ? 2.0 : 1.0 } },
+    vertexShader: DELVE_EMBER_VERT,
+    fragmentShader: DELVE_EMBER_FRAG,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  const pts = new THREE.Points(geo, mat);
+  pts.position.set(cx, baseY, cz);
+  pts.renderOrder = 4; // over the void + vault
+  return pts;
 }
 
 export function buildProps(seed: number): PropsResult {
@@ -766,6 +939,172 @@ export function buildProps(seed: number): PropsResult {
     registerHideable(g, obbFootprint(hx, hz, d.hutLocal.hw, d.hutLocal.hd, d.rot, ground(hx, hz) + 2.9));
   }
 
+  // ---- delve entrance: Meshy portal-door + animated void + carved name lintel -
+  // Town/hub is +z (north) of Reliquary Hill. The portal-door model sits just
+  // south of Brother Halven facing +z; it has its own stone backing slab so the
+  // animated shader plane (FrontSide) reads as a solid void from the approach and
+  // is invisible from behind. The carved name slab rides the model's crown.
+  // All render-only — players enter by talking to Halven; leaveDelve drops them
+  // back at archZ (doorPos.z - 4).
+  const delvePortals: THREE.Mesh[] = [];
+  for (const dm of PROPS.delveMarkers ?? []) {
+    if (!loadedProps.has('delveEntrance2')) continue;
+    const gy = ground(dm.x, dm.z);
+
+    // Portal-door model with its own backing slab — no separate vault sphere needed.
+    // Rotation 0 = portal face toward +z (town); add yaw: Math.PI to the asset def
+    // if the model loads backwards after inspecting in-game.
+    const arch = propAsset('delveEntrance2');
+    const SX = 3.6, SY = 3.6, SZ = 3.6;
+    const archZ = dm.z - 4; // south of Halven (also the leaveDelve drop: doorPos.z - 4)
+    const ag = new THREE.Group();
+    for (const part of arch.parts) {
+      const m = new THREE.Mesh(part.geo, part.mat);
+      m.castShadow = true;
+      m.receiveShadow = true;
+      ag.add(m);
+    }
+    ag.scale.set(SX, SY, SZ);
+    ag.position.set(dm.x, gy, archZ);
+    group.add(ag);
+
+    // portal opening: doorway is roughly half the model's width and a bit over
+    // half its height; the animated shader plane sits on the town-facing front face.
+    // Tune these fractions after seeing the model in-game.
+    const openW = arch.size.x * SX * 0.50;
+    const openH = arch.size.y * SY * 0.55;
+    const openCY = gy + arch.size.y * SY * 0.32; // centre of the doorway opening
+    const townFaceZ = archZ + (arch.size.z * SZ) / 2; // model's +z front face
+
+    // opaque dark backsplash filling the doorway behind the void plane, so no
+    // red leaks through from the rear and you can't see daylight through the
+    // opening — the portal reads as a solid one-way threshold. Slightly larger
+    // than the opening to cover the gap, recessed a touch into the model.
+    const backsplash = new THREE.Mesh(
+      new THREE.PlaneGeometry(openW * 1.1, openH * 1.1),
+      new THREE.MeshBasicMaterial({ color: 0x05030a, side: THREE.DoubleSide }),
+    );
+    backsplash.position.set(dm.x, openCY, townFaceZ - 0.35);
+    group.add(backsplash);
+
+    // swirling void plane — FrontSide, drawn over the dark backsplash so the
+    // animated vortex reads against true black from the town approach.
+    const portal = new THREE.Mesh(new THREE.PlaneGeometry(openW, openH), delvePortalMaterial());
+    portal.position.set(dm.x, openCY, townFaceZ - 0.05);
+    portal.renderOrder = 3;
+    group.add(portal);
+    delvePortals.push(portal);
+
+    // deep purple glow spilling from the mouth — matches the new portal palette.
+    const mouthLight = new THREE.PointLight(0x7010b0, 8, 18, 2);
+    mouthLight.position.set(dm.x, gy + 2.4, townFaceZ + 0.4);
+    mouthLight.userData.baseIntensity = 8;
+    group.add(mouthLight);
+    fireLights.push(mouthLight);
+
+    // embers drifting up out of the mouth (self-animating; not a mesh, so the
+    // static merge skips it automatically)
+    group.add(buildDelveEmbers(dm.x, gy + 1.0, townFaceZ + 0.2, openW * 0.34, openH * 0.85));
+
+    // two flaming braziers flanking the mouth — a tended-entrance read. Reuse
+    // the campfire flame + fire-light pattern so the renderer flickers them and
+    // sheds embers for free; the warm torch orange plays off the red void.
+    const postMat = surfaceMat({ color: 0x2a2622, roughness: 1 });
+    const bowlMat = surfaceMat({ color: 0x191512, roughness: 1 });
+    for (const side of [-1, 1]) {
+      const bx = dm.x + side * (openW * 0.5 + 0.7);
+      const bz = townFaceZ + 0.5; // just in front of the mouth, on the town side
+      const by = ground(bx, bz);
+      const bg = new THREE.Group();
+      const postH = 2.0;
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.33, postH, 8), postMat);
+      post.position.y = postH / 2;
+      bg.add(post);
+      const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.26, 0.38, 10), bowlMat);
+      bowl.position.y = postH + 0.1;
+      bg.add(bowl);
+      const flame = new THREE.Mesh(flameGeo, new THREE.MeshLambertMaterial({
+        color: 0xffaa33, emissive: 0xff6a1e, emissiveIntensity: usePbr ? 2.2 : 1.4,
+        transparent: true, opacity: 0.92,
+      }));
+      flame.position.y = postH + 0.28;
+      flame.scale.setScalar(0.72);
+      bg.add(flame);
+      flames.push(flame);
+      noShadow.add(flame);
+      const light = new THREE.PointLight(0xff8a3a, 9, 13, 2);
+      light.position.y = postH + 0.55;
+      light.userData.baseIntensity = 8;
+      bg.add(light);
+      fireLights.push(light);
+      bg.position.set(bx, by, bz);
+      group.add(shadowed(bg));
+    }
+
+    // (ruin-column dressing removed — the portal-door model has its own pillars,
+    // so flanking rubble columns just cluttered and overpowered the silhouette.
+    // Mossy boulders flanking the approach feet keep it grounded without competing.)
+    const rubble: { kind: PropKey; dx: number; dz: number; s: Scale; rot?: number }[] = [
+      { kind: 'rockLargeD', dx: -8.5, dz: -1.8, s: 1.7, rot: 2.1 },
+      { kind: 'rockLargeD', dx: 8.0, dz: 2.2, s: 1.45, rot: 0.7 },
+    ];
+    for (const rb of rubble) {
+      const rx = dm.x + rb.dx, rz = archZ + rb.dz;
+      const rgrp = new THREE.Group();
+      addParts(rgrp, rb.kind, { scale: rb.s, rot: rb.rot });
+      rgrp.position.set(rx, ground(rx, rz) - 0.08, rz);
+      group.add(shadowed(rgrp));
+    }
+
+    // ---- carved name slab as the arch's town-facing lintel-sign ------------
+    const slabY = gy + arch.size.y * SY * 0.80; // mounted on the crown, above the mouth
+    const slabZ = townFaceZ + 0.10; // proud of the town face so it never z-fights the arch
+
+    // stone backing box
+    const backMat = surfaceMat({ color: 0x3a3530 });
+    const backing = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.9, 0.18), backMat);
+    backing.position.set(dm.x, slabY, slabZ);
+    backing.castShadow = true;
+    group.add(backing);
+
+    // grimy canvas inscription on the town-facing (+z) surface
+    const CW = 512, CH = 96;
+    const cv = document.createElement('canvas');
+    cv.width = CW; cv.height = CH;
+    const ctx = cv.getContext('2d')!;
+
+    ctx.fillStyle = '#2b2722';
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.strokeStyle = '#16120e';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(6, 6, CW - 12, CH - 12);
+
+    // horizontal grime streaks (deterministic)
+    for (let i = 0; i < 10; i++) {
+      const gx = hash2(dm.x + i * 1.3, dm.z, 0x6d61726b) * CW;
+      const gy2 = hash2(dm.z + i * 1.7, dm.x, 0x6d61726b) * CH;
+      const gw = 20 + hash2(i * 3.1, dm.x + dm.z, 0x6d61726b) * 55;
+      ctx.fillStyle = `rgba(6,4,2,${0.22 + hash2(i * 5.9, dm.z, 0x6d61726b) * 0.32})`;
+      ctx.fillRect(gx - gw / 2, gy2 - 1.8, gw, 3.6);
+    }
+
+    // carved text — shadow pass then bright pass for depth illusion
+    ctx.font = 'bold 34px Georgia, "Times New Roman", serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#120f0b';
+    ctx.fillText(dm.label.toUpperCase(), CW / 2 + 2, CH / 2 + 2);
+    ctx.fillStyle = '#7d6e59';
+    ctx.fillText(dm.label.toUpperCase(), CW / 2, CH / 2);
+
+    const tex = new THREE.CanvasTexture(cv);
+    const faceMat = new THREE.MeshBasicMaterial({ map: tex });
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 0.78), faceMat);
+    // sit flush on the town-facing face of the backing (PlaneGeometry faces +z)
+    face.position.set(dm.x, slabY, slabZ + 0.1);
+    group.add(face);
+  }
+
   // ---- flush instanced batches ---------------------------------------------
   const cullables: PropCullable[] = [];
   for (const batch of instanceBatches.values()) {
@@ -787,6 +1126,7 @@ export function buildProps(seed: number): PropsResult {
   // animated flames + camera-ghost props (hidden individually) stay un-merged
   const keep = new Set<THREE.Object3D>(flames);
   for (const m of keepFromMerge) keep.add(m);
+  for (const p of delvePortals) keep.add(p); // shader-driven void: keep its transparency/renderOrder
   const staticMeshes = mergeStaticMeshes(group, keep);
   for (const sm of staticMeshes) {
     const bounds = cullableBounds(sm, sm.geometry.boundingBox, sm.geometry.boundingSphere);

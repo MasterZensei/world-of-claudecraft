@@ -17,6 +17,8 @@ import { saveCharacterState } from '../server/db';
 import { ClientWorld } from '../src/net/online';
 import { Sim } from '../src/sim/sim';
 import { DT, type PlayerClass } from '../src/sim/types';
+import { DELVES } from '../src/sim/data';
+import { terrainHeight } from '../src/sim/world';
 
 const DELTA_KEYS = ['inv', 'buyback', 'equip', 'qlog', 'qdone', 'cds', 'stats', 'weapon', 'party', 'trade', 'duel'];
 
@@ -956,5 +958,122 @@ describe('guild nameplate wire', () => {
     // a later full record without `gd` means "no guild" → reset to ''
     (client as any).applySnapshot({ t: 'snap', ents: [base] });
     expect(client.entities.get(7)!.guild).toBe('');
+  });
+});
+
+describe('delve self-state mirrors over the wire', () => {
+  let server: GameServer;
+  let fc: FakeClient;
+  let session: ClientSession;
+
+  beforeEach(() => {
+    server = new GameServer();
+    fc = fakeWs();
+    session = joinServer(server, fc, 1, 'Delver');
+  });
+
+  function enterDelveOnServer(): void {
+    const sim = server.sim;
+    sim.setPlayerLevel(DELVES.collapsed_reliquary.minLevel);
+    const door = DELVES.collapsed_reliquary.doorPos;
+    const p = sim.entities.get(session.pid)!;
+    p.pos.x = door.x;
+    p.pos.z = door.z;
+    p.pos.y = terrainHeight(door.x, door.z, sim.cfg.seed);
+    p.prevPos = { ...p.pos };
+    sim.enterDelve('collapsed_reliquary', 'normal', session.pid);
+  }
+
+  it('sends drun + dcompanion on entering a delve and the client mirrors them', () => {
+    enterDelveOnServer();
+    broadcast(server);
+    const snap = lastSnap(fc.sent);
+    expect(snap.self).toHaveProperty('drun');
+    expect(snap.self).toHaveProperty('dcompanion');
+    const client = bareClient(session.pid);
+    (client as any).applySnapshot(snap);
+    expect(client.delveRun).not.toBeNull();
+    expect(client.companionState?.companionId).toBe('companion_tessa');
+  });
+
+  it('mirrors delveMarks + delveClears + delveDaily to the client when they change', () => {
+    enterDelveOnServer();
+    broadcast(server);
+    fc.sent.length = 0;
+    server.sim.meta(session.pid)!.delveMarks = 5;
+    server.sim.meta(session.pid)!.delveClears['collapsed_reliquary:heroic'] = 1;
+    server.sim.meta(session.pid)!.delveDaily.markClears = 2;
+    broadcast(server);
+    const snap = lastSnap(fc.sent);
+    expect(snap.self.dmarks).toBe(5);
+    expect(snap.self.dclears['collapsed_reliquary:heroic']).toBe(1);
+    expect(snap.self.delveDaily.markClears).toBe(2);
+    const client = bareClient(session.pid);
+    (client as any).applySnapshot(snap);
+    expect(client.delveMarks).toBe(5);
+    expect(client.delveClears['collapsed_reliquary:heroic']).toBe(1);
+    // the shop view resolves the heroic-gated rare as unlocked off the mirror
+    expect(client.delveShopOffers('collapsed_reliquary').find((o: any) => o.requiresHeroicClear)?.unlocked).toBe(true);
+    expect(client.delveDaily.markClears).toBe(2);
+  });
+
+  it('does NOT resend drun on an unchanged delve-less first/second tick', () => {
+    // Outside a delve, drun is null and must be omitted after the first send.
+    broadcast(server);
+    fc.sent.length = 0;
+    server.sim.tick();
+    broadcast(server);
+    const snap = lastSnap(fc.sent);
+    expect(snap.self).not.toHaveProperty('drun');
+  });
+});
+
+describe('lockpick view rebuilds from events on the online client', () => {
+  function sessionEvent(sid: string, col: number, visible: any[]) {
+    return {
+      type: 'lockpickSession', sessionId: sid, objectId: 77, w: 11, h: 6,
+      col, row: 2, page: 1, pageCount: 1, tries: 1, triesTotal: 1,
+      lootTier: 'premium', allowed: ['hardSet', 'set', 'steady', 'ease', 'drop'], visible,
+    };
+  }
+  function feed(client: ClientWorld, ev: any) {
+    (client as any).onMessage(JSON.stringify({ t: 'events', list: [ev] }));
+  }
+
+  it('builds on session, advances on step, ignores foreign sessions, clears on end', () => {
+    const client = bareClient(1);
+    (client as any).lockpickState = null;
+    const v0 = [{ col: 0, row: 2, kind: 'channel' }];
+    feed(client, sessionEvent('s1', 0, v0));
+    expect(client.lockpickState).not.toBeNull();
+    expect(client.lockpickState!.sessionId).toBe('s1');
+    expect(client.lockpickState!.lootTier).toBe('premium');
+    expect(client.lockpickState!.visible).toEqual(v0);
+
+    // Step advances col + visible, leaves identity fields (w/h/lootTier) intact.
+    const v1 = [{ col: 1, row: 3, kind: 'channel' }];
+    feed(client, { type: 'lockpickStep', sessionId: 's1', col: 1, row: 3, page: 1, pageCount: 1, tries: 1, triesTotal: 1, result: 'advanced', visible: v1 });
+    expect(client.lockpickState!.col).toBe(1);
+    expect(client.lockpickState!.visible).toEqual(v1);
+    expect(client.lockpickState!.w).toBe(11);
+    expect(client.lockpickState!.lootTier).toBe('premium');
+
+    // A step for a different session must not mutate the active view.
+    feed(client, { type: 'lockpickStep', sessionId: 'OTHER', col: 9, row: 9, page: 1, pageCount: 1, tries: 1, triesTotal: 1, result: 'advanced', visible: [] });
+    expect(client.lockpickState!.col).toBe(1);
+
+    // End for the active session clears it; events still reach the HUD queue.
+    feed(client, { type: 'lockpickEnd', sessionId: 's1', outcome: 'success', lootTier: 'premium' });
+    expect(client.lockpickState).toBeNull();
+    expect(client.drainEvents().length).toBeGreaterThan(0);
+  });
+
+  it('does not clear the view on a foreign lockpickEnd', () => {
+    const client = bareClient(1);
+    (client as any).lockpickState = null;
+    feed(client, sessionEvent('s2', 0, []));
+    feed(client, { type: 'lockpickEnd', sessionId: 'OTHER', outcome: 'fail' });
+    expect(client.lockpickState).not.toBeNull();
+    expect(client.lockpickState!.sessionId).toBe('s2');
   });
 });

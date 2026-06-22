@@ -434,6 +434,46 @@ export const VISUALS: Record<string, VisualDef> = {
     clips: BIPED14, tint: 'entity', tintStrength: 0.35,
   },
 
+  // -- delve-specific variants (same rigs, colour-differentiated via mob.color) -
+  delve_skel_wraith: {
+    // Ledger Wraith: pale skeleton, no weapon — stronger wash reads as near-transparent
+    url: `${ENEMIES}/skeleton_minion.glb`, height: 2.5,
+    clips: skeletonClips(['1H_Melee_Attack_Chop', '1H_Melee_Attack_Slice_Diagonal']),
+    tint: 'entity', tintStrength: 0.55,
+  },
+  delve_skel_ringer: {
+    // Funeral Ringer: skeleton rogue rig, cloth-brown tint at mid strength
+    url: `${ENEMIES}/skeleton_rogue.glb`, height: 2.5,
+    clips: skeletonClips(['1H_Melee_Attack_Chop', '1H_Melee_Attack_Slice_Diagonal']),
+    attach: [{ url: `${WEAPONS}/skeleton_axe.glb`, bone: 'handslot.r' }],
+    tint: 'entity', tintStrength: 0.45,
+  },
+  delve_mob_acolyte: {
+    // Gravecall Acolyte: hooded mage with hat + staff, deep dark-brown saturation
+    url: `${PLAYERS}/mage.glb`, height: HUMANOID_H,
+    clips: kaykit(['2H_Melee_Attack_Chop']),
+    show: ['Mage_Hat'],
+    attach: [{ url: `${WEAPONS}/staff.glb`, bone: 'handslot.r' }],
+    tint: 'entity', tintStrength: 0.6,
+  },
+  delve_skel_effigy: {
+    // Saintless Effigy: armoured skeleton, high stone-pale wash — reads as carved stone
+    url: `${ENEMIES}/skeleton_warrior.glb`, height: 2.5,
+    clips: skeletonClips(['1H_Melee_Attack_Chop', '1H_Melee_Attack_Slice_Diagonal']),
+    attach: [
+      { url: `${WEAPONS}/skeleton_blade.glb`, bone: 'handslot.r' },
+      { url: `${WEAPONS}/skeleton_shield_large_a.glb`, bone: 'handslot.l' },
+    ],
+    tint: 'entity', tintStrength: 0.65,
+  },
+  delve_skel_varric: {
+    // Deacon Varric: boss mage rig with Taunt flourish on pull
+    url: `${ENEMIES}/skeleton_mage.glb`, height: 2.5,
+    clips: skeletonClips(['2H_Melee_Attack_Chop'], 'Taunt'),
+    attach: [{ url: `${WEAPONS}/skeleton_staff.glb`, bone: 'handslot.r' }],
+    tint: 'entity', tintStrength: 0.35,
+  },
+
   // -- undead (KayKit skeletons, shared 41-joint rig) ------------------------
   skel_minion: {
     url: `${ENEMIES}/skeleton_minion.glb`, height: 2.5,
@@ -552,6 +592,16 @@ export const VISUALS: Record<string, VisualDef> = {
     show: [],
     tint: 'entity', tintStrength: 0.35,
   },
+  // Brother Halven, the Reliquary Keeper: a dark, hooded figure tending the crypt
+  // door — deliberately grimmer than the chapel's brown-robed npc_mage brothers,
+  // so the delve's threshold reads as ominous from a distance. Hooded rogue rig
+  // ships the hood/mask/cape by default (no show filter); 'entity' tint takes
+  // BROTHER_HALVEN.color (a near-black charcoal) for the "dirty/dark" mood.
+  npc_reliquary_keeper: {
+    url: `${PLAYERS}/rogue_hooded.glb`, height: HUMANOID_H,
+    clips: kaykit(['1H_Melee_Attack_Chop']),
+    tint: 'entity', tintStrength: 0.6,
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -602,6 +652,12 @@ const MOB_KEYS: Record<string, string> = {
   sexton_marrow: 'skel_mage',
   morthen: 'skel_boss',
   crypt_shambler: 'skel_rogue',
+  // delve enemies
+  reliquary_ledger_wraith: 'delve_skel_wraith',
+  reliquary_funeral_ringer: 'delve_skel_ringer',
+  reliquary_gravecall_acolyte: 'delve_mob_acolyte',
+  reliquary_saintless_effigy: 'delve_skel_effigy',
+  deacon_varric: 'delve_skel_varric',
   fallen_captain_aldren: 'skel_warrior',
   corrupted_priest_malric: 'skel_necromancer',
   deathstalker_voss: 'skel_rogue',
@@ -640,6 +696,7 @@ const NPC_KEYS: Record<string, string> = {
   fisherman_brandt: 'npc_villager',
   provisioner_hale: 'npc_villager',
   quartermaster_bree: 'npc_villager',
+  brother_halven: 'npc_reliquary_keeper',
 };
 
 export function visualKeyFor(e: Entity): string {

@@ -3767,6 +3767,70 @@ const RULES: Rule[] = [
   { re: /^(.+) cannot queue while dueling\.$/, build: (m) => tArenaExtra('memberDueling', { name: m[1] }) },
   { re: /^(.+) must finish trading before queueing\.$/, build: (m) => tArenaExtra('memberTrading', { name: m[1] }) },
   { re: /^(.+) cannot queue from inside an instance\.$/, build: (m) => tArenaExtra('memberInstance', { name: m[1] }) },
+  // Delve / lockpicking sim text. Re-localized through t() against the sim.delve.* /
+  // sim.lockpick.* keys (src/ui/i18n.catalog/index.ts). Exact (no-placeholder) lines come
+  // first; the broad "{name} — {objective}" module-enter rule is LAST so it cannot swallow
+  // the em-dash lines above it (mechanismOpen / bossChest).
+  { re: /^You cannot enter a delve right now\.$/, build: () => t('sim.delve.cannotEnterNow') },
+  { re: /^Leave the dungeon first\.$/, build: () => t('sim.delve.leaveDungeonFirst') },
+  { re: /^Leave the arena first\.$/, build: () => t('sim.delve.leaveArenaFirst') },
+  { re: /^You are already in a delve\.$/, build: () => t('sim.delve.alreadyInDelve') },
+  { re: /^You cannot enter a delve while trading\.$/, build: () => t('sim.delve.whileTrading') },
+  { re: /^You cannot enter a delve during a duel\.$/, build: () => t('sim.delve.duringDuel') },
+  { re: /^You cannot enter a delve during an arena match\.$/, build: () => t('sim.delve.duringArena') },
+  { re: /^Unknown delve tier\.$/, build: () => t('sim.delve.unknownTier') },
+  { re: /^A mechanism clicks open nearby\. A passage opens to the north — find the exit portal ahead\.$/, build: () => t('sim.delve.mechanismOpen') },
+  { re: /^The grave rite falters\.$/, build: () => t('sim.delve.graveFalters') },
+  { re: /^The dead answer Deacon Varric's call!$/, build: () => t('delveUi.boss.varric.raise.interrupt_fail') },
+  { re: /^The door is already open\.$/, build: () => t('sim.delve.doorAlreadyOpen') },
+  { re: /^The boss falls\. A warded reliquary chest rises on the dais — pick its lock to claim your spoils\.$/, build: () => t('sim.delve.bossChest') },
+  { re: /^A stairway to the surface opens\. Press F at the stairs to leave\.$/, build: () => t('sim.delve.surfaceStairs') },
+  { re: /^A tombstone passage opens to the north when the room is cleared\.$/, build: () => t('sim.delve.tombstoneHint') },
+  { re: /^A sealed tombstone passage grinds open to the north\. Walk into it to continue\.$/, build: () => t('sim.delve.tombstoneOpen') },
+  { re: /^The chest is empty\.$/, build: () => t('sim.delve.chestEmpty') },
+  { re: /^You are not in a delve\.$/, build: () => t('sim.delve.notInDelve') },
+  { re: /^You cannot interact with that\.$/, build: () => t('sim.delve.cannotInteract') },
+  { re: /^You are too far away\.$/, build: () => t('sim.delve.tooFar') },
+  { re: /^The grave is silent for now\.$/, build: () => t('sim.delve.graveSilent') },
+  { re: /^The door is locked\.$/, build: () => t('sim.delve.doorLocked') },
+  { re: /^Strike the wall to break through\.$/, build: () => t('sim.delve.strikeWall') },
+  { re: /^Nothing happens\.$/, build: () => t('sim.delve.nothingHappens') },
+  { re: /^Unknown companion\.$/, build: () => t('sim.delve.unknownCompanion') },
+  { re: /^This companion is already fully upgraded\.$/, build: () => t('sim.delve.companionMaxRank') },
+  { re: /^You cannot afford this upgrade\.$/, build: () => t('sim.delve.cannotAffordCompanionUpgrade') },
+  { re: /^The passage is sealed\.$/, build: () => t('sim.delve.passageSealed') },
+  { re: /^Move closer to the passage\.$/, build: () => t('sim.delve.moveCloserPassage') },
+  { re: /^Move closer to the chest\.$/, build: () => t('sim.delve.moveCloserChest') },
+  { re: /^The way out is not yet open\.$/, build: () => t('sim.delve.wayOutNotOpen') },
+  { re: /^Move closer to the stairs\.$/, build: () => t('sim.delve.moveCloserStairs') },
+  // Lockpicking minigame (exact lines).
+  { re: /^Someone is already working the lock\.$/, build: () => t('sim.lockpick.alreadyInProgress') },
+  { re: /^You cannot pick that\.$/, build: () => t('sim.lockpick.cannotPickThat') },
+  { re: /^Choose 1, 2, or 3 picks\.$/, build: () => t('sim.lockpick.chooseAnte') },
+  { re: /^No lock attempt in progress\.$/, build: () => t('sim.lockpick.noAttempt') },
+  { re: /^That is not your lock\.$/, build: () => t('sim.lockpick.notYours') },
+  { re: /^That tool slips off this lock\.$/, build: () => t('sim.lockpick.toolSlips') },
+  // Chest-loss lockpick lines (contain em-dashes: must precede the broad module-enter rule).
+  { re: /^The lock is jammed beyond picking — clear the delve again for another attempt\.$/, build: () => t('sim.lockpick.lockJammed') },
+  { re: /^The last pick snaps\. The lock jams — the chest is lost unless you clear the delve again\.$/, build: () => t('sim.lockpick.lastPickSnaps') },
+  // Bountiful seal (purple coffer) — requires Premium ante.
+  { re: /^This seal yields only to a master's hand — only the Premium ante can open it\.$/, build: () => t('sim.delve.shopSealPremiumOnly') },
+  // Interpolated delve / lockpick lines.
+  // levelRequired with tier label (must precede the two-arg form without tier).
+  { re: /^You must be level (\d+) to enter (.+) on (.+)\.$/, build: (m) => t('sim.delve.levelRequiredTier', { level: m[1], name: m[2], tier: m[3] }) },
+  { re: /^You must be level (\d+) to enter (.+)\.$/, build: (m) => t('sim.delve.levelRequired', { level: m[1], name: m[2] }) },
+  { re: /^All instances of (.+) are busy\. Try again soon\.$/, build: (m) => t('sim.delve.instancesBusy', { name: m[1] }) },
+  { re: /^(.+) run failed\.$/, build: (m) => t('sim.delve.runFailed', { name: m[1] }) },
+  { re: /^(.+) begins Raise Dead\.$/, build: (m) => t('sim.delve.raiseDead', { name: locMob(m[1]) }) },
+  { re: /^You need (.+) Delve Marks to upgrade (.+)\.$/, build: (m) => t('sim.delve.companionMarksRequired', { marks: m[1], name: m[2] }) },
+  { re: /^You have not unlocked that item yet\.$/, build: () => t('sim.delve.shopItemLocked') },
+  { re: /^You need (.+) Delve Marks to buy (.+)\.$/, build: (m) => t('sim.delve.shopMarksRequired', { marks: m[1], name: locItem(m[2]) }) },
+  { re: /^You pass through the tombstone into (.+)\.$/, build: (m) => t('sim.delve.tombstoneInto', { name: m[1] }) },
+  { re: /^(.+) reaches rank (.+)\.$/, build: (m) => t('sim.delve.companionRankUp', { name: m[1], rank: m[2] }) },
+  { re: /^(.+) complete\.$/, build: (m) => t('sim.delve.complete', { name: m[1] }) },
+  // Module-enter banner: "<module> — <objective>". Broad catch-all; sits LAST so every
+  // more-specific em-dash rule above wins first.
+  { re: /^(.+) — (.+)$/, build: (m) => t('sim.delve.moduleEnter', { name: m[1], objective: m[2] }) },
   // 2v2 Fiesta. The leader/premade rules are wildcards so they catch both the
   // '2v2' and 'Fiesta' label variants (the ranked exact rules above match first
   // at runtime; this picks up Fiesta and the i18n guard's placeholder token).
