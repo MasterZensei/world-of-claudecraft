@@ -918,7 +918,11 @@ export const zh_CN: EnTranslations = {
       "companion": {
         "pick": "选择一名同伴",
         "tessa": "侍僧泰莎",
-        "rank": "等级 {rank}"
+        "rank": "等级 {rank}",
+        "boon": "在战斗间隙治疗队伍。3级时每次探秘可复活一名倒下的队友一次。",
+        "upgrade": "升级到 {rank} 级（{marks} 印记）",
+        "upgradeAria": "用 {marks} 枚探秘印记将{name}升级到 {rank} 级",
+        "maxRank": "已满级"
       },
       "tabDelve": "探秘",
       "tabShop": "Shop"

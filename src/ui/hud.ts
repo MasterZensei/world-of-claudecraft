@@ -9,7 +9,7 @@ import { skinCount } from '../render/characters/manifest';
 import { preloadMechAssets } from '../render/characters/assets';
 import { emoteIconUrl } from './emote_icons';
 import {
-  ABILITIES, CLASSES, DELVE_AFFIXES, DELVES, DUNGEON_LIST, DUNGEON_X_THRESHOLD, ITEMS, MOBS, NPCS, PROPS, QUESTS,
+  ABILITIES, CLASSES, COMPANION_UPGRADE_COSTS, DELVE_AFFIXES, DELVES, DUNGEON_LIST, DUNGEON_X_THRESHOLD, ITEMS, MOBS, NPCS, PROPS, QUESTS,
   WORLD_MAX_X, WORLD_MAX_Z, WORLD_MIN_X, WORLD_MIN_Z, ZONES, dungeonAt, isDelvePos, questRewardItem, zoneAt,
   zoneWelcomeText,
 } from '../sim/data';
@@ -3259,6 +3259,25 @@ export class Hud {
       const tessaRankLabel = t('delveUi.board.companion.rank', {
         rank: formatNumber(tessaRank, { maximumFractionDigits: 0 }),
       });
+      // Companion rank-up: max rank is the highest cost tier; the next rank's
+      // Marks cost is shown on the button so the upgrade path is visible, and the
+      // button only enables when the player can afford it (the buy is re-checked
+      // sim-side regardless). Mirrors the Marks-shop affordability gating.
+      const companionMaxRank = Math.max(...Object.keys(COMPANION_UPGRADE_COSTS).map(Number));
+      const nextRank = tessaRank + 1;
+      const nextCost = COMPANION_UPGRADE_COSTS[nextRank];
+      const tessaName = t('delveUi.board.companion.tessa');
+      let companionAction: string;
+      if (tessaRank >= companionMaxRank || !nextCost) {
+        companionAction = `<div class="delve-companion-max quest-muted">${esc(t('delveUi.board.companion.maxRank'))}</div>`;
+      } else {
+        const costMarks = formatNumber(nextCost.marks, { maximumFractionDigits: 0 });
+        const nextRankLabel = formatNumber(nextRank, { maximumFractionDigits: 0 });
+        const affordable = this.sim.delveMarks >= nextCost.marks;
+        companionAction = `<button type="button" class="btn delve-companion-upgrade" data-companion-upgrade`
+          + ` aria-label="${esc(t('delveUi.board.companion.upgradeAria', { name: tessaName, rank: nextRankLabel, marks: costMarks }))}"`
+          + `${affordable ? '' : ' disabled'}>${esc(t('delveUi.board.companion.upgrade', { rank: nextRankLabel, marks: costMarks }))}</button>`;
+      }
       const tierRow = ['normal', 'heroic'].map((tierId) => {
         const label = tierId === 'heroic' ? tierHeroic : tierNormal;
         const selected = this.selectedDelveTier === tierId ? ' selected' : '';
@@ -3267,7 +3286,9 @@ export class Hud {
       body = `<div class="delve-board-greeting">${esc(t('delveUi.npc.halven.greeting'))}</div>`
         + `<div class="delve-tier-row">${tierRow}</div>`
         + `<div class="delve-companion-row"><div class="delve-companion-label">${esc(t('delveUi.board.companion.pick'))}</div>`
-        + `<button type="button" class="delve-companion-btn" disabled aria-label="${esc(t('delveUi.board.companion.tessa'))}">${esc(t('delveUi.board.companion.tessa'))} <span class="quest-muted">(${esc(tessaRankLabel)})</span></button></div>`
+        + `<div class="delve-companion-name">${esc(tessaName)} <span class="quest-muted">(${esc(tessaRankLabel)})</span></div>`
+        + `<div class="delve-companion-boon quest-muted">${esc(t('delveUi.board.companion.boon'))}</div>`
+        + `${companionAction}</div>`
         + `<button type="button" class="btn delve-enter-btn" data-delve-enter aria-label="${esc(t('delveUi.board.enterAria', { delve: delveName, tier: this.selectedDelveTier === 'heroic' ? tierHeroic : tierNormal }))}"${canEnter ? '' : ' disabled'}>${esc(t('delveUi.board.enter'))}</button>`;
     }
     el.innerHTML = `<div class="panel-title"><span>${esc(t('delveUi.board.title'))}</span><button type="button" class="x-btn" data-close aria-label="${esc(t('questUi.dialog.close'))}">${svgIcon('close')}</button></div>`
@@ -3292,6 +3313,10 @@ export class Hud {
           this.selectedDelveTier = (btn as HTMLElement).dataset.tierPick as 'normal' | 'heroic';
           this.renderDelveBoard(true);
         });
+      });
+      el.querySelector('[data-companion-upgrade]')?.addEventListener('click', () => {
+        this.sim.companionUpgrade('companion_tessa');
+        this.renderDelveBoard(true);
       });
       el.querySelector('[data-delve-enter]')?.addEventListener('click', () => {
         const tierId = this.selectedDelveTier;

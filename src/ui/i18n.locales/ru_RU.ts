@@ -3106,4 +3106,8 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   "sim.delve.shopItemLocked": "Вы ещё не открыли этот предмет.",
   "sim.delve.shopMarksRequired": "Чтобы купить {name}, нужно Меток Вылазок: {marks}.",
   "sim.delve.shopSealPremiumOnly": "Эта печать поддаётся лишь руке мастера: открыть её можно только Превосходной ставкой.",
+  "delveUi.board.companion.boon": "Лечит группу между боями. На 3 ранге один раз за вылазку поднимает павшего союзника.",
+  "delveUi.board.companion.upgrade": "Улучшить до ранга {rank} ({marks} меток)",
+  "delveUi.board.companion.upgradeAria": "Улучшить {name} до ранга {rank} за {marks} Меток Вылазок",
+  "delveUi.board.companion.maxRank": "Полностью улучшено",
 };

@@ -918,7 +918,11 @@ export const en_XA: EnTranslations = {
       "companion": {
         "pick": "[Çĥóóšé á çóɱþáñíóñ]",
         "tessa": "[Áçóļýţé Ţéššá]",
-        "rank": "[Ŕáñķ {rank}]"
+        "rank": "[Ŕáñķ {rank}]",
+        "boon": "[Ĥéáļš ţĥé þáŕţý ƀéţŵééñ ƒíĝĥţš. Ŕáñķ 3 ŕéʋíʋéš á ƒáļļéñ áļļý óñçé þéŕ ŕúñ.]",
+        "upgrade": "[Úþĝŕáðé ţó Ŕáñķ {rank} ({marks} Ɱáŕķš)]",
+        "upgradeAria": "[Úþĝŕáðé {name} ţó ŕáñķ {rank} ƒóŕ {marks} Ðéļʋé Ɱáŕķš]",
+        "maxRank": "[Ƒúļļý úþĝŕáðéð]"
       },
       "tabDelve": "[Ðéļʋé]",
       "tabShop": "[Šĥóþ]"

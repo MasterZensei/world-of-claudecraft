@@ -918,7 +918,11 @@ export const ja_JP: EnTranslations = {
       "companion": {
         "pick": "仲間を選ぶ",
         "tessa": "侍祭テッサ",
-        "rank": "ランク{rank}"
+        "rank": "ランク{rank}",
+        "boon": "戦闘の合間にパーティを回復する。ランク3ではデルヴごとに一度、倒れた仲間を蘇生する。",
+        "upgrade": "ランク{rank}に強化（刻印{marks}個）",
+        "upgradeAria": "デルヴの刻印{marks}個で{name}をランク{rank}に強化",
+        "maxRank": "最大ランク"
       },
       "tabDelve": "デルヴ",
       "tabShop": "Shop"

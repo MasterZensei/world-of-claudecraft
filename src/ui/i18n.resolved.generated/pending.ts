@@ -10,6 +10,10 @@
 
 export const pending: Record<string, readonly string[]> = {
   "es": [
+    "delveUi.board.companion.boon",
+    "delveUi.board.companion.maxRank",
+    "delveUi.board.companion.upgrade",
+    "delveUi.board.companion.upgradeAria",
     "delveUi.board.tabDelve",
     "delveUi.board.tabShop",
     "delveUi.shop.buy",
@@ -24,6 +28,10 @@ export const pending: Record<string, readonly string[]> = {
     "sim.delve.shopSealPremiumOnly"
   ],
   "es_ES": [
+    "delveUi.board.companion.boon",
+    "delveUi.board.companion.maxRank",
+    "delveUi.board.companion.upgrade",
+    "delveUi.board.companion.upgradeAria",
     "delveUi.board.tabDelve",
     "delveUi.board.tabShop",
     "delveUi.shop.buy",
@@ -38,6 +46,10 @@ export const pending: Record<string, readonly string[]> = {
     "sim.delve.shopSealPremiumOnly"
   ],
   "fr_FR": [
+    "delveUi.board.companion.boon",
+    "delveUi.board.companion.maxRank",
+    "delveUi.board.companion.upgrade",
+    "delveUi.board.companion.upgradeAria",
     "delveUi.board.tabDelve",
     "delveUi.board.tabShop",
     "delveUi.shop.buy",
@@ -52,6 +64,10 @@ export const pending: Record<string, readonly string[]> = {
     "sim.delve.shopSealPremiumOnly"
   ],
   "fr_CA": [
+    "delveUi.board.companion.boon",
+    "delveUi.board.companion.maxRank",
+    "delveUi.board.companion.upgrade",
+    "delveUi.board.companion.upgradeAria",
     "delveUi.board.tabDelve",
     "delveUi.board.tabShop",
     "delveUi.shop.buy",
@@ -67,6 +83,10 @@ export const pending: Record<string, readonly string[]> = {
   ],
   "en_CA": [],
   "it_IT": [
+    "delveUi.board.companion.boon",
+    "delveUi.board.companion.maxRank",
+    "delveUi.board.companion.upgrade",
+    "delveUi.board.companion.upgradeAria",
     "delveUi.board.tabDelve",
     "delveUi.board.tabShop",
     "delveUi.shop.buy",
@@ -81,6 +101,10 @@ export const pending: Record<string, readonly string[]> = {
     "sim.delve.shopSealPremiumOnly"
   ],
   "de_DE": [
+    "delveUi.board.companion.boon",
+    "delveUi.board.companion.maxRank",
+    "delveUi.board.companion.upgrade",
+    "delveUi.board.companion.upgradeAria",
     "delveUi.board.tabDelve",
     "delveUi.board.tabShop",
     "delveUi.shop.buy",
@@ -111,6 +135,10 @@ export const pending: Record<string, readonly string[]> = {
     "delveUi.shop.buy"
   ],
   "pt_BR": [
+    "delveUi.board.companion.boon",
+    "delveUi.board.companion.maxRank",
+    "delveUi.board.companion.upgrade",
+    "delveUi.board.companion.upgradeAria",
     "delveUi.board.tabDelve",
     "delveUi.board.tabShop",
     "delveUi.shop.buy",

@@ -918,7 +918,11 @@ export const de_DE: EnTranslations = {
       "companion": {
         "pick": "Wähle einen Gefährten",
         "tessa": "Akolythin Tessa",
-        "rank": "Rang {rank}"
+        "rank": "Rang {rank}",
+        "boon": "Heals the party between fights. Rank 3 revives a fallen ally once per run.",
+        "upgrade": "Upgrade to Rank {rank} ({marks} Marks)",
+        "upgradeAria": "Upgrade {name} to rank {rank} for {marks} Delve Marks",
+        "maxRank": "Fully upgraded"
       },
       "tabDelve": "Delve",
       "tabShop": "Shop"

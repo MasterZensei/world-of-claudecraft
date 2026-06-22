@@ -918,7 +918,11 @@ export const ru_RU: EnTranslations = {
       "companion": {
         "pick": "Выберите спутника",
         "tessa": "Послушница Тесса",
-        "rank": "Ранг {rank}"
+        "rank": "Ранг {rank}",
+        "boon": "Лечит группу между боями. На 3 ранге один раз за вылазку поднимает павшего союзника.",
+        "upgrade": "Улучшить до ранга {rank} ({marks} меток)",
+        "upgradeAria": "Улучшить {name} до ранга {rank} за {marks} Меток Вылазок",
+        "maxRank": "Полностью улучшено"
       },
       "tabDelve": "Вылазка",
       "tabShop": "Shop"

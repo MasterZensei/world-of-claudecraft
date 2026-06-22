@@ -3106,4 +3106,8 @@ export const zh_TW: Partial<Record<TranslationKey, string>> = {
   "sim.delve.shopItemLocked": "你尚未解鎖該物品。",
   "sim.delve.shopMarksRequired": "購買 {name} 需要 {marks} 枚秘探印記。",
   "sim.delve.shopSealPremiumOnly": "此封印只向大師之手屈服，唯有上等投入方能開啟。",
+  "delveUi.board.companion.boon": "在戰鬥間隙治療隊伍。3級時每次秘探可復活一名倒下的隊友一次。",
+  "delveUi.board.companion.upgrade": "升級到 {rank} 級（{marks} 印記）",
+  "delveUi.board.companion.upgradeAria": "用 {marks} 枚秘探印記將 {name} 升級到 {rank} 級",
+  "delveUi.board.companion.maxRank": "已滿級",
 };

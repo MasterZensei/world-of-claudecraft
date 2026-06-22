@@ -918,7 +918,11 @@ export const zh_TW: EnTranslations = {
       "companion": {
         "pick": "選擇一名同伴",
         "tessa": "侍僧泰莎",
-        "rank": "第 {rank} 階"
+        "rank": "第 {rank} 階",
+        "boon": "在戰鬥間隙治療隊伍。3級時每次秘探可復活一名倒下的隊友一次。",
+        "upgrade": "升級到 {rank} 級（{marks} 印記）",
+        "upgradeAria": "用 {marks} 枚秘探印記將 {name} 升級到 {rank} 級",
+        "maxRank": "已滿級"
       },
       "tabDelve": "秘探",
       "tabShop": "Shop"

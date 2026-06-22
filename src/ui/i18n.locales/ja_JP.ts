@@ -3106,4 +3106,8 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   "sim.delve.shopItemLocked": "そのアイテムはまだ解放されていない。",
   "sim.delve.shopMarksRequired": "{name}を購入するにはデルヴの刻印が{marks}個必要だ。",
   "sim.delve.shopSealPremiumOnly": "この封印は達人の手にのみ応じる。極上の賭けだけが開くことができる。",
+  "delveUi.board.companion.boon": "戦闘の合間にパーティを回復する。ランク3ではデルヴごとに一度、倒れた仲間を蘇生する。",
+  "delveUi.board.companion.upgrade": "ランク{rank}に強化（刻印{marks}個）",
+  "delveUi.board.companion.upgradeAria": "デルヴの刻印{marks}個で{name}をランク{rank}に強化",
+  "delveUi.board.companion.maxRank": "最大ランク",
 };

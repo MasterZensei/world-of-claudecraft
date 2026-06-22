@@ -3106,4 +3106,8 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   "sim.delve.shopItemLocked": "아직 잠금 해제되지 않은 아이템입니다.",
   "sim.delve.shopMarksRequired": "{name}을(를) 구매하려면 탐굴 증표 {marks}개가 필요합니다.",
   "sim.delve.shopSealPremiumOnly": "이 봉인은 대가의 손에만 응합니다. 최상급 베팅만이 열 수 있습니다.",
+  "delveUi.board.companion.boon": "전투 사이에 파티를 치유합니다. 3랭크에서는 탐굴마다 한 번 쓰러진 아군을 부활시킵니다.",
+  "delveUi.board.companion.upgrade": "{rank}랭크로 강화 (증표 {marks}개)",
+  "delveUi.board.companion.upgradeAria": "탐굴 증표 {marks}개로 {name}을(를) {rank}랭크로 강화",
+  "delveUi.board.companion.maxRank": "최대 강화",
 };

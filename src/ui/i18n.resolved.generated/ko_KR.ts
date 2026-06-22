@@ -918,7 +918,11 @@ export const ko_KR: EnTranslations = {
       "companion": {
         "pick": "동료 선택",
         "tessa": "수련사제 테사",
-        "rank": "{rank}등급"
+        "rank": "{rank}등급",
+        "boon": "전투 사이에 파티를 치유합니다. 3랭크에서는 탐굴마다 한 번 쓰러진 아군을 부활시킵니다.",
+        "upgrade": "{rank}랭크로 강화 (증표 {marks}개)",
+        "upgradeAria": "탐굴 증표 {marks}개로 {name}을(를) {rank}랭크로 강화",
+        "maxRank": "최대 강화"
       },
       "tabDelve": "탐굴",
       "tabShop": "Shop"

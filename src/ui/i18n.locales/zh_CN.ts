@@ -3106,4 +3106,8 @@ export const zh_CN: Partial<Record<TranslationKey, string>> = {
   "sim.delve.shopItemLocked": "你尚未解锁该物品。",
   "sim.delve.shopMarksRequired": "购买{name}需要 {marks} 枚探秘印记。",
   "sim.delve.shopSealPremiumOnly": "此封印只向大师之手屈服，唯有上乘投入方能开启。",
+  "delveUi.board.companion.boon": "在战斗间隙治疗队伍。3级时每次探秘可复活一名倒下的队友一次。",
+  "delveUi.board.companion.upgrade": "升级到 {rank} 级（{marks} 印记）",
+  "delveUi.board.companion.upgradeAria": "用 {marks} 枚探秘印记将{name}升级到 {rank} 级",
+  "delveUi.board.companion.maxRank": "已满级",
 };
