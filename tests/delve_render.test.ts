@@ -1,4 +1,5 @@
-// Delve module stacking and slot detection — guards render/collider alignment.
+// Delve module stacking, slot detection, and render prop shapes.
+import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
 import {
   defaultDelveModules,
@@ -126,5 +127,81 @@ describe('delve walkable width', () => {
     expect(loc.moduleIndex).toBe(0);
     expect(loc.oz).toBe(oz);
     expect(layout.zMax - layout.zMin).toBe(110);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildDelveInteractable -- procedural mesh shape tests
+// ---------------------------------------------------------------------------
+import { buildDelveInteractable } from '../src/render/delve_props';
+
+const ALL_DELVE_IDS = [
+  'delve_locked_door',
+  'delve_pressure_plate',
+  'delve_pressure_plate_triggered',
+  'delve_cracked_grave',
+  'delve_module_exit',
+  'delve_reward_chest',
+  'delve_locked_chest',
+  'delve_surface_exit',
+  'delve_destructible_wall',
+] as const;
+
+describe('buildDelveInteractable', () => {
+  it('returns a non-empty group for every templateId', () => {
+    for (const id of ALL_DELVE_IDS) {
+      const { group, height } = buildDelveInteractable(id, 42);
+      expect(group, `${id} group`).toBeInstanceOf(THREE.Group);
+      expect(group.children.length, `${id} has children`).toBeGreaterThan(0);
+      expect(height, `${id} height > 0`).toBeGreaterThan(0);
+    }
+  });
+
+  it('returns a non-empty group for an unknown delve_* id (fallback crate)', () => {
+    const { group, height } = buildDelveInteractable('delve_unknown_thing', 1);
+    expect(group.children.length).toBeGreaterThan(0);
+    expect(height).toBeGreaterThan(0);
+  });
+
+  it('portcullis bounding box X extent is >= 24 to cover the ~28-wide collider', () => {
+    const { group } = buildDelveInteractable('delve_locked_door', 1);
+    group.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(group);
+    const xSpan = box.max.x - box.min.x;
+    expect(xSpan).toBeGreaterThanOrEqual(24);
+  });
+
+  it('portcullis height is >= 6 (covers full dungeon wall height of 8)', () => {
+    const { height } = buildDelveInteractable('delve_locked_door', 1);
+    expect(height).toBeGreaterThanOrEqual(6);
+  });
+
+  it('pressure plate is low-profile (height < 1)', () => {
+    const { height: hOff } = buildDelveInteractable('delve_pressure_plate', 5);
+    const { height: hOn } = buildDelveInteractable('delve_pressure_plate_triggered', 5);
+    expect(hOff).toBeLessThan(1);
+    expect(hOn).toBeLessThan(1);
+  });
+
+  it('triggered pressure plate has more children than untriggered (glow + runes added)', () => {
+    const { group: off } = buildDelveInteractable('delve_pressure_plate', 7);
+    const { group: on } = buildDelveInteractable('delve_pressure_plate_triggered', 7);
+    expect(on.children.length).toBeGreaterThan(off.children.length);
+  });
+
+  it('portcullis does not vary by entityId (fixed layout)', () => {
+    const { group: door1 } = buildDelveInteractable('delve_locked_door', 1);
+    const { group: door2 } = buildDelveInteractable('delve_locked_door', 99);
+    expect(door1.rotation.y).toBe(door2.rotation.y);
+    expect(door1.children.length).toBe(door2.children.length);
+  });
+
+  it('chests and graves have > 0 children regardless of entityId', () => {
+    for (const id of ['delve_reward_chest', 'delve_locked_chest', 'delve_cracked_grave'] as const) {
+      const { group: g1 } = buildDelveInteractable(id, 1);
+      const { group: g2 } = buildDelveInteractable(id, 999);
+      expect(g1.children.length, `${id} entityId=1`).toBeGreaterThan(0);
+      expect(g2.children.length, `${id} entityId=999`).toBeGreaterThan(0);
+    }
   });
 });

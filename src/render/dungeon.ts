@@ -296,6 +296,24 @@ const RECEIVER_KINDS = new Set([
 
 // ---------------------------------------------------------------------------
 
+/**
+ * Build a single non-instanced mesh for one loaded dungeon-kit prop (e.g.
+ * 'chest_gold', 'grave_B'). Lets a per-entity render path (delve interactables)
+ * use the real KayKit GLB instead of procedural geometry. Returns null if the
+ * kit has not finished loading yet, so callers fall back to procedural. Geometry
+ * and material are shared with the instanced path (cheap clone-free reuse).
+ */
+export function buildDungeonPropMesh(kind: string): THREE.Mesh | null {
+  const asset = moduleAssets.get(kind);
+  if (!asset) return null;
+  const mat = packSourceMaterial.get(asset.pack);
+  if (!mat) return null;
+  const mesh = new THREE.Mesh(asset.geo, mat);
+  mesh.castShadow = CASTER_KINDS.has(kind);
+  mesh.receiveShadow = RECEIVER_KINDS.has(kind);
+  return mesh;
+}
+
 // kept for legacy callers: tile a geometry's 0..1 UVs for shared textures
 export function scaleUv(geo: THREE.BufferGeometry, su: number, sv: number): THREE.BufferGeometry {
   const uv = geo.attributes.uv as THREE.BufferAttribute;

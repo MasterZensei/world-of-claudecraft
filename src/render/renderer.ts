@@ -26,6 +26,7 @@ import { buildDelveModule } from './delve_interiors';
 import { ensureDelveInteriorKit } from './interior_kit';
 import { type DelveModuleId } from '../sim/delve_layout';
 import { buildGroundQuestObject } from './quest_objects';
+import { buildDelveInteractable } from './delve_props';
 import { Vfx } from './vfx';
 import { Weather } from './weather';
 import {
@@ -2476,6 +2477,30 @@ export class Renderer {
       portal = built.portal;
       height = 4.6;
       objectMesh = body!;
+    } else if (e.kind === 'object' && e.templateId?.startsWith('delve_')) {
+      // Delve interactables: skip the object pool (each is unique/stateful) and
+      // build a dedicated procedural mesh that matches the crypt aesthetic.
+      objectPoolKey = null;
+      const built = buildDelveInteractable(e.templateId, e.id);
+      body = built.group;
+      height = built.height;
+      objectMesh = body!;
+      // Pressure plates are flush to the floor — no sparkle clutter overhead.
+      if (
+        e.templateId !== 'delve_pressure_plate' &&
+        e.templateId !== 'delve_pressure_plate_triggered' &&
+        e.templateId !== 'delve_locked_door' &&
+        e.templateId !== 'delve_destructible_wall'
+      ) {
+        if (!this.sparkleMat) {
+          this.sparkleMat = new THREE.SpriteMaterial({ map: sparkleTexture(), transparent: true, depthWrite: false });
+          if (!this.lowGfx) this.sparkleMat.color.setScalar(SPARKLE_BOOST);
+        }
+        sparkle = new THREE.Sprite(this.sparkleMat);
+        sparkle.scale.set(0.9, 0.9, 1);
+        sparkle.position.y = 1.35;
+        group.add(sparkle);
+      }
     } else if (e.kind === 'object') {
       objectPoolKey = this.objectPoolKeyFor(e);
       const pooled = objectPoolKey ? this.takePooledObject(objectPoolKey) : null;
