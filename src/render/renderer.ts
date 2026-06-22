@@ -6,6 +6,8 @@ import { drapeRingLocalY } from './selection_ring';
 import {
   CLASSES, MOBS, ABILITIES, DUNGEON_X_THRESHOLD, DUNGEON_LIST, QUESTS,
   instanceOrigin, INSTANCE_SLOT_COUNT, ARENA_SLOT_COUNT, arenaOrigin, isArenaPos, dungeonAt,
+  isDelvePos, delveAt, delveOrigin, delveSlotAt, delveModuleZOffset, delveModuleStackEndRelZ,
+  defaultDelveModules, DELVE_MODULE_Z_START,
   WORLD_MAX_Z, WORLD_MIN_Z, ZONES,
 } from '../sim/data';
 import { cameraOcclusion } from '../sim/colliders';
@@ -20,6 +22,9 @@ import type { SpatialAudioSink, Surface } from './audio_sink';
 import { buildPropMaterialPrewarmGroup, buildProps } from './props';
 import { plankTexture, sparkleTexture } from './textures';
 import { DungeonInteriors, ensureDungeonAssets } from './dungeon';
+import { buildDelveModule } from './delve_interiors';
+import { ensureDelveInteriorKit } from './interior_kit';
+import { type DelveModuleId } from '../sim/delve_layout';
 import { buildGroundQuestObject } from './quest_objects';
 import { Vfx } from './vfx';
 import { Weather } from './weather';
@@ -2212,6 +2217,9 @@ export class Renderer {
       case 'levelup':
         this.vfx.levelUpPillar(this.sim.playerId);
         break;
+      case 'delveEntered':
+        this.prebuildDelveInteriors(ev.delveId);
+        break;
       case 'fiestaPowerup':
         // Big celebratory pop on grab, plus a lingering coloured glow.
         this.vfx.levelUpPillar(ev.entityId);
@@ -2670,7 +2678,10 @@ export class Renderer {
   // ---------------------------------------------------------------------
 
   private builtInteriors = new Set<string>();
-  private fogState: 'outdoor' | 'dungeon' | 'temple' | 'nythraxis' | 'underwater' = 'outdoor';
+  // Delve module interiors build asynchronously; track in-flight keys so a
+  // per-frame ensureDelveInteriorsNear does not re-schedule a build mid-load.
+  private pendingInteriors = new Set<string>();
+  private fogState: 'outdoor' | 'dungeon' | 'temple' | 'nythraxis' | 'delve' | 'underwater' = 'outdoor';
 
   private buildInterior(interior: string, ox: number, oz: number): void {
     this.dungeons ??= new DungeonInteriors(this.scene, this.lowGfx, this.flames, this.fireLights);
@@ -2693,12 +2704,79 @@ export class Renderer {
     return Renderer.BIOME_FOG[zoneBiomeAt(this.sim.player.pos.z)];
   }
 
+  private scheduleDelveModuleBuild(key: string, moduleId: DelveModuleId, ox: number, oz: number): void {
+    if (this.builtInteriors.has(key) || this.pendingInteriors.has(key)) return;
+    this.pendingInteriors.add(key);
+    this.dungeons ??= new DungeonInteriors(this.scene, this.lowGfx, this.flames, this.fireLights);
+    void buildDelveModule(this.dungeons, moduleId, ox, oz).then(() => {
+      this.builtInteriors.add(key);
+      this.pendingInteriors.delete(key);
+    }).catch((err) => {
+      this.pendingInteriors.delete(key);
+      if (import.meta.env?.DEV) {
+        console.warn('Failed to build delve interior:', moduleId, 'at', ox, oz, err);
+      }
+    });
+  }
+
+  /** Build every module in a delve run at its stacked z offset (parallel async). */
+  private buildAllDelveModules(
+    delveId: string,
+    slot: number,
+    origin: { x: number; z: number },
+    modules: readonly DelveModuleId[],
+  ): void {
+    void ensureDelveInteriorKit().catch(() => undefined);
+    for (let mi = 0; mi < modules.length; mi++) {
+      const moduleId = modules[mi];
+      const key = `delve:${delveId}:${slot}:${moduleId}`;
+      if (this.builtInteriors.has(key) || this.pendingInteriors.has(key)) continue;
+      const zOff = delveModuleZOffset(modules, mi);
+      this.scheduleDelveModuleBuild(key, moduleId, origin.x, origin.z + zOff);
+    }
+  }
+
+  /** Prebuild the full module stack when a delve run starts (offline + online). */
+  private prebuildDelveInteriors(delveId: string): void {
+    const run = this.sim.delveRun;
+    if (!run || run.delveId !== delveId || !run.modules.length) return;
+    this.buildAllDelveModules(
+      delveId,
+      run.slot,
+      run.origin,
+      run.modules as DelveModuleId[],
+    );
+  }
+
+  private ensureDelveInteriorsNear(px: number, pz: number): void {
+    const delve = delveAt(px);
+    if (!delve) return;
+    const run = this.sim.delveRun;
+    const modules = (run?.delveId === delve.id && run.modules.length
+      ? run.modules
+      : defaultDelveModules(delve.id)) as DelveModuleId[];
+    const slot = run?.delveId === delve.id
+      ? run.slot
+      : delveSlotAt(delve.index, pz, modules);
+    const origin = run?.delveId === delve.id
+      ? run.origin
+      : delveOrigin(delve.index, slot);
+    // Slot origins are 500u apart on z; nearest-slot heuristics mis-pick slot 1+
+    // once the player advances past module 1 (interiors build at the wrong oz).
+    if (Math.abs(px - origin.x) >= 120) return;
+    const stackEndZ = origin.z + delveModuleStackEndRelZ(modules);
+    if (pz < origin.z + DELVE_MODULE_Z_START - 30 || pz > stackEndZ) return;
+    this.buildAllDelveModules(delve.id, slot, origin, modules);
+  }
+
   private updateAmbience(px: number, camY: number, dt: number): void {
     const inside = px > DUNGEON_X_THRESHOLD;
-    if (inside && isArenaPos(px)) {
+    const pz = this.sim.player.pos.z;
+    if (isDelvePos(px)) {
+      this.ensureDelveInteriorsNear(px, pz);
+    } else if (inside && isArenaPos(px)) {
       void ensureDungeonAssets().catch(() => undefined);
       // build the Ashen Coliseum copy the player was matched into
-      const pz = this.sim.player.pos.z;
       for (let i = 0; i < ARENA_SLOT_COUNT; i++) {
         const key = `arena:${i}`;
         if (this.builtInteriors.has(key)) continue;
@@ -2725,10 +2803,12 @@ export class Renderer {
     }
     // the Drowned Temple reads as submerged: a teal murk instead of the
     // crypt's near-black, so its flooded halls feel underwater, not just dark
-    const interior = inside && !isArenaPos(px) ? dungeonAt(px)?.interior : null;
+    const inDelve = inside && isDelvePos(px);
+    const interior = inside && !inDelve && !isArenaPos(px) ? dungeonAt(px)?.interior : null;
     const inTemple = interior === 'temple';
     const inNythraxis = interior === 'nythraxis';
-    const desired = inTemple ? 'temple'
+    const desired = inDelve ? 'delve'
+      : inTemple ? 'temple'
       : inNythraxis ? 'nythraxis'
         : inside ? 'dungeon'
         : camY < WATER_LEVEL - 0.05 ? 'underwater' : 'outdoor';
@@ -2749,6 +2829,13 @@ export class Renderer {
         fog.color.setHex(0x020106);
         fog.near = 20;
         fog.far = 80;
+      } else if (desired === 'delve') {
+        // the collapsed reliquary breathes a warm ember murk — dried-blood
+        // charcoal, tighter than the overworld crypt's cold near-black — so the
+        // delve reads as its own claustrophobic place under the red torches
+        fog.color.setHex(0x0e0705);
+        fog.near = 14;
+        fog.far = 74;
       } else if (desired === 'underwater') {
         fog.color.setHex(0x17506e);
         fog.near = 2;
@@ -2763,7 +2850,7 @@ export class Renderer {
       // underground so the torch point lights own the scene; restore outside.
       // The rim glow cranks up instead — silhouettes must split from the murk.
       if (!this.lowGfx) {
-        const underground = desired === 'dungeon' || desired === 'temple' || desired === 'nythraxis';
+        const underground = desired === 'dungeon' || desired === 'temple' || desired === 'nythraxis' || desired === 'delve';
         this.sun.intensity = underground ? DUNGEON_SUN_INTENSITY : SUN_INTENSITY;
         this.hemi.intensity = underground ? DUNGEON_HEMI_INTENSITY : HEMI_INTENSITY;
         this.scene.environmentIntensity = underground ? DUNGEON_ENV_INTENSITY : this.envOutdoorIntensity;
