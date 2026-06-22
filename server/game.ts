@@ -1517,6 +1517,12 @@ export class GameServer {
       }
       case 'companion_upgrade': {
         if (typeof msg.companionId !== 'string') break;
+        const e = sim.entities.get(pid);
+        if (!e || e.dead) break;
+        // Geo-gate to the board NPC (at the delve door), like enter_delve / delve_buy:
+        // the companion is ranked up at Brother Halven, not from anywhere in the world.
+        const delve = Object.values(DELVES).find((d) => d.autoCompanionId === msg.companionId);
+        if (!delve || Math.hypot(e.pos.x - delve.doorPos.x, e.pos.z - delve.doorPos.z) > 12) break;
         sim.companionUpgrade(msg.companionId, pid);
         break;
       }

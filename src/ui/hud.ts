@@ -5125,6 +5125,7 @@ export class Hud {
         }
         case 'delveChestLoot': this.openDelveLoot(ev.chestId, ev.items); break;
         case 'delveComplete': this.showBanner(t('delveUi.summary.title')); break;
+        case 'delveFailed': this.showBanner(t('delveUi.run.failed')); break;
         case 'companionBark': {
           // Acolyte Tessa's voice line: overhead bubble over her (when on-screen),
           // plus an attributed combat-log line so it is never missed off-screen.
