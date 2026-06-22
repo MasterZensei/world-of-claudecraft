@@ -120,7 +120,7 @@ export const PLACEHOLDER_DELVE: DelveDef = {
 
   suggestedPlayers: 1,
 
-  doorPos: { x: 0, z: 0 },
+  doorPos: { x: 12, z: -52 }, // off the world origin; offset from collapsed_reliquary's board door at (-5, -52)
 
   modules: ['placeholder_entry', 'placeholder_hall'],
 
