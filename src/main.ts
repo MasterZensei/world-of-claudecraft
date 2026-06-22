@@ -23,6 +23,7 @@ import { sfx } from './game/sfx';
 import { activePvpOpponentIds, handlePickedEntity, hoverCursorKind, isAttackableEntity } from './game/interactions';
 import { clickMoveShouldWalk, clickMoveStep, distance2d, latencyAdjustedStopDistance, resolveClickMoveAction, stepAngleToward } from './game/click_move';
 import { Api, isAuthError, ClientWorld, CharacterSummary, NATIVE_APP, type ReleaseEntry } from './net/online';
+import { createNativeAttestationProof } from './net/native_attestation';
 import { setWalletDisplayAvailable, setWocBalance, setWalletUiEnabled, resolveWocBalanceUpdate } from './ui/wallet_balance';
 import {
   accountPortalModel, validatePasswordChange, validateEmailShape, deactivateConfirmReady,
@@ -1891,7 +1892,7 @@ const hoverTimeouts: Record<string, number | null> = {
 };
 
 function switchMainView(targetId: string): void {
-  const views = ['#hero-view', '#highscores-view', '#wiki-view', '#news-view', '#download-view', '#account-view'];
+  const views = ['#hero-view', '#highscores-view', '#news-view', '#download-view', '#account-view'];
   const currentViewId = views.find(id => {
     const el = $(id);
     return el && !el.hasAttribute('hidden');
@@ -1902,7 +1903,6 @@ function switchMainView(targetId: string): void {
   const navMap: Record<string, string> = {
     '#hero-view': 'nav-btn-play',
     '#highscores-view': 'nav-btn-highscores',
-    '#wiki-view': 'nav-btn-wiki',
     '#news-view': 'nav-btn-news',
     '#download-view': 'nav-btn-download',
     '#account-view': 'nav-btn-account'
@@ -4386,13 +4386,14 @@ function wireStartScreens(): void {
     const password = ($('#login-pass') as unknown as HTMLInputElement).value;
     loginError('');
     const token = turnstileToken();
-    if (TURNSTILE_SITEKEY && !token) {
+    if (!NATIVE_APP && TURNSTILE_SITEKEY && !token) {
       loginError(t('errors.api.verificationFailed'));
       return;
     }
     try {
-      if (mode === 'login') await api.login(username, password, token);
-      else await api.register(username, password, token, REFERRAL_SLUG);
+      const nativeAttestation = NATIVE_APP ? await createNativeAttestationProof(api.base, mode) : undefined;
+      if (mode === 'login') await api.login(username, password, token, nativeAttestation);
+      else await api.register(username, password, token, REFERRAL_SLUG, nativeAttestation);
     } catch (err) {
       // Auth itself failed (bad credentials, taken username, Turnstile reject…).
       // The token is single-use, so refresh the widget for the next attempt.
@@ -4783,7 +4784,9 @@ function wireStartScreens(): void {
     switchMainView('#highscores-view');
     void loadHighscores();
   });
-  setupNavBtn(navBtnWiki, '#wiki-view');
+  // The wiki is the curated guide SPA at /wiki (its own page), so this nav item
+  // navigates there rather than switching an in-page view.
+  setupNavBtn(navBtnWiki, '', () => { window.location.href = '/wiki'; });
   setupNavBtn(navBtnNews, '#news-view', () => {
     switchMainView('#news-view');
     void loadNews();

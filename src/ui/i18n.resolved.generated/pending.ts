@@ -22,8 +22,6 @@ export const pending: Record<string, readonly string[]> = {
     "delveUi.shop.price",
     "delveUi.shop.reqClears",
     "delveUi.shop.reqHeroic",
-    "hudChrome.perf.groups.input",
-    "hudChrome.perf.labels.apm",
     "sim.delve.levelRequiredTier",
     "sim.delve.shopItemLocked",
     "sim.delve.shopMarksRequired",
@@ -42,8 +40,6 @@ export const pending: Record<string, readonly string[]> = {
     "delveUi.shop.price",
     "delveUi.shop.reqClears",
     "delveUi.shop.reqHeroic",
-    "hudChrome.perf.groups.input",
-    "hudChrome.perf.labels.apm",
     "sim.delve.levelRequiredTier",
     "sim.delve.shopItemLocked",
     "sim.delve.shopMarksRequired",
@@ -62,8 +58,6 @@ export const pending: Record<string, readonly string[]> = {
     "delveUi.shop.price",
     "delveUi.shop.reqClears",
     "delveUi.shop.reqHeroic",
-    "hudChrome.perf.groups.input",
-    "hudChrome.perf.labels.apm",
     "sim.delve.levelRequiredTier",
     "sim.delve.shopItemLocked",
     "sim.delve.shopMarksRequired",
@@ -82,8 +76,6 @@ export const pending: Record<string, readonly string[]> = {
     "delveUi.shop.price",
     "delveUi.shop.reqClears",
     "delveUi.shop.reqHeroic",
-    "hudChrome.perf.groups.input",
-    "hudChrome.perf.labels.apm",
     "sim.delve.levelRequiredTier",
     "sim.delve.shopItemLocked",
     "sim.delve.shopMarksRequired",
@@ -103,8 +95,6 @@ export const pending: Record<string, readonly string[]> = {
     "delveUi.shop.price",
     "delveUi.shop.reqClears",
     "delveUi.shop.reqHeroic",
-    "hudChrome.perf.groups.input",
-    "hudChrome.perf.labels.apm",
     "sim.delve.levelRequiredTier",
     "sim.delve.shopItemLocked",
     "sim.delve.shopMarksRequired",
@@ -123,8 +113,6 @@ export const pending: Record<string, readonly string[]> = {
     "delveUi.shop.price",
     "delveUi.shop.reqClears",
     "delveUi.shop.reqHeroic",
-    "hudChrome.perf.groups.input",
-    "hudChrome.perf.labels.apm",
     "sim.delve.levelRequiredTier",
     "sim.delve.shopItemLocked",
     "sim.delve.shopMarksRequired",
@@ -132,27 +120,19 @@ export const pending: Record<string, readonly string[]> = {
   ],
   "zh_CN": [
     "delveUi.board.tabShop",
-    "delveUi.shop.buy",
-    "hudChrome.perf.groups.input",
-    "hudChrome.perf.labels.apm"
+    "delveUi.shop.buy"
   ],
   "zh_TW": [
     "delveUi.board.tabShop",
-    "delveUi.shop.buy",
-    "hudChrome.perf.groups.input",
-    "hudChrome.perf.labels.apm"
+    "delveUi.shop.buy"
   ],
   "ko_KR": [
     "delveUi.board.tabShop",
-    "delveUi.shop.buy",
-    "hudChrome.perf.groups.input",
-    "hudChrome.perf.labels.apm"
+    "delveUi.shop.buy"
   ],
   "ja_JP": [
     "delveUi.board.tabShop",
-    "delveUi.shop.buy",
-    "hudChrome.perf.groups.input",
-    "hudChrome.perf.labels.apm"
+    "delveUi.shop.buy"
   ],
   "pt_BR": [
     "delveUi.board.companion.boon",
@@ -167,8 +147,6 @@ export const pending: Record<string, readonly string[]> = {
     "delveUi.shop.price",
     "delveUi.shop.reqClears",
     "delveUi.shop.reqHeroic",
-    "hudChrome.perf.groups.input",
-    "hudChrome.perf.labels.apm",
     "sim.delve.levelRequiredTier",
     "sim.delve.shopItemLocked",
     "sim.delve.shopMarksRequired",
@@ -176,8 +154,6 @@ export const pending: Record<string, readonly string[]> = {
   ],
   "ru_RU": [
     "delveUi.board.tabShop",
-    "delveUi.shop.buy",
-    "hudChrome.perf.groups.input",
-    "hudChrome.perf.labels.apm"
+    "delveUi.shop.buy"
   ]
 };
