@@ -509,7 +509,7 @@ export const en = {
       tessa: {
         combat_start: "Keep your footing, {playerName}. The dead are restless here.",
         low_hp: "Breathe. I still have prayers left for you.",
-        trap_spotted: "Hold — something in the floor remembers footsteps.",
+        trap_spotted: "Hold. Something in the floor remembers footsteps.",
         boss_pull: "That bell knows your weight, {playerName}. Do not kneel.",
         completion: "The ledger can rest another night. Well done.",
         rank: {
@@ -528,7 +528,7 @@ export const en = {
           log: "Deacon Varric begins to toll the burial bell.",
           warning: "Move away from Deacon Varric!",
           impact: "The bell's toll cracks the chamber floor!",
-          lesson: "Bell Toll — a ground slam every twelve seconds. Move out before it lands.",
+          lesson: "Bell Toll: a ground slam every twelve seconds. Move out before it lands.",
         },
         raise: {
           emote: "Deacon Varric calls names from the broken graves!",
@@ -549,7 +549,7 @@ export const en = {
     lore: {
       eastbrook_ledger: "A water-stained page from Eastbrook's burial ledger. Names crossed out and rewritten in a hand that is not human.",
       first_collapse: "Chapel records note the first sinkage: saint-stones cracked, shelves tilted, and a bell-note heard from below ground.",
-      gravecaller_mark: "A sigil scraped into coffin wood — not Morthen's seal, but an older gravecaller mark predating the Hollow Crypt.",
+      gravecaller_mark: "A sigil scraped into coffin wood, not Morthen's seal, but an older gravecaller mark predating the Hollow Crypt.",
       bell_below: "Tessa's margin note: \"There is a second bell under the reliquary. It tolls for the misplaced, not the dead.\"",
       tessa_note: "Folded scrap in Tessa's script: \"If the ledgers change while we are below, trust the candle, not the voices.\"",
     },
@@ -564,7 +564,7 @@ export const en = {
       cult_remnants: "Cult Remnants",
     },
     blessing: {
-      chapel_candle: "Chapel Candle — safer run, one fewer Mark on completion.",
+      chapel_candle: "Chapel Candle: safer run, one fewer Mark on completion.",
     },
     chest: {
       flavor: "The dead have surrendered what they can spare.",
