@@ -1,7 +1,7 @@
 import { generateDecorations, groundHeight } from './world';
 import {
-  DELVE_SLOT_COUNT, DELVE_X_MIN, DUNGEON_X_THRESHOLD, INSTANCE_SLOT_COUNT, PROPS,
-  arenaOriginAt, defaultDelveModules, delveAt, delveModuleLocal, delveOrigin, dungeonAt,
+  DUNGEON_X_THRESHOLD, INSTANCE_SLOT_COUNT, PROPS,
+  arenaOriginAt, defaultDelveModules, delveAt, delveModuleLocal, dungeonAt,
   instanceOrigin, isArenaPos, isDelvePos,
 } from './data';
 import { delveModuleColliders, type DelveModuleId } from './delve_layout';
@@ -257,19 +257,6 @@ function instanceLocal(x: number, z: number): { ox: number; oz: number; interior
   }
   const o = instanceOrigin(index, best);
   return { ox: o.x, oz: o.z, interior: dungeon?.interior ?? 'crypt' };
-}
-
-function delveInstanceLocal(x: number, z: number): { ox: number; oz: number } {
-  const delve = delveAt(x);
-  const index = delve?.index ?? Math.round((x - DELVE_X_MIN) / 600);
-  let best = 0, bestD = Infinity;
-  for (let i = 0; i < DELVE_SLOT_COUNT; i++) {
-    const o = delveOrigin(index, i);
-    const d = Math.abs(z - o.z);
-    if (d < bestD) { bestD = d; best = i; }
-  }
-  const o = delveOrigin(index, best);
-  return { ox: o.x, oz: o.z };
 }
 
 // Resolve a movement destination against all static geometry. Movers slide
