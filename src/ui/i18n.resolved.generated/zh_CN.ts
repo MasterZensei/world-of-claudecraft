@@ -246,6 +246,11 @@ export const zh_CN: EnTranslations = {
       "browserEffectsReduced": "精简",
       "browserEffectsMinimal": "最低",
       "browserEffectsNote": "自动模式会根据你的浏览器和设备调低高开销的 CSS 特效（模糊、光晕、背景动画）。如果界面感觉卡顿，可手动降低。",
+      "interfaceMode": "界面模式",
+      "interfaceModeAuto": "自动",
+      "interfaceModeDesktop": "桌面",
+      "interfaceModeTouch": "触控",
+      "interfaceModeNote": "自动会根据你的设备选择桌面或触控操作。选择桌面可强制使用键盘和鼠标（适合带键盘的平板），选择触控则使用屏幕上的操作控件。",
       "footstepSounds": "脚步声",
       "clickFeedback": "点击标记",
       "showWalletOnCharacterScreen": "在角色界面显示钱包",
@@ -292,7 +297,8 @@ export const zh_CN: EnTranslations = {
         "frame": "帧与计时",
         "network": "网络",
         "renderer": "渲染器",
-        "system": "系统"
+        "system": "系统",
+        "input": "Input"
       },
       "labels": {
         "fps": "FPS",
@@ -312,7 +318,8 @@ export const zh_CN: EnTranslations = {
         "gpu": "GPU",
         "memory": "内存",
         "hitches": "卡顿",
-        "entities": "实体"
+        "entities": "实体",
+        "apm": "APM"
       },
       "themes": {
         "gold": "金色",

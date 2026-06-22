@@ -246,6 +246,11 @@ export const ja_JP: EnTranslations = {
       "browserEffectsReduced": "軽減",
       "browserEffectsMinimal": "最小",
       "browserEffectsNote": "自動はブラウザとデバイスに応じて、負荷の高い CSS エフェクト（ぼかし・グロー・背景アニメーション）を抑えます。動作が重い場合は手動で下げてください。",
+      "interfaceMode": "操作モード",
+      "interfaceModeAuto": "自動",
+      "interfaceModeDesktop": "デスクトップ",
+      "interfaceModeTouch": "タッチ",
+      "interfaceModeNote": "自動では、デバイスに応じてデスクトップ操作かタッチ操作を選びます。デスクトップを選ぶとキーボードとマウスに固定され（キーボード付きタブレットなどに便利）、タッチを選ぶと画面上の操作になります。",
       "footstepSounds": "足音",
       "clickFeedback": "クリックマーカー",
       "showWalletOnCharacterScreen": "キャラクター画面にウォレットを表示",
@@ -292,7 +297,8 @@ export const ja_JP: EnTranslations = {
         "frame": "フレームとタイミング",
         "network": "ネットワーク",
         "renderer": "レンダラー",
-        "system": "システム"
+        "system": "システム",
+        "input": "Input"
       },
       "labels": {
         "fps": "FPS",
@@ -312,7 +318,8 @@ export const ja_JP: EnTranslations = {
         "gpu": "GPU",
         "memory": "メモリ",
         "hitches": "カクつき",
-        "entities": "エンティティ"
+        "entities": "エンティティ",
+        "apm": "APM"
       },
       "themes": {
         "gold": "ゴールド",

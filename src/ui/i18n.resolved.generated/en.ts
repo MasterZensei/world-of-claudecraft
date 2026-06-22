@@ -246,6 +246,11 @@ export const en: EnTranslations = {
       "browserEffectsReduced": "Reduced",
       "browserEffectsMinimal": "Minimal",
       "browserEffectsNote": "Auto tones down heavy CSS effects (blur, glow, background motion) based on your browser and device. Lower it manually if the interface feels sluggish.",
+      "interfaceMode": "Interface Mode",
+      "interfaceModeAuto": "Auto",
+      "interfaceModeDesktop": "Desktop",
+      "interfaceModeTouch": "Touch",
+      "interfaceModeNote": "Auto picks desktop or touch controls from your device. Choose Desktop to force keyboard and mouse (useful on a tablet with a keyboard), or Touch for the on-screen controls.",
       "footstepSounds": "Footstep Sounds",
       "clickFeedback": "Click Marker",
       "showWalletOnCharacterScreen": "Show Wallet on Character Screen",
@@ -292,7 +297,8 @@ export const en: EnTranslations = {
         "frame": "Frame & Timing",
         "network": "Network",
         "renderer": "Renderer",
-        "system": "System"
+        "system": "System",
+        "input": "Input"
       },
       "labels": {
         "fps": "FPS",
@@ -312,7 +318,8 @@ export const en: EnTranslations = {
         "gpu": "GPU",
         "memory": "Memory",
         "hitches": "Hitches",
-        "entities": "Entities"
+        "entities": "Entities",
+        "apm": "APM"
       },
       "themes": {
         "gold": "Gold",

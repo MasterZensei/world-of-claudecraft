@@ -246,6 +246,11 @@ export const ko_KR: EnTranslations = {
       "browserEffectsReduced": "감소",
       "browserEffectsMinimal": "최소",
       "browserEffectsNote": "자동은 브라우저와 기기에 맞춰 무거운 CSS 효과(흐림, 글로우, 배경 모션)를 낮춥니다. 인터페이스가 느리게 느껴지면 수동으로 낮추세요.",
+      "interfaceMode": "인터페이스 모드",
+      "interfaceModeAuto": "자동",
+      "interfaceModeDesktop": "데스크톱",
+      "interfaceModeTouch": "터치",
+      "interfaceModeNote": "자동은 기기에 따라 데스크톱 또는 터치 조작을 선택합니다. 데스크톱을 선택하면 키보드와 마우스로 고정되며(키보드가 있는 태블릿 등에 유용), 터치를 선택하면 화면 조작이 됩니다.",
       "footstepSounds": "발소리",
       "clickFeedback": "클릭 표시",
       "showWalletOnCharacterScreen": "캐릭터 화면에 지갑 표시",
@@ -292,7 +297,8 @@ export const ko_KR: EnTranslations = {
         "frame": "프레임 및 시간",
         "network": "네트워크",
         "renderer": "렌더러",
-        "system": "시스템"
+        "system": "시스템",
+        "input": "Input"
       },
       "labels": {
         "fps": "FPS",
@@ -312,7 +318,8 @@ export const ko_KR: EnTranslations = {
         "gpu": "GPU",
         "memory": "메모리",
         "hitches": "버벅임",
-        "entities": "개체"
+        "entities": "개체",
+        "apm": "APM"
       },
       "themes": {
         "gold": "황금",

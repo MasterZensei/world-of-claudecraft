@@ -3,6 +3,7 @@ import { Sim } from '../src/sim/sim';
 import type { PlayerMeta } from '../src/sim/sim';
 import { DT, Entity, EQUIP_SLOTS, EquipSlot, RUN_SPEED, SimEvent, dist2d, emptyMoveInput } from '../src/sim/types';
 import { parseMoveInputFrame } from '../src/sim/move_input';
+import { verifyChallenge } from '../src/sim/client_challenge';
 import { stealthDetectionRadius, threatEntries } from '../src/sim/threat';
 import { zoneAt, DUNGEONS, DELVES } from '../src/sim/data';
 import { MECH_CHROMAS, mechChromaItemId, mechChromaSkinIndex } from '../src/sim/content/skins';
@@ -136,6 +137,8 @@ export interface ClientSession {
   // IP address at join time (from requestMetadata); used for per-IP session counting.
   ip: string;
   isAdmin: boolean;
+  // Seed the client sends at auth; signs its challenge answers.
+  clientSeed: string;
   // Behavioral bot-detection state. Ephemeral — reset on every join.
   botTrackingContext: BotTrackingContext;
 }
@@ -702,7 +705,7 @@ export class GameServer {
     cls: import('../src/sim/types').PlayerClass,
     state: import('../src/sim/sim').CharacterState | null,
     isGm = false,
-    meta: RequestMetadata & Partial<AccountChatMuteStatus> & { accountCosmetics?: AccountCosmetics; chatStrikes?: number; isAdmin?: boolean } = {},
+    meta: RequestMetadata & Partial<AccountChatMuteStatus> & { accountCosmetics?: AccountCosmetics; chatStrikes?: number; isAdmin?: boolean; clientSeed?: string } = {},
   ): ClientSession | { error: string } {
     if (this.sessionsByCharacterId.has(characterId)) return { error: 'character already in world' };
     // Anti-bot: cap simultaneous online characters per account. Accounts can
@@ -750,6 +753,7 @@ export class GameServer {
       sentEnts: new Map(),
       ip: sessionIp,
       isAdmin: meta.isAdmin ?? false,
+      clientSeed: meta.clientSeed ?? '',
       botTrackingContext,
     };
     this.ipSessionCounts.set(sessionIp, (this.ipSessionCounts.get(sessionIp) ?? 0) + 1);
@@ -1203,7 +1207,7 @@ export class GameServer {
       this.botDetector.observeProtocolAnomaly(session.botTrackingContext, 'unknown_type', raw, receivedAtMs);
       return;
     }
-    this.botDetector.observeCommand(session.botTrackingContext, String(msg.cmd ?? ''), receivedAtMs);
+    this.botDetector.observeCommand(session.botTrackingContext, String(msg.cmd ?? ''), receivedAtMs, msg);
     switch (msg.cmd) {
       case 'castSlot': sim.castAbilityBySlot(msg.slot | 0, pid); break;
       case 'cast': if (typeof msg.ability === 'string') sim.castAbility(msg.ability, pid); break;
@@ -1286,6 +1290,11 @@ export class GameServer {
         }
         break;
       case 'release': sim.releaseSpirit(pid); break;
+      case 'challengeResponse':
+        if (typeof msg.n === 'string' && typeof msg.r === 'string' && typeof msg.sig === 'string') {
+          if (!verifyChallenge(msg.n, msg.r, msg.sig, session.clientSeed)) break;
+        }
+        break;
       case 'chat': {
         if (typeof msg.text !== 'string') break;
         if (this.isChatMuted(session)) break;
@@ -1564,6 +1573,9 @@ export class GameServer {
         sim.collectDelveChestLoot(msg.objectId, pid);
         break;
       }
+      // client telemetry should not be considered as unknown command. Used for offline stats computing.
+      case 'telemetry':
+        break;
       default:
         this.botDetector.observeProtocolAnomaly(session.botTrackingContext, 'unknown_command', raw, receivedAtMs);
     }

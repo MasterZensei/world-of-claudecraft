@@ -246,6 +246,11 @@ export const en_XA: EnTranslations = {
       "browserEffectsReduced": "[Ŕéðúçéð]",
       "browserEffectsMinimal": "[Ɱíñíɱáļ]",
       "browserEffectsNote": "[Áúţó ţóñéš ðóŵñ ĥéáʋý ÇŠŠ éƒƒéçţš (ƀļúŕ, ĝļóŵ, ƀáçķĝŕóúñð ɱóţíóñ) ƀášéð óñ ýóúŕ ƀŕóŵšéŕ áñð ðéʋíçé. Ļóŵéŕ íţ ɱáñúáļļý íƒ ţĥé íñţéŕƒáçé ƒééļš šļúĝĝíšĥ.]",
+      "interfaceMode": "[Íñţéŕƒáçé Ɱóðé]",
+      "interfaceModeAuto": "[Áúţó]",
+      "interfaceModeDesktop": "[Ðéšķţóþ]",
+      "interfaceModeTouch": "[Ţóúçĥ]",
+      "interfaceModeNote": "[Áúţó þíçķš ðéšķţóþ óŕ ţóúçĥ çóñţŕóļš ƒŕóɱ ýóúŕ ðéʋíçé. Çĥóóšé Ðéšķţóþ ţó ƒóŕçé ķéýƀóáŕð áñð ɱóúšé (úšéƒúļ óñ á ţáƀļéţ ŵíţĥ á ķéýƀóáŕð), óŕ Ţóúçĥ ƒóŕ ţĥé óñ-šçŕééñ çóñţŕóļš.]",
       "footstepSounds": "[Ƒóóţšţéþ Šóúñðš]",
       "clickFeedback": "[Çļíçķ Ɱáŕķéŕ]",
       "showWalletOnCharacterScreen": "[Šĥóŵ Ŵáļļéţ óñ Çĥáŕáçţéŕ Šçŕééñ]",
@@ -292,7 +297,8 @@ export const en_XA: EnTranslations = {
         "frame": "[Ƒŕáɱé & Ţíɱíñĝ]",
         "network": "[Ñéţŵóŕķ]",
         "renderer": "[Ŕéñðéŕéŕ]",
-        "system": "[Šýšţéɱ]"
+        "system": "[Šýšţéɱ]",
+        "input": "[Íñþúţ]"
       },
       "labels": {
         "fps": "[ƑÞŠ]",
@@ -312,7 +318,8 @@ export const en_XA: EnTranslations = {
         "gpu": "[ĜÞÚ]",
         "memory": "[Ɱéɱóŕý]",
         "hitches": "[Ĥíţçĥéš]",
-        "entities": "[Éñţíţíéš]"
+        "entities": "[Éñţíţíéš]",
+        "apm": "[ÁÞⱮ]"
       },
       "themes": {
         "gold": "[Ĝóļð]",

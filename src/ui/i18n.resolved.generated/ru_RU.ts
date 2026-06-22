@@ -246,6 +246,11 @@ export const ru_RU: EnTranslations = {
       "browserEffectsReduced": "Сниженные",
       "browserEffectsMinimal": "Минимальные",
       "browserEffectsNote": "Авто снижает тяжёлые CSS-эффекты (размытие, свечение, движение фона) в зависимости от браузера и устройства. Если интерфейс тормозит, понизьте вручную.",
+      "interfaceMode": "Режим интерфейса",
+      "interfaceModeAuto": "Авто",
+      "interfaceModeDesktop": "Компьютер",
+      "interfaceModeTouch": "Сенсорный",
+      "interfaceModeNote": "В режиме «Авто» управление для компьютера или сенсорное выбирается по вашему устройству. Выберите «Компьютер», чтобы включить клавиатуру и мышь (удобно на планшете с клавиатурой), или «Сенсорный» для экранного управления.",
       "footstepSounds": "Звуки шагов",
       "clickFeedback": "Метка клика",
       "showWalletOnCharacterScreen": "Показывать кошелек на экране персонажей",
@@ -292,7 +297,8 @@ export const ru_RU: EnTranslations = {
         "frame": "Кадры и время",
         "network": "Сеть",
         "renderer": "Рендер",
-        "system": "Система"
+        "system": "Система",
+        "input": "Input"
       },
       "labels": {
         "fps": "FPS",
@@ -312,7 +318,8 @@ export const ru_RU: EnTranslations = {
         "gpu": "GPU",
         "memory": "Память",
         "hitches": "Подвисания",
-        "entities": "Объекты"
+        "entities": "Объекты",
+        "apm": "APM"
       },
       "themes": {
         "gold": "Золото",
