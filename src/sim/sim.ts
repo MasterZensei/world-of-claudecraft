@@ -268,6 +268,12 @@ const MARKET_WIRE_LIMIT = 120; // most listings shipped to one client at a time
 const VENDOR_BUYBACK_LIMIT = 12;
 const INSTANCE_EMPTY_TIMEOUT = 300; // seconds before an empty instance resets
 const DELVE_PLATE_RADIUS = 2.5;
+// Push-out radii (yards) for solid delve props, kept under the chest/grave interact
+// range (DELVE_PLATE_RADIUS + 2 = 4.5) so you can still loot from adjacent. Pressure
+// plates and open passages stay walkable (no entry here = radius 0).
+const DELVE_CHEST_SOLID_R = 2.4; // matches the enlarged reliquary chest footprint
+const DELVE_GRAVE_SOLID_R = 1.0;
+const DELVE_WALL_SOLID_R = 3.2; // an intact (undestroyed) destructible wall
 const DELVE_INTERACT_RANGE = 6;
 const DELVE_BAD_AIR_INTERVAL = 8;
 const DELVE_RAISE_DEAD_CHANNEL = 5;
@@ -279,6 +285,10 @@ const DELVE_COMPANION_FOLLOW = 4;
 // noise by level 9. Tuned (combat spec) so L7 Normal is sustainable, L7 Heroic is not
 // savable by Tessa alone, and L9 Heroic is sustainable from rank 2.
 const DELVE_COMPANION_HEAL_PCT = [0, 0.06, 0.08, 0.10];
+// Tessa's combat level as a fraction of the owner's, indexed by rank (1-3): she
+// arrives a junior aide and grows into a true peer as you invest Marks. Pairs with
+// DELVE_COMPANION_HEAL_PCT so a rank-up lifts both her survivability and her healing.
+const DELVE_COMPANION_LEVEL_PCT = [0, 0.5, 0.75, 1.0]; // index = rank
 const DELVE_COMPANION_MAX_RANK = 3;
 const DELVE_EXIT_PORTAL_RADIUS = 3.5;
 const DELVE_MODULE_NAMES: Record<string, string> = {
@@ -11951,20 +11961,39 @@ export class Sim {
     return run ? this.clampDelveDoors(run, res.x, res.z, r) : res;
   }
 
-  // Closed portcullis doors block the full walkable aisle until all plates fire.
+  // Closed portcullis doors block the full walkable aisle until all plates fire;
+  // solid props (chests, cracked graves, an intact destructible wall) block as
+  // circles so you cannot walk through them. Pressure plates and open passages
+  // stay walkable. Mobs and the companion route through the same clamp.
   private clampDelveDoors(run: DelveRun, x: number, z: number, r: number): { x: number; z: number } {
     for (const id of run.objectIds) {
       const state = run.objectState[id];
-      if (!state || state.kind !== 'locked_door' || state.open) continue;
-      const door = this.entities.get(id);
-      if (!door) continue;
-      const hw = 14, hd = 1.2; // spans full walkable aisle (|x|<14), thin in z
-      const dx = x - door.pos.x, dz = z - door.pos.z;
-      const ox = Math.abs(dx) - hw - r;
-      const oz = Math.abs(dz) - hd - r;
-      if (ox < 0 && oz < 0) {
-        if (ox > oz) x = door.pos.x + Math.sign(dx || 1) * (hw + r);
-        else z = door.pos.z + Math.sign(dz || 1) * (hd + r);
+      if (!state) continue;
+      const obj = this.entities.get(id);
+      if (!obj) continue;
+      if (state.kind === 'locked_door') {
+        if (state.open) continue;
+        const hw = 14, hd = 1.2; // spans full walkable aisle (|x|<14), thin in z
+        const dx = x - obj.pos.x, dz = z - obj.pos.z;
+        const ox = Math.abs(dx) - hw - r;
+        const oz = Math.abs(dz) - hd - r;
+        if (ox < 0 && oz < 0) {
+          if (ox > oz) x = obj.pos.x + Math.sign(dx || 1) * (hw + r);
+          else z = obj.pos.z + Math.sign(dz || 1) * (hd + r);
+        }
+        continue;
+      }
+      let solidR = 0;
+      if (state.kind === 'reward_chest' || state.kind === 'locked_chest') solidR = DELVE_CHEST_SOLID_R;
+      else if (state.kind === 'cracked_grave') solidR = DELVE_GRAVE_SOLID_R;
+      else if (state.kind === 'destructible_wall') solidR = obj.hp > 0 ? DELVE_WALL_SOLID_R : 0;
+      if (solidR <= 0) continue;
+      const dx = x - obj.pos.x, dz = z - obj.pos.z;
+      const dist = Math.hypot(dx, dz);
+      const min = solidR + r;
+      if (dist < min) {
+        if (dist > 1e-6) { x = obj.pos.x + (dx / dist) * min; z = obj.pos.z + (dz / dist) * min; }
+        else x = obj.pos.x + min;
       }
     }
     return { x, z };
@@ -12806,7 +12835,13 @@ export class Sim {
     const owner = this.entities.get(pid);
     const template = def ? MOBS[def.mobTemplateId] : null;
     if (!def || !owner || !template || run.companion) return;
-    const mob = createMob(this.nextId++, template, owner.level, this.groundPos(owner.pos.x + 1.5, owner.pos.z));
+    // Tessa's combat level scales with her purchased rank (rank 1 = 50% of owner
+    // level, up to 100% at rank 3), so Marks investment, not just being present,
+    // is what makes her a peer. Floored at 1 so a low-level owner never yields 0.
+    const rank = this.players.get(pid)?.companionUpgrades[companionId] ?? 1;
+    const levelPct = DELVE_COMPANION_LEVEL_PCT[rank] ?? DELVE_COMPANION_LEVEL_PCT[1];
+    const companionLevel = Math.max(1, Math.round(owner.level * levelPct));
+    const mob = createMob(this.nextId++, template, companionLevel, this.groundPos(owner.pos.x + 1.5, owner.pos.z));
     mob.ownerId = pid;
     mob.hostile = false;
     mob.aiState = 'idle';

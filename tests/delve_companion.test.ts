@@ -26,6 +26,48 @@ describe('delve companions', () => {
     expect(sim.companionState?.companionId).toBe('companion_tessa');
   });
 
+  it('companion level scales with purchased rank (50/75/100% of owner level)', () => {
+    for (const [rank, expected] of [[1, 10], [2, 15], [3, 20]] as const) {
+      const sim = makeSim();
+      sim.setPlayerLevel(20);
+      const meta = (sim as any).players.get(sim.playerId);
+      meta.companionUpgrades.companion_tessa = rank;
+      teleport(sim, 0, 0);
+      sim.enterDelve('collapsed_reliquary', 'normal');
+      const run = sim.delveRunForPlayer(sim.playerId)!;
+      const companion = sim.entities.get(run.companion!.entityId)!;
+      expect(companion.level).toBe(expected);
+    }
+  });
+
+  it('solid props block movement; pressure plates stay walkable', () => {
+    const sim = makeSim();
+    sim.setPlayerLevel(10);
+    teleport(sim, 0, 0);
+    sim.enterDelve('collapsed_reliquary', 'normal');
+    const run = sim.delveRunForPlayer(sim.playerId)!;
+    run.modules = ['reliquary_finale'];
+    run.moduleIndex = 0;
+    (sim as any).spawnDelveModule(run);
+
+    // A cracked grave pushes the player out of its footprint.
+    const grave = [...sim.entities.values()].find((e) => e.templateId === 'delve_cracked_grave')!;
+    expect(grave).toBeDefined();
+    const pushed = (sim as any).clampDelveDoors(run, grave.pos.x, grave.pos.z, 0.5);
+    expect(Math.hypot(pushed.x - grave.pos.x, pushed.z - grave.pos.z)).toBeGreaterThanOrEqual(1.4);
+
+    // A pressure plate is NOT solid — you must be able to stand on it to trigger it.
+    const plate = [...sim.entities.values()].find((e) => e.templateId === 'delve_pressure_plate')!;
+    expect(plate).toBeDefined();
+    const onPlate = (sim as any).clampDelveDoors(run, plate.pos.x, plate.pos.z, 0.5);
+    expect(onPlate.x).toBeCloseTo(plate.pos.x);
+    expect(onPlate.z).toBeCloseTo(plate.pos.z);
+
+    // A point well clear of any prop is unchanged.
+    const clear = (sim as any).clampDelveDoors(run, grave.pos.x + 20, grave.pos.z, 0.5);
+    expect(clear.x).toBeCloseTo(grave.pos.x + 20);
+  });
+
   it('stows hunter pet on enter and restores on leave', () => {
     const sim = makeSim('hunter');
     sim.setPlayerLevel(10);
