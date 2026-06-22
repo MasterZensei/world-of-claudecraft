@@ -71,6 +71,22 @@ describe('generateLock — invariants', () => {
         }
       });
 
+      it('no open cell is stranded in front of a gate or bolt seat (forward reachability)', () => {
+        const deltas = tier.allowedActions.map((a) => ACTION_DELTA[a]);
+        for (const seed of SEEDS) {
+          const spec = generateLock(seed, tier);
+          for (let c = 0; c < spec.open.length - 1; c++) {
+            // A single-open-row next column is an exact checkpoint (gate or seat).
+            if (spec.open[c + 1].length !== 1) continue;
+            const target = spec.open[c + 1][0];
+            for (const r of spec.open[c]) {
+              const canReach = deltas.some((d) => r + d === target);
+              expect(canReach, `seed ${seed} ${name}: col ${c} row ${r} cannot legally reach checkpoint row ${target} at col ${c + 1}`).toBe(true);
+            }
+          }
+        }
+      });
+
       it('the solver path actually clears the lock via stepLock', () => {
         for (const seed of SEEDS.slice(0, 50)) {
           const spec = generateLock(seed, tier);

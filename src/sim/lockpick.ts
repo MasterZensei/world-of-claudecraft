@@ -199,6 +199,19 @@ export function generateLock(seed: number, tier: LockTierSpec): LockSpec {
     open[c] = open[c].filter((r) => prev.some((pr) => deltas.includes(r - pr)));
   }
 
+  // 4b. Forward trim: drop any open cell that cannot legally reach a retained
+  //     open cell in the NEXT column. Processed right-to-left so each column sees
+  //     its finalized successor. This removes dead ends and, crucially, the unfair
+  //     "stranded before a gate" case: a legal move into the forgiveness band must
+  //     never leave the single open row of a gate/bolt-seat column (open[c+1] of
+  //     length 1) physically unreachable. The carved path is always retained
+  //     because path[c] -> path[c+1] is a legal delta and path[c+1] survives by
+  //     induction from the seat, so solvability is preserved.
+  for (let c = W - 2; c >= 0; c--) {
+    const next = open[c + 1];
+    open[c] = open[c].filter((r) => next.some((nr) => deltas.includes(nr - r)));
+  }
+
   // 5. Sprinkle ward-traps: open-looking rows that JAM instantly on contact.
   //    Never on the solution path (path[c] is always safe), never in a gate/seat
   //    column (those hold a single open row = the path). They shrink the
