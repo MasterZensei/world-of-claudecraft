@@ -13,7 +13,7 @@ import {
   emptyMoveInput,
 } from '../sim/types';
 import { normalizeMoveFacing, sanitizeMoveInput } from '../sim/move_input';
-import type { Ante } from '../sim/lockpick';
+import type { Ante, PickAction } from '../sim/lockpick';
 import {
   isOverheadEmoteId,
   type AccountCosmetics, type ArenaInfo, type CharacterSearchResult, type DelveCompanionInfo,
@@ -1422,7 +1422,7 @@ export class ClientWorld implements IWorld {
   lockpickEngage(objectId: number, ante: Ante): void {
     this.cmd({ cmd: 'lockpick_engage', objectId, ante });
   }
-  lockpickAction(action: string): void {
+  lockpickAction(action: PickAction): void {
     this.cmd({ cmd: 'lockpick_action', sid: this.lockpickState?.sessionId, action });
   }
   lockpickAbort(): void {

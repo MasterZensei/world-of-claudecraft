@@ -1260,9 +1260,10 @@ export class Sim {
     this.players.delete(pid);
     this.chatTokens.delete(pid);
     this.channelSubs.delete(pid);
-    // A pet stowed for a delve is already serialized into the persisted character
-    // (despawnPersistentPet writes meta.pet), so the transient stash entry is dead
-    // weight once the player leaves, drop it so the map can't grow unbounded.
+    // The caller serializes the character before removePlayer (saveCharacterOnLeave),
+    // and serializePet reads delvePetStash when the pet is stowed for a delve, so the
+    // pet is already persisted by now. Drop the transient stash entry here so the map
+    // can't grow unbounded across sessions.
     this.delvePetStash.delete(pid);
     if (this.primaryId === pid) this.primaryId = this.players.size > 0 ? [...this.players.keys()][0] : -1;
   }
@@ -3613,7 +3614,11 @@ export class Sim {
 
   private serializePet(ownerPid: number): PetState | null {
     const pet = this.petOf(ownerPid, true);
-    if (!pet) return null;
+    // While the owner is inside a delve their pet is despawned and parked in
+    // delvePetStash (stowPetForDelve). It has no live entity, so fall back to the
+    // stashed snapshot, otherwise a save taken mid-delve (autosave, disconnect, or
+    // shutdown saveAll) would persist pet:null and lose the pet on reload.
+    if (!pet) return this.delvePetStash.get(ownerPid) ?? null;
     return {
       templateId: pet.templateId,
       name: pet.name,

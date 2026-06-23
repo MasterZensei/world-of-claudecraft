@@ -9,7 +9,7 @@ import { skinCount } from '../render/characters/manifest';
 import { preloadMechAssets } from '../render/characters/assets';
 import { emoteIconUrl } from './emote_icons';
 import {
-  ABILITIES, CLASSES, COMPANION_UPGRADE_COSTS, DELVE_AFFIXES, DELVES, DUNGEON_LIST, DUNGEON_X_THRESHOLD, ITEMS, MOBS, NPCS, PROPS, QUESTS,
+  ABILITIES, CLASSES, COMPANION_UPGRADE_COSTS, DELVE_AFFIXES, DELVE_LIST, DELVES, DUNGEON_LIST, DUNGEON_X_THRESHOLD, ITEMS, MOBS, NPCS, PROPS, QUESTS,
   WORLD_MAX_X, WORLD_MAX_Z, WORLD_MIN_X, WORLD_MIN_Z, ZONES, dungeonAt, isDelvePos, questRewardItem, zoneAt,
   zoneWelcomeText,
 } from '../sim/data';
@@ -5486,6 +5486,10 @@ export class Hud {
     for (const dungeon of DUNGEON_LIST) {
       if (text === dungeon.enterText) return dungeonText(dungeon.id, 'enterText');
       if (text === dungeon.leaveText) return dungeonText(dungeon.id, 'leaveText');
+    }
+    for (const delve of DELVE_LIST) {
+      if (text === delve.enterText) return delveText(delve.id, 'enterText');
+      if (text === delve.leaveText) return delveText(delve.id, 'leaveText');
     }
 
     let match = /^You have invited (.+) to your party\.$/.exec(text);
@@ -11085,6 +11089,10 @@ function dungeonDisplayName(dungeonId: string): string {
 
 function dungeonText(dungeonId: string, field: 'enterText' | 'leaveText'): string {
   return tEntity({ kind: 'dungeon', id: dungeonId, field });
+}
+
+function delveText(delveId: string, field: 'enterText' | 'leaveText'): string {
+  return tEntity({ kind: 'delve', id: delveId, field });
 }
 
 function dungeonDisplayNameFromSource(name: string): string {

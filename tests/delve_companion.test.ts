@@ -81,6 +81,21 @@ describe('delve companions', () => {
     expect(sim.petOf(sim.playerId)?.templateId).toBe('wild_boar');
   });
 
+  it('serializes the stowed pet while in a delve (no pet loss on mid-delve disconnect/save)', () => {
+    const sim = makeSim('hunter');
+    sim.setPlayerLevel(10);
+    const boar = [...sim.entities.values()].find((e) => e.templateId === 'wild_boar' && e.ownerId === null);
+    (sim as any).completeTame(sim.player, boar!);
+    teleport(sim, 0, 0);
+    sim.enterDelve('collapsed_reliquary', 'normal');
+    // The live pet is despawned (stowed) while inside the delve...
+    expect(sim.petOf(sim.playerId)).toBeNull();
+    // ...but a save taken right now (autosave / disconnect / shutdown saveAll) must
+    // still persist it from the stash, or the pet is lost when the character reloads.
+    const state = sim.serializeCharacter(sim.playerId)!;
+    expect(state.pet?.templateId).toBe('wild_boar');
+  });
+
   it('barks on boss pull', () => {
     const sim = makeSim();
     sim.setPlayerLevel(10);
