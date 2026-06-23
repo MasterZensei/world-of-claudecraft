@@ -114,7 +114,7 @@ const ACTIVE_PROP_KEYS = new Set<PropKey>(GFX.standardMaterials
     'stand1', 'stand2', 'cart', 'fence', 'bonfire', 'oreRocks',
     'tentOpen', 'tentSmall', 'rockLargeD', 'mushroomRed', 'column', 'columnBroken',
     'dockPlatform', 'rowboat', 'graveRound', 'timberPillar', 'crateWooden', 'barrel',
-    'delveEntrance2', // delve entrance portal — a landmark, so keep it on low gfx too
+    'delveEntrance2', // delve entrance portal, a landmark, so keep it on low gfx too
   ]);
 
 // Headless sim/test imports never fetch; the browser kicks loads immediately.
@@ -321,7 +321,7 @@ function setScale(o: THREE.Object3D, s: Scale): void {
 
 // ---------------------------------------------------------------------------
 // Delve-mouth portal: a self-animating red "void" sheet that fills the entrance
-// arch, driven by the shared uTime clock (no per-frame JS plumbing — same
+// arch, driven by the shared uTime clock (no per-frame JS plumbing, same
 // pattern as the Drowned-Temple water in dungeon.ts). A churning swirl + a
 // global breathing pulse take a deep near-black red up to a hot bright red; the
 // circular alpha mask hides the plane's rectangular edges so it reads as a glowing
@@ -368,7 +368,7 @@ const DELVE_PORTAL_FRAG = /* glsl */ `
     // slow ominous breathing pulse
     float pulse = 0.5 + 0.5 * sin(uTime * 0.85);
 
-    // hot crimson outer rim (baked — distinct from the purple mid-zone)
+    // hot crimson outer rim (baked, distinct from the purple mid-zone)
     vec3 rimCol = vec3(0.85, 0.04, 0.10) * uHdr;
 
     // zone blending: void core (uDim) → purple swirl (uBright) → crimson rim
@@ -414,7 +414,7 @@ function delvePortalMaterial(): THREE.ShaderMaterial {
   return delvePortalMat;
 }
 
-// Embers drifting up out of the delve mouth — a deterministic point cloud whose
+// Embers drifting up out of the delve mouth, a deterministic point cloud whose
 // whole motion (rise + sideways waver + life fade) is a function of uTime, so it
 // self-animates with no per-frame JS. Additive + HDR-boosted so it glows and
 // blooms on composer tiers; reads as warm sparks on low too.
@@ -945,14 +945,14 @@ export function buildProps(seed: number, delveLabel?: (delveId: string) => strin
   // south of Brother Halven facing +z; it has its own stone backing slab so the
   // animated shader plane (FrontSide) reads as a solid void from the approach and
   // is invisible from behind. The carved name slab rides the model's crown.
-  // All render-only — players enter by talking to Halven; leaveDelve drops them
+  // All render-only, players enter by talking to Halven; leaveDelve drops them
   // back at archZ (doorPos.z - 4).
   const delvePortals: THREE.Mesh[] = [];
   for (const dm of PROPS.delveMarkers ?? []) {
     if (!loadedProps.has('delveEntrance2')) continue;
     const gy = ground(dm.x, dm.z);
 
-    // Portal-door model with its own backing slab — no separate vault sphere needed.
+    // Portal-door model with its own backing slab, no separate vault sphere needed.
     // Rotation 0 = portal face toward +z (town); add yaw: Math.PI to the asset def
     // if the model loads backwards after inspecting in-game.
     const arch = propAsset('delveEntrance2');
@@ -979,7 +979,7 @@ export function buildProps(seed: number, delveLabel?: (delveId: string) => strin
 
     // opaque dark backsplash filling the doorway behind the void plane, so no
     // red leaks through from the rear and you can't see daylight through the
-    // opening — the portal reads as a solid one-way threshold. Slightly larger
+    // opening, the portal reads as a solid one-way threshold. Slightly larger
     // than the opening to cover the gap, recessed a touch into the model.
     const backsplash = new THREE.Mesh(
       new THREE.PlaneGeometry(openW * 1.1, openH * 1.1),
@@ -988,7 +988,7 @@ export function buildProps(seed: number, delveLabel?: (delveId: string) => strin
     backsplash.position.set(dm.x, openCY, townFaceZ - 0.35);
     group.add(backsplash);
 
-    // swirling void plane — FrontSide, drawn over the dark backsplash so the
+    // swirling void plane, FrontSide, drawn over the dark backsplash so the
     // animated vortex reads against true black from the town approach.
     const portal = new THREE.Mesh(new THREE.PlaneGeometry(openW, openH), delvePortalMaterial());
     portal.position.set(dm.x, openCY, townFaceZ - 0.05);
@@ -996,7 +996,7 @@ export function buildProps(seed: number, delveLabel?: (delveId: string) => strin
     group.add(portal);
     delvePortals.push(portal);
 
-    // deep purple glow spilling from the mouth — matches the new portal palette.
+    // deep purple glow spilling from the mouth, matches the new portal palette.
     const mouthLight = new THREE.PointLight(0x7010b0, 8, 18, 2);
     mouthLight.position.set(dm.x, gy + 2.4, townFaceZ + 0.4);
     mouthLight.userData.baseIntensity = 8;
@@ -1007,7 +1007,7 @@ export function buildProps(seed: number, delveLabel?: (delveId: string) => strin
     // static merge skips it automatically)
     group.add(buildDelveEmbers(dm.x, gy + 1.0, townFaceZ + 0.2, openW * 0.34, openH * 0.85));
 
-    // two flaming braziers flanking the mouth — a tended-entrance read. Reuse
+    // two flaming braziers flanking the mouth, a tended-entrance read. Reuse
     // the campfire flame + fire-light pattern so the renderer flickers them and
     // sheds embers for free; the warm torch orange plays off the red void.
     const postMat = surfaceMat({ color: 0x2a2622, roughness: 1 });
@@ -1042,7 +1042,7 @@ export function buildProps(seed: number, delveLabel?: (delveId: string) => strin
       group.add(shadowed(bg));
     }
 
-    // (ruin-column dressing removed — the portal-door model has its own pillars,
+    // (ruin-column dressing removed, the portal-door model has its own pillars,
     // so flanking rubble columns just cluttered and overpowered the silhouette.
     // Mossy boulders flanking the approach feet keep it grounded without competing.)
     const rubble: { kind: PropKey; dx: number; dz: number; s: Scale; rot?: number }[] = [
@@ -1089,7 +1089,7 @@ export function buildProps(seed: number, delveLabel?: (delveId: string) => strin
       ctx.fillRect(gx - gw / 2, gy2 - 1.8, gw, 3.6);
     }
 
-    // carved text — shadow pass then bright pass for depth illusion
+    // carved text, shadow pass then bright pass for depth illusion
     ctx.font = 'bold 34px Georgia, "Times New Roman", serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

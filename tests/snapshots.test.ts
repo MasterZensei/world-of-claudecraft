@@ -984,6 +984,30 @@ describe('delve self-state mirrors over the wire', () => {
     sim.enterDelve('collapsed_reliquary', 'normal', session.pid);
   }
 
+  it('geo-gates companion_upgrade and enter_delve to the board NPC door', () => {
+    const sim = server.sim;
+    sim.setPlayerLevel(DELVES.collapsed_reliquary.minLevel);
+    const meta = sim.meta(session.pid)!;
+    meta.companionUpgrades.companion_tessa = 1;
+    meta.delveMarks = 100;
+    const p = sim.entities.get(session.pid)!;
+    const door = DELVES.collapsed_reliquary.doorPos;
+    const place = (x: number, z: number) => {
+      p.pos.x = x; p.pos.z = z; p.pos.y = terrainHeight(x, z, sim.cfg.seed); p.prevPos = { ...p.pos };
+    };
+    // Far from Brother Halven: the upgrade command is rejected (rank unchanged)...
+    place(door.x + 200, door.z);
+    server.handleMessage(session, JSON.stringify({ t: 'cmd', cmd: 'companion_upgrade', companionId: 'companion_tessa' }));
+    expect(meta.companionUpgrades.companion_tessa).toBe(1);
+    // ...and enter_delve does not claim a run from across the world.
+    server.handleMessage(session, JSON.stringify({ t: 'cmd', cmd: 'enter_delve', delveId: 'collapsed_reliquary', tierId: 'normal' }));
+    expect(sim.delveRunForPlayer(session.pid)).toBeNull();
+    // Standing on the board door: the upgrade goes through.
+    place(door.x, door.z);
+    server.handleMessage(session, JSON.stringify({ t: 'cmd', cmd: 'companion_upgrade', companionId: 'companion_tessa' }));
+    expect(meta.companionUpgrades.companion_tessa).toBe(2);
+  });
+
   it('sends drun + dcompanion on entering a delve and the client mirrors them', () => {
     enterDelveOnServer();
     broadcast(server);
@@ -1025,6 +1049,23 @@ describe('delve self-state mirrors over the wire', () => {
     broadcast(server);
     const snap = lastSnap(fc.sent);
     expect(snap.self).not.toHaveProperty('drun');
+  });
+
+  it('clears drun + dcompanion (value to null) on leaving a delve and the client mirror follows', () => {
+    enterDelveOnServer();
+    broadcast(server);
+    const client = bareClient(session.pid);
+    (client as any).applySnapshot(lastSnap(fc.sent));
+    expect(client.delveRun).not.toBeNull();
+    fc.sent.length = 0;
+    server.sim.leaveDelve(session.pid);
+    broadcast(server);
+    const snap = lastSnap(fc.sent);
+    expect(snap.self.drun).toBeNull();
+    expect(snap.self.dcompanion).toBeNull();
+    (client as any).applySnapshot(snap);
+    expect(client.delveRun).toBeNull();
+    expect(client.companionState).toBeNull();
   });
 });
 

@@ -13,6 +13,7 @@ import {
   emptyMoveInput,
 } from '../sim/types';
 import { normalizeMoveFacing, sanitizeMoveInput } from '../sim/move_input';
+import type { Ante } from '../sim/lockpick';
 import {
   isOverheadEmoteId,
   type AccountCosmetics, type ArenaInfo, type CharacterSearchResult, type DelveCompanionInfo,
@@ -1363,7 +1364,7 @@ export class ClientWorld implements IWorld {
   delveShopOffers(delveId: string): DelveShopOfferView[] {
     return resolveDelveShopOffers(delveId, this.delveClears);
   }
-  lockpickEngage(objectId: number, ante: number): void {
+  lockpickEngage(objectId: number, ante: Ante): void {
     this.cmd({ cmd: 'lockpick_engage', objectId, ante });
   }
   lockpickAction(action: string): void {

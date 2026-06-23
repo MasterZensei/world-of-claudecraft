@@ -58,13 +58,13 @@ export interface DelveRunInfo {
   affixes: string[];
   completed: boolean;
   exitPortalOpen: boolean;
-  /** §7.6 — this run rolled Bountiful: the reward chest is a purple Coffer that
+  /** §7.6: this run rolled Bountiful: the reward chest is a purple Coffer that
    * only yields to a Hard + Premium-ante solve and guarantees a signature rare. */
   bountiful: boolean;
 }
 
 // Render-safe projection of an active lockpicking attempt. Only ever holds cells
-// inside the fog window — the full lock layout never reaches the client.
+// inside the fog window, the full lock layout never reaches the client.
 export interface LockpickView {
   sessionId: string;
   objectId: number;

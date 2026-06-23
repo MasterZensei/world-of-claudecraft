@@ -1638,6 +1638,8 @@ export const de_DE: EnTranslations = {
       "bossChest": "Der Boss fällt. Eine gebannte Reliquiartruhe erhebt sich auf dem Podest. Knacke ihr Schloss, um deine Beute zu beanspruchen.",
       "surfaceStairs": "Eine Treppe zur Oberfläche öffnet sich. Drücke F an der Treppe, um zu gehen.",
       "moduleEnter": "{name}: {objective}",
+      "objectiveClearRoom": "Den Raum räumen.",
+      "objectiveDefeatBoss": "Den Boss erschlagen.",
       "tombstoneHint": "Ein Grabstein-Durchgang öffnet sich nach Norden, wenn der Raum geräumt ist.",
       "tombstoneOpen": "Ein versiegelter Grabstein-Durchgang schiebt sich knirschend nach Norden auf. Geh hinein, um fortzufahren.",
       "tombstoneInto": "Du schreitest durch den Grabstein nach {name}.",
@@ -1676,6 +1678,51 @@ export const de_DE: EnTranslations = {
       "toolSlips": "Dieses Werkzeug rutscht von diesem Schloss ab.",
       "lockJammed": "Das Schloss ist so verklemmt, dass es sich nicht mehr knacken lässt. Schließe den Tiefgang erneut ab für einen weiteren Versuch.",
       "lastPickSnaps": "Der letzte Dietrich bricht ab. Das Schloss klemmt. Die Truhe ist verloren, es sei denn, du schließt den Tiefgang erneut ab."
+    }
+  },
+  "lockpickUi": {
+    "pickTitle": "Knacke das Schloss",
+    "cofferTitle": "Reich gefüllte Truhe",
+    "cache": "{tier} Hort",
+    "pickBlurb": "Ein reicherer Hort ist hinter mehr Schlössern versiegelt. Leichtere Schlösser geben dir mehr Versuche und mehr Zeit; ein fehlgeschlagener Versuch setzt das Schloss zurück, bis deine Versuche aufgebraucht sind.",
+    "cofferBlurb": "Dieses Siegel weicht nur einer Meisterhand: allein der schwere, erlesene Weg kann es öffnen. Knacke alle drei Schlösser für den besonderen Preis.",
+    "pagesAria": "{count} Schlösser",
+    "tries": "{count} Versuche",
+    "triesOne": "1 Versuch",
+    "perLock": "{seconds}s / Schloss",
+    "seconds": "{seconds}s",
+    "boardTitle": "Pfad der Stifte: {tier} Hort",
+    "closeAria": "Schließen",
+    "withdrawAria": "Zurückziehen",
+    "timerAria": "Verbleibende Zeit",
+    "lockOf": "Schloss {page}/{total}",
+    "lockOfAria": "Schloss {page} von {total}",
+    "triesOf": "Versuche {tries}/{total}",
+    "triesOfAria": "{tries} von {total} Versuchen übrig",
+    "ward": "Sperre {col} / {total}",
+    "withdraw": "Zurückziehen (Esc)",
+    "action": {
+      "hardSet": "Fest setzen",
+      "set": "Setzen",
+      "steady": "Halten",
+      "ease": "Lockern",
+      "drop": "Lösen"
+    },
+    "feedback": {
+      "advanced": "Der Stift gibt nach...",
+      "slip": "Eine Sperre greift, der Dietrich rutscht ab!",
+      "bind": "Der Stift verklemmt: falsche Tiefe!",
+      "trap": "Eine falsche Sperre schnappt zu, das Schloss klemmt!",
+      "retry": "Das Schloss setzt sich zurück. Setze zu einem neuen Versuch an.",
+      "pageCleared": "Eine Stiftreihe fällt. Das nächste Schloss taucht auf.",
+      "success": "Der Riegel springt auf, der Hort gehört dir!",
+      "fail": "Das Schloss klemmt. Es rührt sich nicht mehr."
+    },
+    "summary": {
+      "success": "Schloss geknackt, {tier} Hort beansprucht.",
+      "successGeneric": "Schloss geknackt, der Hort ist beansprucht.",
+      "fail": "Das Schloss ist ruiniert. Schließe den Tiefgang erneut ab für einen weiteren Versuch.",
+      "abandoned": "Du ziehst die Dietriche wieder heraus. Das Schloss wartet."
     }
   },
   "delveUi": {
@@ -4924,9 +4971,6 @@ export const de_DE: EnTranslations = {
       "acolyte_tessa": {
         "name": "Akolythin Tessa"
       },
-      "placeholder_boss": {
-        "name": "Prüfungswärter"
-      },
       "elder_bristleback": {
         "name": "Alter Bristleback"
       },
@@ -6259,11 +6303,6 @@ export const de_DE: EnTranslations = {
         "name": "Das Eingestürzte Reliquiar",
         "enterText": "Du steigst hinab in das eingestürzte Reliquiar.",
         "leaveText": "Du kletterst zurück zu Bruder Halven bei der Reliquiarruine."
-      },
-      "delve_placeholder": {
-        "name": "Flache Prüfungsgruft",
-        "enterText": "Du steigst hinab in die flache Prüfungsgruft.",
-        "leaveText": "Du kletterst zurück an die Oberfläche."
       }
     }
   },

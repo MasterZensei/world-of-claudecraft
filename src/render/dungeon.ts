@@ -309,6 +309,15 @@ export function buildDungeonPropMesh(kind: string): THREE.Mesh | null {
   const mat = packSourceMaterial.get(asset.pack);
   if (!mat) return null;
   const mesh = new THREE.Mesh(asset.geo, mat);
+  // asset.geo and mat are the module-level shared kit resources that also back
+  // every instanced dungeon-prop draw. The per-entity object path (a delve chest)
+  // sets objectPoolKey=null, so removeView would otherwise traverse-and-dispose
+  // this geometry when the chest leaves interest range, freeing the GPU buffer
+  // out from under the instanced renderer. Flag them shared (the same
+  // userData.sharedRendererResource marker the renderer's isShared* checks read)
+  // so removeView skips them.
+  mesh.geometry.userData.sharedRendererResource = true;
+  mat.userData.sharedRendererResource = true;
   mesh.castShadow = CASTER_KINDS.has(kind);
   mesh.receiveShadow = RECEIVER_KINDS.has(kind);
   return mesh;

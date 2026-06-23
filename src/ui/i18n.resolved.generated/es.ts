@@ -1638,6 +1638,8 @@ export const es: EnTranslations = {
       "bossChest": "El jefe cae. Un cofre de relicario protegido se alza sobre el estrado: fuerza su cerradura para reclamar tu botín.",
       "surfaceStairs": "Se abre una escalera hacia la superficie. Pulsa F en las escaleras para salir.",
       "moduleEnter": "{name}: {objective}",
+      "objectiveClearRoom": "Despeja la sala.",
+      "objectiveDefeatBoss": "Derrota al jefe.",
       "tombstoneHint": "Un pasaje de lápida se abre al norte cuando la sala queda despejada.",
       "tombstoneOpen": "Un pasaje de lápida sellado se abre con un chirrido al norte. Camina hacia él para continuar.",
       "tombstoneInto": "Atraviesas la lápida hacia {name}.",
@@ -1676,6 +1678,51 @@ export const es: EnTranslations = {
       "toolSlips": "Esa herramienta resbala sobre esta cerradura.",
       "lockJammed": "La cerradura está demasiado atascada para forzarla: vuelve a superar la expedición para otro intento.",
       "lastPickSnaps": "La última ganzúa se rompe. La cerradura se atasca: el cofre se pierde a menos que vuelvas a superar la expedición."
+    }
+  },
+  "lockpickUi": {
+    "pickTitle": "Fuerza la cerradura",
+    "cofferTitle": "Cofre Pródigo",
+    "cache": "Botín {tier}",
+    "pickBlurb": "Un botín más rico está sellado tras más cerraduras. Las cerraduras fáciles te dan más intentos y más tiempo; un intento fallido reinicia la cerradura hasta que agotes los intentos.",
+    "cofferBlurb": "Este sello solo cede ante la mano de un maestro: únicamente la senda Difícil, Selecta puede abrirlo. Resuelve las tres cerraduras para obtener el premio insignia.",
+    "pagesAria": "{count} cerraduras",
+    "tries": "{count} intentos",
+    "triesOne": "1 intento",
+    "perLock": "{seconds}s / cerradura",
+    "seconds": "{seconds}s",
+    "boardTitle": "Senda del Tambor: botín {tier}",
+    "closeAria": "Cerrar",
+    "withdrawAria": "Retirarse",
+    "timerAria": "Tiempo restante",
+    "lockOf": "Cerradura {page}/{total}",
+    "lockOfAria": "Cerradura {page} de {total}",
+    "triesOf": "Intentos {tries}/{total}",
+    "triesOfAria": "{tries} de {total} intentos restantes",
+    "ward": "Guarda {col} / {total}",
+    "withdraw": "Retirarse (Esc)",
+    "action": {
+      "hardSet": "Fijar a fondo",
+      "set": "Fijar",
+      "steady": "Sostener",
+      "ease": "Aflojar",
+      "drop": "Soltar"
+    },
+    "feedback": {
+      "advanced": "El pasador cede...",
+      "slip": "¡Una guarda muerde y la ganzúa resbala!",
+      "bind": "El tambor se traba: ¡profundidad incorrecta!",
+      "trap": "¡Una guarda falsa se cierra de golpe y la cerradura se atasca!",
+      "retry": "La cerradura se reinicia. Prepara un nuevo intento.",
+      "pageCleared": "Cae un banco de tambores. La siguiente cerradura aparece.",
+      "success": "¡El cerrojo salta y el botín es tuyo!",
+      "fail": "La cerradura se traba. No volverá a moverse."
+    },
+    "summary": {
+      "success": "Cerradura abierta, botín {tier} reclamado.",
+      "successGeneric": "Cerradura abierta, el botín queda reclamado.",
+      "fail": "La cerradura está arruinada. Vuelve a superar la expedición para otro intento.",
+      "abandoned": "Sacas las ganzúas con cuidado. La cerradura aguarda."
     }
   },
   "delveUi": {
@@ -4924,9 +4971,6 @@ export const es: EnTranslations = {
       "acolyte_tessa": {
         "name": "Acólita Tessa"
       },
-      "placeholder_boss": {
-        "name": "Guardián de la prueba"
-      },
       "elder_bristleback": {
         "name": "Viejo Bristleback"
       },
@@ -6259,11 +6303,6 @@ export const es: EnTranslations = {
         "name": "El Relicario Hundido",
         "enterText": "Desciendes al relicario hundido.",
         "leaveText": "Subes de vuelta hasta el Hermano Halven, en la ruina del relicario."
-      },
-      "delve_placeholder": {
-        "name": "Cripta de Prueba Poco Profunda",
-        "enterText": "Desciendes a la cripta de prueba poco profunda.",
-        "leaveText": "Subes de vuelta a la superficie."
       }
     }
   },

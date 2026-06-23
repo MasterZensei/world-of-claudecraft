@@ -1067,7 +1067,7 @@ async function startGame(world: IWorld, offlineSim: Sim | null, online: ClientWo
     let bestNpc: number | null = null, bestNpcD = INTERACT_RANGE + 1;
     // Delve interactables (warded chest, cracked grave, sealed/tombstone passage,
     // surface stairs) are driven through delveInteract, not the generic pickup
-    // path — the sim owns their per-object proximity + state gating and the
+    // path, the sim owns their per-object proximity + state gating and the
     // lockpick offer. Selected a touch wider than INTERACT_RANGE so the sim can
     // emit its precise "move closer to the chest/passage" hint.
     let bestDelve: number | null = null, bestDelveD = INTERACT_RANGE + 1;

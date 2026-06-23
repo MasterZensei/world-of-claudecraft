@@ -35,10 +35,10 @@ const MOB_IDS = [
   'brightwood_hare', 'glade_fox', 'spotted_fawn', 'meadow_crane', 'thornpelt_badger',
   'dawnmane_doe', 'bramble_lynx', 'brightwood_stag', 'grovetusk_boar', 'sunhide_bear',
   'brightwood_monarch',
-  // Collapsed Reliquary delve mobs + placeholder boss
+  // Collapsed Reliquary delve mobs
   'reliquary_ledger_wraith', 'reliquary_funeral_ringer', 'reliquary_gravecall_acolyte',
   'reliquary_bonewalker', 'reliquary_saintless_effigy', 'deacon_varric',
-  'acolyte_tessa', 'placeholder_boss',
+  'acolyte_tessa',
 ] as const;
 
 const NPC_IDS = [
@@ -74,7 +74,7 @@ const QUEST_IDS = [
 
 const ZONE_IDS = ['eastbrook_vale', 'mirefen_marsh', 'thornpeak_heights'] as const;
 const DUNGEON_IDS = ['hollow_crypt', 'sunken_bastion', 'gravewyrm_sanctum', 'nythraxis_crypt', 'nythraxis_boss_arena'] as const;
-const DELVE_IDS = ['collapsed_reliquary', 'delve_placeholder'] as const;
+const DELVE_IDS = ['collapsed_reliquary'] as const;
 
 type MobId = typeof MOB_IDS[number];
 type NpcId = typeof NPC_IDS[number];
@@ -175,14 +175,6 @@ function makeEnglishWorldEntities(): WorldEntityTranslations {
       leaveText: normalizeSourceText(delve.leaveText),
     };
   });
-  // "delve_placeholder" is dev scaffolding (Phase 1 stand-in, superseded by
-  // collapsed_reliquary). Its raw name/enterText contain "placeholder" which is
-  // dev-channel wording. Override with shippable display text at the i18n boundary.
-  delves.delve_placeholder = {
-    name: 'Shallow Trial Crypt',
-    enterText: 'You descend into the shallow trial crypt.',
-    leaveText: 'You climb back to the surface.',
-  };
 
   return {
     worldContent: {

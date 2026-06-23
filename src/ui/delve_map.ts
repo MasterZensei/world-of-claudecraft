@@ -2,7 +2,6 @@
 // takes plain data in, returns draw primitives or strings.
 // Imported by hud.ts; tested by tests/delve_map.test.ts.
 
-import type { DelveRunInfo } from '../world_api';
 import type { DungeonLayout } from '../sim/dungeon_layout';
 
 /** Compose the area label shown on the minimap / world-map zone title. The

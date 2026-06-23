@@ -42,9 +42,6 @@ import {
 export { DELVE_AFFIXES, DELVE_COMPANIONS, COMPANION_UPGRADE_COSTS, DELVE_SHOPS, delveShopGateUnlocked, resolveDelveShopOffers } from './content/delves';
 export type { DelveShopEntry, DelveShopGate, DelveShopOffer } from './content/delves';
 import { DELVE_ITEMS } from './content/delves/items';
-import {
-  PLACEHOLDER_DELVE, PLACEHOLDER_DELVE_MODULES, PLACEHOLDER_DELVE_MOBS,
-} from './content/delves/_placeholder';
 import { DELVE_MODULE_LAYOUTS, delveModuleSpan, type DelveModuleId } from './delve_layout';
 
 function mergeItems(...parts: Record<string, ItemDef>[]): Record<string, ItemDef> {
@@ -73,7 +70,7 @@ export const ITEMS: Record<string, ItemDef> = mergeItems(BASE_ITEMS, ZONE2_ITEMS
 export const MOBS: Record<string, MobTemplate> = {
   ...ZONE1_MOBS, ...ZONE2_MOBS, ...ZONE3_MOBS, ...DUNGEON_MOBS,
   ...WARLOCK_PET_MOBS, ...TEMPLE_MOBS, ...TEMPLE_DUNGEON_MOBS,
-  ...DELVE_MOBS, ...PLACEHOLDER_DELVE_MOBS,
+  ...DELVE_MOBS,
 };
 
 export const NPCS: Record<string, NpcDef> = {
@@ -118,7 +115,7 @@ function mergeProps(sets: ZonePropsDef[]): ZonePropsDef {
     ruinRings: sets.flatMap((s) => s.ruinRings),
     fences: sets.flatMap((s) => s.fences),
     graveyards: sets.flatMap((s) => s.graveyards),
-    // optional per-zone field — was being dropped here, so the delve entrance
+    // optional per-zone field, was being dropped here, so the delve entrance
     // marker (name slab + arch) never reached the renderer (props.ts)
     delveMarkers: sets.flatMap((s) => s.delveMarkers ?? []),
   };
@@ -252,7 +249,7 @@ export const CRYPT_EXIT_OFFSET = DUNGEONS.hollow_crypt.exitOffset;
 export const CRYPT_SPAWNS = DUNGEONS.hollow_crypt.spawns;
 
 // ---------------------------------------------------------------------------
-// Delves — private party instances past the arena x-band (see docs/prd/delves.md).
+// Delves, private party instances past the arena x-band (see docs/prd/delves.md).
 // DELVE_X_MIN must stay above ARENA_X_MIN (4000) and ARENA_X (4200).
 // ---------------------------------------------------------------------------
 
@@ -265,7 +262,7 @@ export const DELVE_X_MIN = 4800;
 // |x| = DELVE_WALL_X (25, mirror of delve_layout.ts WALL_X) and the collider's
 // outer face sits 1u beyond that (|x| = 26), i.e. world-x = DELVE_X_MIN - 26 =
 // 4774 for slot 0. We set the band edge 1u further west again (4773) so
-// isDelvePos covers the ENTIRE room footprint — including the west wall face —
+// isDelvePos covers the ENTIRE room footprint, including the west wall face, 
 // and the west half is never misclassified as arena. Still >500u clear of ARENA_X.
 const DELVE_WALL_X = 25; // mirror of delve_layout.ts WALL_X (delve side-wall centre)
 export const DELVE_BAND_X_MIN = DELVE_X_MIN - (DELVE_WALL_X + DUNGEON_WALL_HW + 1);
@@ -291,12 +288,10 @@ export function delveAt(x: number): DelveDef | null {
 
 export const DELVES: Record<string, DelveDef> = {
   [COLLAPSED_RELIQUARY_DELVE.id]: COLLAPSED_RELIQUARY_DELVE,
-  [PLACEHOLDER_DELVE.id]: PLACEHOLDER_DELVE,
 };
 export const DELVE_LIST: DelveDef[] = Object.values(DELVES).sort((a, b) => a.index - b.index);
 export const DELVE_MODULES: Record<string, DelveModuleDef> = {
   ...COLLAPSED_RELIQUARY_MODULES,
-  ...PLACEHOLDER_DELVE_MODULES,
 };
 
 function delveModuleFootprint(moduleId: string): number {

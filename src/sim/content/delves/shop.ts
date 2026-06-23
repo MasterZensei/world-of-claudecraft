@@ -33,7 +33,7 @@ export interface DelveShopEntry {
   gate: DelveShopGate;
 }
 
-export const COLLAPSED_RELIQUARY_SHOP: DelveShopEntry[] = [
+const COLLAPSED_RELIQUARY_SHOP: DelveShopEntry[] = [
   // -- immediately available utility pieces (class-neutral / off-set) --
   { itemId: 'reliquary_legs',         marks: 8,  gate: 'available' },
   { itemId: 'reliquary_shoulder',     marks: 8,  gate: 'available' },
@@ -54,9 +54,6 @@ export const COLLAPSED_RELIQUARY_SHOP: DelveShopEntry[] = [
 export const DELVE_SHOPS: Record<string, DelveShopEntry[]> = {
   collapsed_reliquary: COLLAPSED_RELIQUARY_SHOP,
 };
-
-// Back-compat alias for the single entry-tier shop.
-export const DELVE_SHOP = COLLAPSED_RELIQUARY_SHOP;
 
 // Pure gate check, shared by the Sim (server-authoritative buy) and the client UI
 // (ClientWorld, for the lock badge) so the lock state the player sees matches what

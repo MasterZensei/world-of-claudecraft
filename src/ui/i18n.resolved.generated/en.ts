@@ -1637,7 +1637,9 @@ export const en: EnTranslations = {
       "companionRankUp": "{name} reaches rank {rank}.",
       "bossChest": "The boss falls. A warded reliquary chest rises on the dais. Pick its lock to claim your spoils.",
       "surfaceStairs": "A stairway to the surface opens. Press F at the stairs to leave.",
-      "moduleEnter": "{name} — {objective}",
+      "moduleEnter": "{name}: {objective}",
+      "objectiveClearRoom": "Clear the room.",
+      "objectiveDefeatBoss": "Defeat the boss.",
       "tombstoneHint": "A tombstone passage opens to the north when the room is cleared.",
       "tombstoneOpen": "A sealed tombstone passage grinds open to the north. Walk into it to continue.",
       "tombstoneInto": "You pass through the tombstone into {name}.",
@@ -1676,6 +1678,51 @@ export const en: EnTranslations = {
       "toolSlips": "That tool slips off this lock.",
       "lockJammed": "The lock is jammed beyond picking. Clear the delve again for another attempt.",
       "lastPickSnaps": "The last pick snaps. The lock jams. The chest is lost unless you clear the delve again."
+    }
+  },
+  "lockpickUi": {
+    "pickTitle": "Pick the Lock",
+    "cofferTitle": "Bountiful Coffer",
+    "cache": "{tier} Cache",
+    "pickBlurb": "A richer cache is sealed behind more locks. Easier locks give you more tries and more time; a failed try resets the lock until your tries run out.",
+    "cofferBlurb": "This seal yields only to a master's hand: the Hard, Premium path alone can open it. Solve all three locks for the signature prize.",
+    "pagesAria": "{count} locks",
+    "tries": "{count} tries",
+    "triesOne": "1 try",
+    "perLock": "{seconds}s / lock",
+    "seconds": "{seconds}s",
+    "boardTitle": "Tumbler's Path: {tier} cache",
+    "closeAria": "Close",
+    "withdrawAria": "Withdraw",
+    "timerAria": "Time remaining",
+    "lockOf": "Lock {page}/{total}",
+    "lockOfAria": "Lock {page} of {total}",
+    "triesOf": "Tries {tries}/{total}",
+    "triesOfAria": "{tries} of {total} tries left",
+    "ward": "Ward {col} / {total}",
+    "withdraw": "Withdraw (Esc)",
+    "action": {
+      "hardSet": "Hard Set",
+      "set": "Set",
+      "steady": "Steady",
+      "ease": "Ease",
+      "drop": "Drop"
+    },
+    "feedback": {
+      "advanced": "The pin gives...",
+      "slip": "A ward bites, the pick slips!",
+      "bind": "The tumbler binds: wrong depth!",
+      "trap": "A false ward snaps shut, the lock jams!",
+      "retry": "The lock resets. Line up a fresh attempt.",
+      "pageCleared": "A tumbler bank falls. The next lock turns up.",
+      "success": "The bolt throws, the cache is yours!",
+      "fail": "The lock seizes. It won't budge again."
+    },
+    "summary": {
+      "success": "Lock sprung, {tier} cache claimed.",
+      "successGeneric": "Lock sprung, the cache is claimed.",
+      "fail": "The lock is ruined. Clear the delve again for another attempt.",
+      "abandoned": "You ease the picks back out. The lock waits."
     }
   },
   "delveUi": {
@@ -4924,9 +4971,6 @@ export const en: EnTranslations = {
       "acolyte_tessa": {
         "name": "Acolyte Tessa"
       },
-      "placeholder_boss": {
-        "name": "Trial Warden"
-      },
       "elder_bristleback": {
         "name": "Elder Bristleback"
       },
@@ -6259,11 +6303,6 @@ export const en: EnTranslations = {
         "name": "The Collapsed Reliquary",
         "enterText": "You descend into the collapsed reliquary.",
         "leaveText": "You climb back to Brother Halven at the reliquary ruin."
-      },
-      "delve_placeholder": {
-        "name": "Shallow Trial Crypt",
-        "enterText": "You descend into the shallow trial crypt.",
-        "leaveText": "You climb back to the surface."
       }
     }
   },

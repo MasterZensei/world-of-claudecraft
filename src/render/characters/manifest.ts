@@ -436,7 +436,7 @@ export const VISUALS: Record<string, VisualDef> = {
 
   // -- delve-specific variants (same rigs, colour-differentiated via mob.color) -
   delve_skel_wraith: {
-    // Ledger Wraith: pale skeleton, no weapon — stronger wash reads as near-transparent
+    // Ledger Wraith: pale skeleton, no weapon, stronger wash reads as near-transparent
     url: `${ENEMIES}/skeleton_minion.glb`, height: 2.5,
     clips: skeletonClips(['1H_Melee_Attack_Chop', '1H_Melee_Attack_Slice_Diagonal']),
     tint: 'entity', tintStrength: 0.55,
@@ -457,7 +457,7 @@ export const VISUALS: Record<string, VisualDef> = {
     tint: 'entity', tintStrength: 0.6,
   },
   delve_skel_effigy: {
-    // Saintless Effigy: armoured skeleton, high stone-pale wash — reads as carved stone
+    // Saintless Effigy: armoured skeleton, high stone-pale wash, reads as carved stone
     url: `${ENEMIES}/skeleton_warrior.glb`, height: 2.5,
     clips: skeletonClips(['1H_Melee_Attack_Chop', '1H_Melee_Attack_Slice_Diagonal']),
     attach: [
@@ -593,7 +593,7 @@ export const VISUALS: Record<string, VisualDef> = {
     tint: 'entity', tintStrength: 0.35,
   },
   // Brother Halven, the Reliquary Keeper: a dark, hooded figure tending the crypt
-  // door — deliberately grimmer than the chapel's brown-robed npc_mage brothers,
+  // door, deliberately grimmer than the chapel's brown-robed npc_mage brothers,
   // so the delve's threshold reads as ominous from a distance. Hooded rogue rig
   // ships the hood/mask/cape by default (no show filter); 'entity' tint takes
   // BROTHER_HALVEN.color (a near-black charcoal) for the "dirty/dark" mood.

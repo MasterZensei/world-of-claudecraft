@@ -1638,6 +1638,8 @@ export const fr_CA: EnTranslations = {
       "bossChest": "Le boss tombe. Un coffre de reliquaire scellé s'élève sur l'estrade : crochetez sa serrure pour réclamer votre butin.",
       "surfaceStairs": "Un escalier vers la surface s'ouvre. Appuyez sur F à l'escalier pour partir.",
       "moduleEnter": "{name} : {objective}",
+      "objectiveClearRoom": "Nettoyez la salle.",
+      "objectiveDefeatBoss": "Vainquez le boss.",
       "tombstoneHint": "Un passage de pierre tombale s'ouvre vers le nord une fois la salle nettoyée.",
       "tombstoneOpen": "Un passage de pierre tombale scellé s'ouvre en grinçant vers le nord. Avancez dedans pour continuer.",
       "tombstoneInto": "Vous franchissez la pierre tombale vers {name}.",
@@ -1676,6 +1678,51 @@ export const fr_CA: EnTranslations = {
       "toolSlips": "Cet outil glisse sur cette serrure.",
       "lockJammed": "La serrure est bloquée, impossible à crocheter : terminez l'excavation de nouveau pour une autre tentative.",
       "lastPickSnaps": "Le dernier crochet se brise. La serrure se bloque : le coffre est perdu à moins de terminer l'excavation de nouveau."
+    }
+  },
+  "lockpickUi": {
+    "pickTitle": "Crocheter la serrure",
+    "cofferTitle": "Coffre opulent",
+    "cache": "Cachette {tier}",
+    "pickBlurb": "Une cachette plus riche est scellée derrière davantage de serrures. Les serrures plus faciles vous donnent plus d'essais et plus de temps ; un essai raté réinitialise la serrure jusqu'à épuisement de vos essais.",
+    "cofferBlurb": "Ce sceau ne cède qu'à la main d'un maître : seule la voie Difficile, Supérieure peut l'ouvrir. Crochetez les trois serrures pour la récompense d'exception.",
+    "pagesAria": "{count} serrures",
+    "tries": "{count} essais",
+    "triesOne": "1 essai",
+    "perLock": "{seconds}s / serrure",
+    "seconds": "{seconds}s",
+    "boardTitle": "Voie du crocheteur : cachette {tier}",
+    "closeAria": "Fermer",
+    "withdrawAria": "Se retirer",
+    "timerAria": "Temps restant",
+    "lockOf": "Serrure {page}/{total}",
+    "lockOfAria": "Serrure {page} sur {total}",
+    "triesOf": "Essais {tries}/{total}",
+    "triesOfAria": "{tries} essais restants sur {total}",
+    "ward": "Garde {col} / {total}",
+    "withdraw": "Se retirer (Esc)",
+    "action": {
+      "hardSet": "Forcer fort",
+      "set": "Forcer",
+      "steady": "Stabiliser",
+      "ease": "Relâcher",
+      "drop": "Lâcher"
+    },
+    "feedback": {
+      "advanced": "La goupille cède...",
+      "slip": "Une garde mord, le crochet glisse !",
+      "bind": "Le mécanisme se coince : mauvaise profondeur !",
+      "trap": "Une fausse garde se referme, la serrure se bloque !",
+      "retry": "La serrure se réinitialise. Préparez une nouvelle tentative.",
+      "pageCleared": "Une rangée de goupilles cède. La serrure suivante se présente.",
+      "success": "Le pêne se débloque, la cachette est à vous !",
+      "fail": "La serrure se grippe. Elle ne bougera plus."
+    },
+    "summary": {
+      "success": "Serrure forcée, cachette {tier} récupérée.",
+      "successGeneric": "Serrure forcée, la cachette est récupérée.",
+      "fail": "La serrure est détruite. Terminez à nouveau la plongée pour un autre essai.",
+      "abandoned": "Vous retirez doucement les crochets. La serrure attend."
     }
   },
   "delveUi": {
@@ -4924,9 +4971,6 @@ export const fr_CA: EnTranslations = {
       "acolyte_tessa": {
         "name": "Acolyte Tessa"
       },
-      "placeholder_boss": {
-        "name": "Gardien de l'épreuve"
-      },
       "elder_bristleback": {
         "name": "Ancien Bristleback"
       },
@@ -6259,11 +6303,6 @@ export const fr_CA: EnTranslations = {
         "name": "Le Reliquaire effondré",
         "enterText": "Vous descendez dans le reliquaire effondré.",
         "leaveText": "Vous remontez auprès du frère Halven, à la ruine du reliquaire."
-      },
-      "delve_placeholder": {
-        "name": "Crypte d'épreuve peu profonde",
-        "enterText": "Vous descendez dans la crypte d'épreuve peu profonde.",
-        "leaveText": "Vous remontez à la surface."
       }
     }
   },

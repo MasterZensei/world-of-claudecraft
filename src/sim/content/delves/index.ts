@@ -2,8 +2,8 @@ import type { NpcDef } from '../../types';
 import { COLLAPSED_RELIQUARY_DELVE, COLLAPSED_RELIQUARY_MODULES } from './collapsed_reliquary';
 
 export { DELVE_AFFIXES } from './affixes';
-export { DELVE_COMPANIONS, COMPANION_UPGRADE_COSTS, COMPANION_TESSA } from './companions';
-export { DELVE_SHOPS, DELVE_SHOP, COLLAPSED_RELIQUARY_SHOP, delveShopGateUnlocked, resolveDelveShopOffers } from './shop';
+export { DELVE_COMPANIONS, COMPANION_UPGRADE_COSTS } from './companions';
+export { DELVE_SHOPS, delveShopGateUnlocked, resolveDelveShopOffers } from './shop';
 export type { DelveShopEntry, DelveShopGate, DelveShopOffer } from './shop';
 export { DELVE_MOBS } from './mobs';
 export { COLLAPSED_RELIQUARY_DELVE, COLLAPSED_RELIQUARY_MODULES } from './collapsed_reliquary';

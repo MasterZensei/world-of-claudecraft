@@ -281,7 +281,7 @@ const DELVE_COMPANION_HEAL_RANGE = 22;
 const DELVE_COMPANION_HEAL_INTERVAL = 3;
 const DELVE_COMPANION_FOLLOW = 4;
 // Tessa heals a PERCENT of the target's max HP each tick, indexed by rank (1-3), so
-// her output stays relevant as player HP grows — the old flat `8 + rank*4` decayed to
+// her output stays relevant as player HP grows, the old flat `8 + rank*4` decayed to
 // noise by level 9. Tuned (combat spec) so L7 Normal is sustainable, L7 Heroic is not
 // savable by Tessa alone, and L9 Heroic is sustainable from rank 2.
 const DELVE_COMPANION_HEAL_PCT = [0, 0.06, 0.08, 0.10];
@@ -291,7 +291,7 @@ const DELVE_COMPANION_HEAL_PCT = [0, 0.06, 0.08, 0.10];
 const DELVE_COMPANION_LEVEL_PCT = [0, 0.5, 0.75, 1.0]; // index = rank
 const DELVE_COMPANION_MAX_RANK = 3;
 const DELVE_EXIT_PORTAL_RADIUS = 3.5;
-const DELVE_MODULE_NAMES: Record<string, string> = {
+export const DELVE_MODULE_NAMES: Record<string, string> = {
   reliquary_sunken_ossuary: 'The Sunken Ossuary',
   reliquary_bell_niche: 'The Bell Niche',
   reliquary_saintless_hall: 'The Saintless Hall',
@@ -876,7 +876,7 @@ export class Sim {
   // Real-world UTC day ('YYYY-MM-DD') for the delve daily reset (FR-5.1). The sim
   // core must stay deterministic, so it never reads the wall clock itself: the host
   // (server/offline client) sets this each tick from `new Date()`. Empty string =
-  // "no calendar known" (headless/replay) — the daily window then never rolls over,
+  // "no calendar known" (headless/replay), the daily window then never rolls over,
   // keeping same-seed runs reproducible. Tests may set it to pin a date.
   utcDay = '';
   // the World Market: one shared listing book, per-seller collections keyed by
@@ -1252,7 +1252,7 @@ export class Sim {
     this.channelSubs.delete(pid);
     // A pet stowed for a delve is already serialized into the persisted character
     // (despawnPersistentPet writes meta.pet), so the transient stash entry is dead
-    // weight once the player leaves — drop it so the map can't grow unbounded.
+    // weight once the player leaves, drop it so the map can't grow unbounded.
     this.delvePetStash.delete(pid);
     if (this.primaryId === pid) this.primaryId = this.players.size > 0 ? [...this.players.keys()][0] : -1;
   }
@@ -11954,7 +11954,7 @@ export class Sim {
     return `Talents: ${head} — ${spent}/${total} points spent (${breakdown}).${tail}`;
   }
   // -------------------------------------------------------------------------
-  // Delves — replayable modular instances (see docs/prd/delves.md)
+  // Delves, replayable modular instances (see docs/prd/delves.md)
   // -------------------------------------------------------------------------
 
   private delveOriginOf(run: DelveRun): { x: number; z: number } {
@@ -11979,7 +11979,7 @@ export class Sim {
     return this.delveRunForMob(e.id);
   }
 
-  // Swept move resolution for players — keeps v0.10.0's segment-based
+  // Swept move resolution for players, keeps v0.10.0's segment-based
   // resolveMovement (no tunnelling through thin walls) and layers the delve
   // module colliders + portcullis doors on top when inside a delve.
   private resolveMove(
@@ -12074,7 +12074,7 @@ export class Sim {
   private refreshDelveDaily(meta: PlayerMeta): void {
     // `utcDay` is supplied by the host (never read from the wall clock here, so the
     // sim stays deterministic). When unknown (''), the daily window does not roll
-    // over — same-seed replays stay reproducible.
+    // over, same-seed replays stay reproducible.
     const today = this.utcDay;
     if (today && meta.delveDaily.date !== today) {
       meta.delveDaily = { date: today, firstClearXp: new Set(), markClears: 0 };
@@ -12172,6 +12172,12 @@ export class Sim {
     this.emit({ type: 'delveEntered', delveId, tierId, pid: r.meta.entityId });
   }
 
+  // Early-abandon path: drop the player back at the board door without completing
+  // (despawns the companion, restores the stowed pet, tears down any lockpick). The
+  // shipped in-delve exit instead runs through the 'surface_exit' interactable ->
+  // freeDelveRun, so this IWorld method (and its server 'leave_delve' command) is
+  // currently only reachable as scaffolding for a future explicit "Abandon Delve"
+  // control; kept wired in both worlds so that control needs no new plumbing.
   leaveDelve(pid?: number): void {
     const r = this.resolve(pid);
     if (!r || r.e.dead) return;
@@ -12196,7 +12202,7 @@ export class Sim {
     run.partyKey = key;
     run.seed = this.rng.int(1, 0x7fffffff);
     run.tierId = tierId;
-    // §7.6 — roll Bountiful once at run start (Heroic 5% / Normal 2%). Derived from
+    // §7.6, roll Bountiful once at run start (Heroic 5% / Normal 2%). Derived from
     // run.seed in its own stream (like affixes/modules) so it is deterministic
     // without perturbing the global rng draw order that the chest loot depends on.
     run.bountiful = new Rng((run.seed ^ 0x600dc0ff) >>> 0).chance(tierId === 'heroic' ? 0.05 : 0.02);
@@ -12385,7 +12391,7 @@ export class Sim {
     const layout = DELVE_MODULE_LAYOUTS[moduleId];
     const zBase = this.delveModuleZOffset(run);
     const dais = layout?.dais ?? { x: 0, z: 52 };
-    // Centre aisle, south of the dais — clear of the north sealed passage at zMax-6.
+    // Centre aisle, south of the dais, clear of the north sealed passage at zMax-6.
     const chestLocalZ = dais.z - 9;
     const chestPos = this.groundPos(run.origin.x, run.origin.z + zBase + chestLocalZ);
     // Drop any stale module_exit (same z as dais / north passage) before placing the chest.
@@ -12427,7 +12433,7 @@ export class Sim {
     return this.rng.chance(0.5) ? 1 : 0;
   }
 
-  // Unlock the next un-owned lore journal entry (PRD §6.4 / §7.6 — five entries
+  // Unlock the next un-owned lore journal entry (PRD §6.4 / §7.6, five entries
   // across repeat clears). Emits a stable lore id (no English crosses the sim
   // boundary); the client localises it via the `delveUi.lore.*` keys.
   private unlockNextDelveLore(meta: PlayerMeta, pid: number): void {
@@ -12624,11 +12630,13 @@ export class Sim {
     if (!run.partyKey) return;
     const modName = DELVE_MODULE_NAMES[mod.id] ?? mod.id;
     const isFinale = run.moduleIndex >= run.modules.length - 1;
-    const objective = isFinale ? 'Defeat the boss.' : 'Clear the room.';
     for (const pid of this.partyMembersForKey(run.partyKey)) {
+      // Keep the objective as a literal at each emit site (not a variable) so the
+      // S3 guard sees the full "<module>: Clear the room." / ": Defeat the boss."
+      // strings the sim_i18n rules are anchored on.
       this.emit({
         type: 'log',
-        text: `${modName} — ${objective}`,
+        text: isFinale ? `${modName}: Defeat the boss.` : `${modName}: Clear the room.`,
         color: '#cc9',
         pid,
       });
@@ -12745,7 +12753,7 @@ export class Sim {
         if (d <= DELVE_PLATE_RADIUS + 4) this.maybeCompanionBark(run, pid, 'trap_spotted');
         if (d > DELVE_PLATE_RADIUS) continue;
         state.triggered = true;
-        // Switch the visual to the triggered (green) variant — renderer rebuilds the view.
+        // Switch the visual to the triggered (green) variant, renderer rebuilds the view.
         plate.templateId = 'delve_pressure_plate_triggered';
         // Open each linked door only when ALL plates referencing it are triggered.
         for (const linkId of state.linkIds) {
@@ -13088,10 +13096,10 @@ export class Sim {
   }
 
   // -------------------------------------------------------------------------
-  // Lockpicking minigame ("Tumbler's Path") — server-authoritative. The client
+  // Lockpicking minigame ("Tumbler's Path"), server-authoritative. The client
   // submits one action enum per step; the sim owns the lock, validates every
   // step, and grants loot only on a server-side SUCCESS. The full lock layout is
-  // never serialized — only visibleCells() inside the fog window is emitted.
+  // never serialized, only visibleCells() inside the fog window is emitted.
   // -------------------------------------------------------------------------
 
   /** Resolve the locked-chest object + run for an acting player, with all the
@@ -13123,7 +13131,7 @@ export class Sim {
     if (run.lockpick && run.lockpick.state === 'IN_PROGRESS') { this.error(r.meta.entityId, 'Someone is already working the lock.'); return; }
 
     // §7.6 Bountiful Coffer: a purple coffer only yields to a Hard-tier (heroic
-    // preset) + Premium-ante (1) solve. Server-authoritative — rejected here no
+    // preset) + Premium-ante (1) solve. Server-authoritative, rejected here no
     // matter what ante the UI offered; the lower antes are not an option.
     const isCoffer = run.bountiful && objectId === run.rewardChestId;
     if (isCoffer && ante !== 1) {
@@ -13152,7 +13160,6 @@ export class Sim {
       triesLeft: triesTotal,
       triesTotal,
       state: 'IN_PROGRESS',
-      lastActionTick: this.tickCount,
     };
     run.lockpick = session;
     this.emit({
@@ -13190,7 +13197,6 @@ export class Sim {
     if (action === 'abort') { this.lockpickAbort(r.meta.entityId, session.sessionId); return; }
     let spec = session.pages[session.pageIndex];
     if (!spec.tier.allowedActions.includes(action)) { this.error(r.meta.entityId, 'That tool slips off this lock.'); return; }
-    session.lastActionTick = this.tickCount;
 
     const step = stepLock(spec, session.col, session.row, action);
     let result = step.result;
@@ -13203,7 +13209,7 @@ export class Sim {
       session.col = step.col;
       session.row = step.row;
       if (result === 'success' && session.pageIndex < session.pages.length - 1) {
-        // Page seated but more remain — roll onto the next lock board.
+        // Page seated but more remain, roll onto the next lock board.
         session.pageIndex += 1;
         spec = session.pages[session.pageIndex];
         session.col = 0;
@@ -13299,6 +13305,10 @@ export class Sim {
       this.error(r.meta.entityId, 'There is nothing left to take.');
       return;
     }
+    if (state.lootOwnerId != null && state.lootOwnerId !== r.meta.entityId) {
+      this.error(r.meta.entityId, 'There is nothing left to take.');
+      return;
+    }
     if (!obj || dist2d(r.e.pos, obj.pos) > DELVE_PLATE_RADIUS + 2) {
       this.error(r.meta.entityId, 'Move closer to the chest.');
       return;
@@ -13333,6 +13343,9 @@ export class Sim {
       state.attemptAvailable = false;
       state.lootedTier = session.lootTier;
       state.pendingLoot = items.map((s) => ({ ...s }));
+      // Loot belongs to the picker; record it so a non-picker party member who is
+      // also standing on the chest cannot front-run the collect.
+      state.lootOwnerId = session.ownerId;
     }
     if (obj) {
       obj.name = 'Opened Chest';
@@ -13349,7 +13362,7 @@ export class Sim {
   private lockpickFail(run: DelveRun, session: LockSession): void {
     session.state = 'FAILED';
     const state = run.objectState[session.chestId];
-    if (state) state.attemptAvailable = false; // chest lost — re-clear the delve
+    if (state) state.attemptAvailable = false; // chest lost, re-clear the delve
     this.emit({ type: 'lockpickEnd', sessionId: session.sessionId, outcome: 'fail', pid: session.ownerId });
     if (run.partyKey) {
       for (const pid of this.partyMembersForKey(run.partyKey)) {
@@ -13430,7 +13443,7 @@ export class Sim {
   // `clears:N` counts total clears of this delve at ANY difficulty; `heroicClear`
   // requires at least one Heroic (difficulty ≥ 2) completion. Delegates to the pure
   // content helper so the server-authoritative buy and the client lock badge
-  // (ClientWorld) agree — same answer offline, on the server, and headless.
+  // (ClientWorld) agree, same answer offline, on the server, and headless.
   delveShopGateMet(meta: PlayerMeta, delveId: string, gate: DelveShopGate): boolean {
     return delveShopGateUnlocked(meta.delveClears, delveId, gate);
   }
@@ -13471,7 +13484,7 @@ export class Sim {
     meta.delveMarks -= entry.marks;
     this.addItem(itemId, 1, meta.entityId);
     // Feedback rides the 'vendor' event (the shop panel re-renders), matching the
-    // regular buyItem path — no raw English log string emitted from the sim.
+    // regular buyItem path, no raw English log string emitted from the sim.
     this.emit({ type: 'vendor', action: 'buy', itemId, pid: meta.entityId });
   }
 

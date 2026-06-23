@@ -2498,7 +2498,7 @@ export class Renderer {
       body = built.group;
       height = built.height;
       objectMesh = body!;
-      // Pressure plates are flush to the floor — no sparkle clutter overhead.
+      // Pressure plates are flush to the floor, no sparkle clutter overhead.
       if (
         e.templateId !== 'delve_pressure_plate' &&
         e.templateId !== 'delve_pressure_plate_triggered' &&
@@ -2868,8 +2868,8 @@ export class Renderer {
         fog.near = 20;
         fog.far = 80;
       } else if (desired === 'delve') {
-        // the collapsed reliquary breathes a warm ember murk — dried-blood
-        // charcoal, tighter than the overworld crypt's cold near-black — so the
+        // the collapsed reliquary breathes a warm ember murk, dried-blood
+        // charcoal, tighter than the overworld crypt's cold near-black, so the
         // delve reads as its own claustrophobic place under the red torches
         fog.color.setHex(0x0e0705);
         fog.near = 14;

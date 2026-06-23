@@ -1638,6 +1638,8 @@ export const ko_KR: EnTranslations = {
       "bossChest": "우두머리가 쓰러집니다. 봉인된 성물실 상자가 단상 위로 솟아오릅니다. 자물쇠를 따서 전리품을 차지하세요.",
       "surfaceStairs": "지상으로 향하는 계단이 열립니다. 계단에서 F 키를 눌러 나가세요.",
       "moduleEnter": "{name}: {objective}",
+      "objectiveClearRoom": "방을 정리하세요.",
+      "objectiveDefeatBoss": "우두머리를 처치하세요.",
       "tombstoneHint": "방을 정리하면 북쪽으로 묘비 통로가 열립니다.",
       "tombstoneOpen": "봉인된 묘비 통로가 북쪽으로 갈리며 열립니다. 그 안으로 걸어 들어가 계속 진행하세요.",
       "tombstoneInto": "묘비를 통과해 {name}(으)로 들어갑니다.",
@@ -1676,6 +1678,51 @@ export const ko_KR: EnTranslations = {
       "toolSlips": "도구가 이 자물쇠에서 미끄러집니다.",
       "lockJammed": "자물쇠가 더는 딸 수 없게 걸려 버렸습니다. 다시 시도하려면 탐굴을 다시 정리하세요.",
       "lastPickSnaps": "마지막 도구가 부러집니다. 자물쇠가 걸려 버립니다. 탐굴을 다시 정리하지 않으면 상자를 잃습니다."
+    }
+  },
+  "lockpickUi": {
+    "pickTitle": "자물쇠 따기",
+    "cofferTitle": "풍요의 금고",
+    "cache": "{tier} 상자",
+    "pickBlurb": "더 풍성한 상자일수록 자물쇠가 더 많이 걸려 있습니다. 쉬운 자물쇠는 시도 횟수와 시간이 더 넉넉합니다. 시도에 실패하면 시도 횟수가 다 떨어질 때까지 자물쇠가 처음으로 돌아갑니다.",
+    "cofferBlurb": "이 봉인은 대가의 손에만 응합니다. 어려움, 최상급 경로만이 열 수 있습니다. 세 개의 자물쇠를 모두 풀어 최고의 보상을 차지하세요.",
+    "pagesAria": "자물쇠 {count}개",
+    "tries": "시도 {count}회",
+    "triesOne": "시도 1회",
+    "perLock": "{seconds}s / 자물쇠",
+    "seconds": "{seconds}s",
+    "boardTitle": "열쇠공의 길: {tier} 상자",
+    "closeAria": "닫기",
+    "withdrawAria": "물러나기",
+    "timerAria": "남은 시간",
+    "lockOf": "자물쇠 {page}/{total}",
+    "lockOfAria": "자물쇠 {total}개 중 {page}번째",
+    "triesOf": "시도 {tries}/{total}",
+    "triesOfAria": "남은 시도 {total}회 중 {tries}회",
+    "ward": "방호 장치 {col} / {total}",
+    "withdraw": "물러나기 (Esc)",
+    "action": {
+      "hardSet": "강하게 고정",
+      "set": "고정",
+      "steady": "유지",
+      "ease": "풀기",
+      "drop": "내리기"
+    },
+    "feedback": {
+      "advanced": "핀이 살짝 풀립니다...",
+      "slip": "방호 장치가 물리며 도구가 미끄러집니다!",
+      "bind": "실린더가 걸립니다: 깊이가 틀렸습니다!",
+      "trap": "가짜 방호 장치가 닫히며 자물쇠가 걸려 버립니다!",
+      "retry": "자물쇠가 처음으로 돌아갑니다. 다시 한번 맞춰 보세요.",
+      "pageCleared": "실린더 한 벌이 풀립니다. 다음 자물쇠가 나타납니다.",
+      "success": "빗장이 풀립니다. 상자는 당신의 것입니다!",
+      "fail": "자물쇠가 걸려 버립니다. 더는 꿈쩍하지 않습니다."
+    },
+    "summary": {
+      "success": "자물쇠가 풀려 {tier} 상자를 차지했습니다.",
+      "successGeneric": "자물쇠가 풀려 상자를 차지했습니다.",
+      "fail": "자물쇠가 망가졌습니다. 다시 시도하려면 탐굴을 다시 정리하세요.",
+      "abandoned": "도구를 도로 빼냅니다. 자물쇠가 기다립니다."
     }
   },
   "delveUi": {
@@ -4924,9 +4971,6 @@ export const ko_KR: EnTranslations = {
       "acolyte_tessa": {
         "name": "수련사제 테사"
       },
-      "placeholder_boss": {
-        "name": "시험의 감시자"
-      },
       "elder_bristleback": {
         "name": "늙은 뻣센등뼈"
       },
@@ -6259,11 +6303,6 @@ export const ko_KR: EnTranslations = {
         "name": "무너진 성물실",
         "enterText": "무너진 성물실로 내려갑니다.",
         "leaveText": "성물실 폐허의 브라더 할벤에게로 다시 올라갑니다."
-      },
-      "delve_placeholder": {
-        "name": "얕은 시험의 묘실",
-        "enterText": "얕은 시험의 묘실로 내려갑니다.",
-        "leaveText": "지상으로 다시 올라갑니다."
       }
     }
   },

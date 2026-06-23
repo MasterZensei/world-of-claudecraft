@@ -9,8 +9,6 @@ export const DELVE_COMPANIONS: Record<string, DelveCompanionDef> = {
   },
 };
 
-export const COMPANION_TESSA = DELVE_COMPANIONS.companion_tessa;
-
 /**
  * Rank-up costs (rank 1 is free at intro; max rank 3). Marks only, tuned to the
  * ~3-6 Marks/day income so the full companion is a ~2-3 day goal, not a 2-week grind.

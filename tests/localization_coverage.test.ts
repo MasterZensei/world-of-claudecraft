@@ -543,6 +543,19 @@ describe("i18n Localization Key Coverage", () => {
     setLanguage("en");
   });
 
+  it("interpolates {playerName} into the delve board greeting in every locale", () => {
+    // Regression for the Brother Halven greeting that once rendered a literal
+    // {playerName}: guards both the call-site value-pass and the token's
+    // cross-locale parity (a translator dropping the token is caught here too).
+    for (const lang of supportedLanguages) {
+      setLanguage(lang);
+      const greeting = t("delveUi.npc.halven.greeting", { playerName: "Mira" });
+      expect(greeting, `${lang} greeting`).not.toContain("{playerName}");
+      expect(greeting, `${lang} greeting`).toContain("Mira");
+    }
+    setLanguage("en");
+  });
+
   it("should expose typed locale utilities for shell metadata and formatting", () => {
     expect(supportedLanguages).toEqual([
       "en",

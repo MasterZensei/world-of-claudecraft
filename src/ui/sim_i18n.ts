@@ -11,7 +11,8 @@
 // The S3 guard in tests/localization_fixes.test.ts parses src/sim/sim.ts, enumerates
 // every player-facing emit site, and fails if any is no longer recognized by a client
 // matcher — so a new unhandled sim string cannot ship silently.
-import { ITEMS, MOBS, ABILITIES } from '../sim/data';
+import { ITEMS, MOBS, ABILITIES, DELVES } from '../sim/data';
+import { DELVE_MODULE_NAMES } from '../sim/sim';
 import { getLanguage, supportedLanguages, t, formatNumber, type InterpolationValues, type SupportedLanguage, type TranslationKey } from './i18n';
 import { tEntity } from './entity_i18n';
 
@@ -2556,6 +2557,12 @@ const mobNameToId = new Map<string, string>();
 for (const [id, m] of Object.entries(MOBS)) mobNameToId.set(m.name, id);
 const abilityNameToId = new Map<string, string>();
 for (const [id, a] of Object.entries(ABILITIES)) abilityNameToId.set(a.name, id);
+const delveNameToId = new Map<string, string>();
+for (const [id, d] of Object.entries(DELVES)) delveNameToId.set(d.name, id);
+// Module display names are also the delveUi.moduleName.* source values; reverse
+// them so the sim's English module-name splices localize like the run tracker.
+const delveModuleNameToId = new Map<string, string>();
+for (const [id, name] of Object.entries(DELVE_MODULE_NAMES)) delveModuleNameToId.set(name, id);
 
 function locItem(name: string): string {
   const id = itemNameToId.get(name);
@@ -2568,6 +2575,14 @@ function locMob(name: string): string {
 function locAbility(name: string): string {
   const id = abilityNameToId.get(name);
   return id ? tEntity({ kind: 'ability', id, field: 'name' }) : name;
+}
+function locDelve(name: string): string {
+  const id = delveNameToId.get(name);
+  return id ? tEntity({ kind: 'delve', id, field: 'name' }) : name;
+}
+function locDelveModule(name: string): string {
+  const id = delveModuleNameToId.get(name);
+  return id ? t(`delveUi.moduleName.${id}` as TranslationKey) : name;
 }
 function locItemStack(name: string, stackSuffix?: string): string {
   const item = locItem(name);
@@ -3768,9 +3783,9 @@ const RULES: Rule[] = [
   { re: /^(.+) must finish trading before queueing\.$/, build: (m) => tArenaExtra('memberTrading', { name: m[1] }) },
   { re: /^(.+) cannot queue from inside an instance\.$/, build: (m) => tArenaExtra('memberInstance', { name: m[1] }) },
   // Delve / lockpicking sim text. Re-localized through t() against the sim.delve.* /
-  // sim.lockpick.* keys (src/ui/i18n.catalog/index.ts). Exact (no-placeholder) lines come
-  // first; the broad "{name} — {objective}" module-enter rule is LAST so it cannot swallow
-  // the em-dash lines above it (mechanismOpen / bossChest).
+  // sim.lockpick.* keys (src/ui/i18n.catalog/index.ts). The module-enter banner is two
+  // rules anchored on the fixed objective lines ("X: Clear the room." / "X: Defeat the
+  // boss."), each localizing the captured module name, so there is no bare catch-all.
   { re: /^You cannot enter a delve right now\.$/, build: () => t('sim.delve.cannotEnterNow') },
   { re: /^Leave the dungeon first\.$/, build: () => t('sim.delve.leaveDungeonFirst') },
   { re: /^Leave the arena first\.$/, build: () => t('sim.delve.leaveArenaFirst') },
@@ -3820,18 +3835,21 @@ const RULES: Rule[] = [
   // levelRequired with tier label (must precede the two-arg form without tier).
   { re: /^You must be level (\d+) to enter (.+) on (.+)\.$/, build: (m) => t('sim.delve.levelRequiredTier', { level: m[1], name: m[2], tier: m[3] }) },
   { re: /^You must be level (\d+) to enter (.+)\.$/, build: (m) => t('sim.delve.levelRequired', { level: m[1], name: m[2] }) },
-  { re: /^All instances of (.+) are busy\. Try again soon\.$/, build: (m) => t('sim.delve.instancesBusy', { name: m[1] }) },
-  { re: /^(.+) run failed\.$/, build: (m) => t('sim.delve.runFailed', { name: m[1] }) },
+  // "All instances of X are busy" is handled by the hud-local localizeErrorText
+  // arm (it runs first and resolves the dungeon-or-delve name), so no rule here.
+  { re: /^(.+) run failed\.$/, build: (m) => t('sim.delve.runFailed', { name: locDelve(m[1]) }) },
   { re: /^(.+) begins Raise Dead\.$/, build: (m) => t('sim.delve.raiseDead', { name: locMob(m[1]) }) },
-  { re: /^You need (.+) Delve Marks to upgrade (.+)\.$/, build: (m) => t('sim.delve.companionMarksRequired', { marks: m[1], name: m[2] }) },
+  { re: /^You need (.+) Delve Marks to upgrade (.+)\.$/, build: (m) => t('sim.delve.companionMarksRequired', { marks: m[1], name: locMob(m[2]) }) },
   { re: /^You have not unlocked that item yet\.$/, build: () => t('sim.delve.shopItemLocked') },
   { re: /^You need (.+) Delve Marks to buy (.+)\.$/, build: (m) => t('sim.delve.shopMarksRequired', { marks: m[1], name: locItem(m[2]) }) },
-  { re: /^You pass through the tombstone into (.+)\.$/, build: (m) => t('sim.delve.tombstoneInto', { name: m[1] }) },
-  { re: /^(.+) reaches rank (.+)\.$/, build: (m) => t('sim.delve.companionRankUp', { name: m[1], rank: m[2] }) },
-  { re: /^(.+) complete\.$/, build: (m) => t('sim.delve.complete', { name: m[1] }) },
-  // Module-enter banner: "<module> — <objective>". Broad catch-all; sits LAST so every
-  // more-specific em-dash rule above wins first.
-  { re: /^(.+) — (.+)$/, build: (m) => t('sim.delve.moduleEnter', { name: m[1], objective: m[2] }) },
+  { re: /^You pass through the tombstone into (.+)\.$/, build: (m) => t('sim.delve.tombstoneInto', { name: locDelveModule(m[1]) }) },
+  { re: /^(.+) reaches rank (.+)\.$/, build: (m) => t('sim.delve.companionRankUp', { name: locMob(m[1]), rank: m[2] }) },
+  { re: /^(.+) complete\.$/, build: (m) => t('sim.delve.complete', { name: locDelve(m[1]) }) },
+  // Module-enter banner: "<module>: <objective>". Anchored on the two fixed
+  // objective lines (not a bare "X: Y" catch-all), so the captured module name is
+  // the only free part; localize it and the objective.
+  { re: /^(.+): Clear the room\.$/, build: (m) => t('sim.delve.moduleEnter', { name: locDelveModule(m[1]), objective: t('sim.delve.objectiveClearRoom') }) },
+  { re: /^(.+): Defeat the boss\.$/, build: (m) => t('sim.delve.moduleEnter', { name: locDelveModule(m[1]), objective: t('sim.delve.objectiveDefeatBoss') }) },
   // 2v2 Fiesta. The leader/premade rules are wildcards so they catch both the
   // '2v2' and 'Fiesta' label variants (the ranked exact rules above match first
   // at runtime; this picks up Fiesta and the i18n guard's placeholder token).

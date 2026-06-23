@@ -19,8 +19,8 @@ import {
   playerDelveLocal, type SchematicPrimitive,
 } from './delve_map';
 import {
-  anteOptions, endSummary, pageDots, lockpickActionButtons, lockpickBoardModel,
-  stepFeedback, TIER_LABEL, TIER_TIMER_SECONDS,
+  anteOptions, pageDots, lockpickActionButtons, lockpickBoardModel,
+  stepFeedback, TIER_TIMER_SECONDS,
 } from './lockpick_panel';
 import type { Ante, PickAction, StepResult } from '../sim/lockpick';
 import { PICK_ACTIONS } from '../sim/lockpick';
@@ -833,6 +833,17 @@ export class Hud {
         this.toggleQuestTrackerCollapsed();
       }
     });
+    // The delve board and lockpick panel are non-modal .window.panel overlays, so
+    // canUseGameKeys() stays true and the global jump (Space) / chat (Enter) binds
+    // would otherwise hijack those keys on a focused panel button. Stop propagation
+    // (but NOT the default, so the button's native activation still fires) when a
+    // panel button has focus, mirroring the quest-tracker guard above.
+    for (const panelId of ['#delve-board', '#lockpick-panel']) {
+      $(panelId).addEventListener('keydown', (e) => {
+        if ((e.target as HTMLElement).tagName !== 'BUTTON') return;
+        if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') e.stopPropagation();
+      });
+    }
     $('#mm-map').addEventListener('click', () => this.toggleMap());
     $('#map-close').addEventListener('click', () => { $('#map-window').style.display = 'none'; });
     const mapCanvas = $('#map-canvas') as unknown as HTMLCanvasElement;
@@ -3321,10 +3332,10 @@ export class Hud {
       });
       el.querySelector('[data-delve-enter]')?.addEventListener('click', () => {
         const tierId = this.selectedDelveTier;
-        this.sim.enterDelve('collapsed_reliquary', tierId);
+        this.sim.enterDelve(delve.id, tierId);
         // enterDelve queues delveEntered for the next sim tick; kick interior
         // prebuild now so the first rendered frame is not a fog void.
-        this.renderer.handleEvent({ type: 'delveEntered', delveId: 'collapsed_reliquary', tierId });
+        this.renderer.handleEvent({ type: 'delveEntered', delveId: delve.id, tierId });
         this.closeDelveBoard();
       });
     }
@@ -3392,7 +3403,8 @@ export class Hud {
   // Lockpicking minigame ("Tumbler's Path"). The chest's first touch emits a
   // lockpickOffer (ante selector); engaging opens a live, server-authoritative
   // board driven entirely by lockpickSession/Step/End events. The HUD only ever
-  // sees the fogged LockpickView -- never the full lock. English-only by design.
+  // sees the fogged LockpickView, never the full lock. Player text renders through
+  // the lockpickUi.* t() keys.
   // ---------------------------------------------------------------------------
 
   private openLockpickAnte(objectId: number, bountiful = false): void {
@@ -3406,26 +3418,31 @@ export class Hud {
     this.renderLockpickAnte();
   }
 
+  // The lockpick loot tier names are shared with the combat-log lines, so reuse
+  // the sim.lockpick.tier* keys rather than minting parallel lockpickUi ones.
+  private lockpickTierName(tier: 'premium' | 'medium' | 'low'): string {
+    return t(tier === 'premium' ? 'sim.lockpick.tierPremium' : tier === 'medium' ? 'sim.lockpick.tierMedium' : 'sim.lockpick.tierLow');
+  }
+
   private renderLockpickAnte(): void {
     const el = $('#lockpick-panel');
     const objectId = this.lockpickOfferId;
     if (objectId === null) { this.closeLockpick(); return; }
     const coffer = this.lockpickCoffer;
+    const numFmt = { maximumFractionDigits: 0 } as const;
     const buttons = anteOptions(coffer).map((o) => `<button type="button" class="lp-ante-btn" data-ante="${o.ante}">`
-      + `<span class="lp-ante-tier">${esc(o.tierLabel)} Cache</span>`
+      + `<span class="lp-ante-tier">${esc(t('lockpickUi.cache', { tier: this.lockpickTierName(o.tier) }))}</span>`
       + `<span class="lp-ante-badges">`
-      + `<span class="lp-ante-pages">🔒 ${o.pages}</span>`
-      + `<span class="lp-ante-tries">${o.tries} ${o.tries > 1 ? 'tries' : 'try'}</span>`
+      + `<span class="lp-ante-pages" aria-label="${esc(t('lockpickUi.pagesAria', { count: formatNumber(o.pages, numFmt) }))}">${esc(formatNumber(o.pages, numFmt))}</span>`
+      + `<span class="lp-ante-tries">${esc(o.tries > 1 ? t('lockpickUi.tries', { count: formatNumber(o.tries, numFmt) }) : t('lockpickUi.triesOne'))}</span>`
       + `</span>`
-      + `<span class="lp-ante-timer">${o.timerSeconds}s / lock</span>`
+      + `<span class="lp-ante-timer">${esc(t('lockpickUi.perLock', { seconds: formatNumber(o.timerSeconds, numFmt) }))}</span>`
       + `</button>`).join('');
-    const title = coffer ? 'Bountiful Coffer' : 'Pick the Lock';
-    const blurb = coffer
-      ? 'This seal yields only to a master\'s hand -- the Hard, Premium path alone can open it. Solve all three locks for the signature prize.'
-      : 'A richer cache is sealed behind more locks. Easier locks give you more tries and more time; a failed try resets the lock until your tries run out.';
-    el.innerHTML = `<div class="panel-title"><span>${title}</span>`
-      + `<button type="button" class="x-btn" data-close aria-label="Close">${svgIcon('close')}</button></div>`
-      + `<div class="lp-blurb${coffer ? ' lp-blurb-coffer' : ''}">${blurb}</div>`
+    const title = coffer ? t('lockpickUi.cofferTitle') : t('lockpickUi.pickTitle');
+    const blurb = coffer ? t('lockpickUi.cofferBlurb') : t('lockpickUi.pickBlurb');
+    el.innerHTML = `<div class="panel-title"><span>${esc(title)}</span>`
+      + `<button type="button" class="x-btn" data-close aria-label="${esc(t('lockpickUi.closeAria'))}">${svgIcon('close')}</button></div>`
+      + `<div class="lp-blurb${coffer ? ' lp-blurb-coffer' : ''}">${esc(blurb)}</div>`
       + `<div class="lp-ante-row${coffer ? ' lp-ante-row-coffer' : ''}">${buttons}</div>`;
     el.querySelectorAll('[data-ante]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -3463,7 +3480,9 @@ export class Hud {
       this.startLockpickTimer(TIER_TIMER_SECONDS[this.lockpickView.lootTier]);
     }
     const fb = stepFeedback(result);
-    this.renderLockpickBoard(fb.text, fb.tone);
+    // stepFeedback returns English text only for the known step results; localize
+    // those via t() and leave the (empty) default unlocalized.
+    this.renderLockpickBoard(fb.text ? t(`lockpickUi.feedback.${result}` as TranslationKey) : '', fb.tone);
   }
 
   private renderLockpickBoard(feedback = '', tone: 'good' | 'bad' | 'win' = 'good'): void {
@@ -3490,22 +3509,27 @@ export class Hud {
       .map((d) => `<span class="lp-page-dot lp-page-${d}"></span>`).join('');
     const actions = lockpickActionButtons(view.allowed).map((b) => `<button type="button" class="lp-action-btn"`
       + ` data-action="${esc(b.action)}"${b.enabled ? '' : ' disabled'}>`
-      + `<span class="lp-action-key">${b.key}</span>`
+      + `<span class="lp-action-key">${esc(b.key)}</span>`
       + `<span class="lp-action-glyph">${b.glyph}</span>`
-      + `<span class="lp-action-label">${esc(b.label)}</span></button>`).join('');
+      + `<span class="lp-action-label">${esc(t(`lockpickUi.action.${b.action}` as TranslationKey))}</span></button>`).join('');
+    const n = { maximumFractionDigits: 0 } as const;
+    const page = formatNumber(view.page, n);
+    const total = formatNumber(view.pageCount, n);
+    const tries = formatNumber(view.tries, n);
+    const triesTotal = formatNumber(view.triesTotal, n);
     const timerSecs = TIER_TIMER_SECONDS[view.lootTier];
-    el.innerHTML = `<div class="panel-title"><span>Tumbler's Path -- ${esc(TIER_LABEL[view.lootTier])} cache</span>`
-      + `<button type="button" class="x-btn" data-close aria-label="Withdraw">${svgIcon('close')}</button></div>`
-      + `<div class="lp-status"><span class="lp-pages" aria-label="Lock ${view.page} of ${view.pageCount}">${dots}`
-      + `<span class="lp-pages-label">Lock ${view.page}/${view.pageCount}</span></span>`
-      + `<span class="lp-tries" aria-label="${view.tries} of ${view.triesTotal} tries left">Tries ${view.tries}/${view.triesTotal}</span>`
-      + `<span class="lp-col">Ward ${m.activeCol + 1} / ${m.w}</span></div>`
-      + `<div class="lp-timer" aria-label="Time remaining"><div class="lp-timer-track"><div class="lp-timer-bar" id="lp-timer-bar" style="width:100%"></div></div>`
-      + `<span class="lp-timer-value" id="lp-timer-value">${timerSecs}.0s</span></div>`
+    el.innerHTML = `<div class="panel-title"><span>${esc(t('lockpickUi.boardTitle', { tier: this.lockpickTierName(view.lootTier) }))}</span>`
+      + `<button type="button" class="x-btn" data-close aria-label="${esc(t('lockpickUi.withdrawAria'))}">${svgIcon('close')}</button></div>`
+      + `<div class="lp-status"><span class="lp-pages" aria-label="${esc(t('lockpickUi.lockOfAria', { page, total }))}">${dots}`
+      + `<span class="lp-pages-label">${esc(t('lockpickUi.lockOf', { page, total }))}</span></span>`
+      + `<span class="lp-tries" aria-label="${esc(t('lockpickUi.triesOfAria', { tries, total: triesTotal }))}">${esc(t('lockpickUi.triesOf', { tries, total: triesTotal }))}</span>`
+      + `<span class="lp-col">${esc(t('lockpickUi.ward', { col: formatNumber(m.activeCol + 1, n), total: formatNumber(m.w, n) }))}</span></div>`
+      + `<div class="lp-timer" aria-label="${esc(t('lockpickUi.timerAria'))}"><div class="lp-timer-track"><div class="lp-timer-bar" id="lp-timer-bar" style="width:100%"></div></div>`
+      + `<span class="lp-timer-value" id="lp-timer-value">${esc(t('lockpickUi.seconds', { seconds: timerSecs.toFixed(1) }))}</span></div>`
       + `<div class="lp-board" style="grid-template-columns:repeat(${m.w},1fr)">${tracks}</div>`
       + `<div class="lp-feedback lp-tone-${tone}" role="status" aria-live="polite">${esc(feedback)}</div>`
       + `<div class="lp-actions">${actions}</div>`
-      + `<button type="button" class="btn lp-withdraw" data-withdraw>Withdraw (Esc)</button>`;
+      + `<button type="button" class="btn lp-withdraw" data-withdraw>${esc(t('lockpickUi.withdraw'))}</button>`;
     el.querySelectorAll('[data-action]').forEach((btn) => {
       btn.addEventListener('click', () => {
         if ((btn as HTMLButtonElement).disabled) return;
@@ -3517,7 +3541,9 @@ export class Hud {
   }
 
   private endLockpick(outcome: 'success' | 'fail' | 'abandoned', tier?: 'premium' | 'medium' | 'low'): void {
-    const summary = endSummary(outcome, tier);
+    const summary = outcome === 'success'
+      ? (tier ? t('lockpickUi.summary.success', { tier: this.lockpickTierName(tier) }) : t('lockpickUi.summary.successGeneric'))
+      : outcome === 'fail' ? t('lockpickUi.summary.fail') : t('lockpickUi.summary.abandoned');
     if (outcome === 'success') this.showBanner(summary);
     this.log(summary, outcome === 'success' ? '#7fdc4f' : outcome === 'fail' ? '#ff7a6a' : '#ccc');
     this.closeLockpick();
@@ -3589,7 +3615,7 @@ export class Hud {
       const bar = document.getElementById('lp-timer-bar') as HTMLElement | null;
       const val = document.getElementById('lp-timer-value');
       if (bar) bar.style.width = `${(remaining / seconds) * 100}%`;
-      if (val) val.textContent = `${remaining.toFixed(1)}s`;
+      if (val) val.textContent = t('lockpickUi.seconds', { seconds: remaining.toFixed(1) });
       const wrap = document.querySelector('.lp-timer') as HTMLElement | null;
       if (wrap) wrap.classList.toggle('lp-timer-urgent', remaining < 3);
     }, 100);
@@ -3650,7 +3676,7 @@ export class Hud {
     const delveName = delveDisplayName(run.delveId);
     const tierLabel = run.tierId === 'heroic' ? t('delveUi.board.tier.heroic') : t('delveUi.board.tier.normal');
     const modId = run.modules[run.moduleIndex];
-    const modName = modId ? t(`delveUi.module.${modId}` as TranslationKey) : '';
+    const modName = modId ? t(`delveUi.moduleName.${modId}` as TranslationKey) : '';
     const moduleLine = t('delveUi.tracker.module', {
       current: formatNumber(run.moduleIndex + 1, { maximumFractionDigits: 0 }),
       total: formatNumber(run.moduleCount, { maximumFractionDigits: 0 }),
@@ -3664,7 +3690,7 @@ export class Hud {
       affixHtml = `<div class="dt-affix-row"><span class="dt-affix-label">${esc(t('delveUi.tracker.affix'))}</span>`;
       for (const affixId of run.affixes) {
         const color = DELVE_AFFIX_COLORS[affixId] ?? '#888';
-        affixHtml += `<span class="dt-affix-icon" data-affix="${esc(affixId)}" style="background:${color}" aria-hidden="true"></span>`;
+        affixHtml += `<span class="dt-affix-icon" data-affix="${esc(affixId)}" style="background:${color}" role="img" tabindex="0" aria-label="${esc(this.delveAffixLabel(affixId))}"></span>`;
       }
       affixHtml += '</div>';
     }
@@ -5371,7 +5397,14 @@ export class Hud {
     match = /^That is your own listing (?:\u2014|-) cancel it to reclaim it\.$/.exec(text);
     if (match) return t('itemUi.errors.ownListing');
     match = /^All instances of (.+) are busy\. Try again soon\.$/.exec(text);
-    if (match) return t('worldContent.dungeonInstanceBusy', { name: dungeonDisplayNameFromSource(match[1]) });
+    if (match) {
+      const busyName = match[1];
+      // The same line is emitted for dungeons and delves; resolve the name in the
+      // matching table so a delve name does not fall through as raw English.
+      const delve = Object.values(DELVES).find((d) => d.name === busyName);
+      if (delve) return t('sim.delve.instancesBusy', { name: delveDisplayName(delve.id) });
+      return t('worldContent.dungeonInstanceBusy', { name: dungeonDisplayNameFromSource(busyName) });
+    }
     const server = localizeServerText(text);
     if (server !== null) return server;
     // Sim-emitted log/error/loot text (src/sim) is English at the source; localize it

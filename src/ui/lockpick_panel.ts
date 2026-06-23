@@ -9,13 +9,14 @@
 // a blank covered plate (unknown). The run is FLAWLESS across multiple pages
 // (premium 3 / medium 2 / low 1); one slip, bind, or hidden ward-trap jams it.
 //
-// NOTE: strings here are English literals by product decision (the lockpick
-// minigame ships English-only for now; no t()/locale coverage). Keep all other
-// HUD i18n rules intact.
+// NOTE: the strings returned here are the English SOURCE plus stable
+// discriminators (tier / action / step result). hud.ts re-renders the
+// player-visible text through the lockpickUi.* and sim.lockpick.tier* t() keys,
+// so this module stays DOM/i18n-free and snapshot-tested as the English reference.
 
 import type { LockpickView } from '../world_api';
 import type {
-  Ante, LootTier, PickAction, StepResult, VisibleCell,
+  Ante, LootTier, PickAction, StepResult,
 } from '../sim/lockpick';
 import { ACTION_DELTA, ANTE_TO_PAGES, ANTE_TO_TIER, ANTE_TO_TRIES, PICK_ACTIONS } from '../sim/lockpick';
 

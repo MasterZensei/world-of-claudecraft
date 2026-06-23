@@ -1638,6 +1638,8 @@ export const pt_BR: EnTranslations = {
       "bossChest": "O chefe tomba. Um baú de relicário encantado surge no estrado: arrombe a fechadura para reivindicar os seus espólios.",
       "surfaceStairs": "Uma escadaria para a superfície se abre. Pressione F nas escadas para sair.",
       "moduleEnter": "{name}: {objective}",
+      "objectiveClearRoom": "Limpe a sala.",
+      "objectiveDefeatBoss": "Derrote o chefe.",
       "tombstoneHint": "Uma passagem de lápide se abre ao norte quando a sala é limpa.",
       "tombstoneOpen": "Uma passagem de lápide selada range ao se abrir, ao norte. Caminhe até ela para prosseguir.",
       "tombstoneInto": "Você atravessa a lápide e chega a {name}.",
@@ -1676,6 +1678,51 @@ export const pt_BR: EnTranslations = {
       "toolSlips": "Essa ferramenta escorrega desta fechadura.",
       "lockJammed": "A fechadura está emperrada além de qualquer arrombamento: conclua a incursão novamente para outra tentativa.",
       "lastPickSnaps": "A última gazua se parte. A fechadura emperra: o baú está perdido a menos que você conclua a incursão novamente."
+    }
+  },
+  "lockpickUi": {
+    "pickTitle": "Arrombe a Fechadura",
+    "cofferTitle": "Cofre Generoso",
+    "cache": "Reserva {tier}",
+    "pickBlurb": "Uma reserva mais rica fica selada por mais fechaduras. Fechaduras mais fáceis dão mais tentativas e mais tempo; uma tentativa falha reinicia a fechadura até as suas tentativas se esgotarem.",
+    "cofferBlurb": "Este selo só cede à mão de um mestre: apenas a aposta Superior pode abri-lo. Resolva as três fechaduras para o prêmio especial.",
+    "pagesAria": "{count} fechaduras",
+    "tries": "{count} tentativas",
+    "triesOne": "1 tentativa",
+    "perLock": "{seconds}s / fechadura",
+    "seconds": "{seconds}s",
+    "boardTitle": "Caminho dos Pinos: reserva {tier}",
+    "closeAria": "Fechar",
+    "withdrawAria": "Recuar",
+    "timerAria": "Tempo restante",
+    "lockOf": "Fechadura {page}/{total}",
+    "lockOfAria": "Fechadura {page} de {total}",
+    "triesOf": "Tentativas {tries}/{total}",
+    "triesOfAria": "{tries} de {total} tentativas restantes",
+    "ward": "Guarda {col} / {total}",
+    "withdraw": "Recuar (Esc)",
+    "action": {
+      "hardSet": "Fixar Forte",
+      "set": "Fixar",
+      "steady": "Firmar",
+      "ease": "Aliviar",
+      "drop": "Soltar"
+    },
+    "feedback": {
+      "advanced": "O pino cede...",
+      "slip": "Uma guarda morde e a gazua escorrega!",
+      "bind": "O pino trava: profundidade errada!",
+      "trap": "Uma falsa guarda se fecha de golpe e a fechadura emperra!",
+      "retry": "A fechadura reinicia. Prepare uma nova tentativa.",
+      "pageCleared": "Uma fileira de pinos tomba. A próxima fechadura aparece.",
+      "success": "O ferrolho corre, a reserva é sua!",
+      "fail": "A fechadura emperra. Não vai ceder de novo."
+    },
+    "summary": {
+      "success": "Fechadura aberta, reserva {tier} reivindicada.",
+      "successGeneric": "Fechadura aberta, a reserva foi reivindicada.",
+      "fail": "A fechadura está arruinada. Conclua a incursão novamente para outra tentativa.",
+      "abandoned": "Você retira as gazuas com cuidado. A fechadura aguarda."
     }
   },
   "delveUi": {
@@ -4924,9 +4971,6 @@ export const pt_BR: EnTranslations = {
       "acolyte_tessa": {
         "name": "Acólita Tessa"
       },
-      "placeholder_boss": {
-        "name": "Guardião da Provação"
-      },
       "elder_bristleback": {
         "name": "Bristleback ancião"
       },
@@ -6259,11 +6303,6 @@ export const pt_BR: EnTranslations = {
         "name": "O Relicário Desmoronado",
         "enterText": "Você desce até o relicário desmoronado.",
         "leaveText": "Você sobe de volta até o Irmão Halven, na ruína do relicário."
-      },
-      "delve_placeholder": {
-        "name": "Cripta Rasa de Provação",
-        "enterText": "Você desce até a cripta rasa de provação.",
-        "leaveText": "Você sobe de volta à superfície."
       }
     }
   },

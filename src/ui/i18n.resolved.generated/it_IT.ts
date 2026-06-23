@@ -1638,6 +1638,8 @@ export const it_IT: EnTranslations = {
       "bossChest": "Il boss cade. Sul piedistallo si leva uno scrigno reliquiario protetto da incantesimi: scassinane la serratura per reclamare il bottino.",
       "surfaceStairs": "Si apre una scalinata verso la superficie. Premi F alle scale per uscire.",
       "moduleEnter": "{name}: {objective}",
+      "objectiveClearRoom": "Ripulisci la stanza.",
+      "objectiveDefeatBoss": "Sconfiggi il boss.",
       "tombstoneHint": "Un passaggio attraverso una lapide si apre a nord quando la stanza è ripulita.",
       "tombstoneOpen": "Un passaggio sigillato attraverso una lapide si apre stridendo a nord. Entraci per proseguire.",
       "tombstoneInto": "Attraversi la lapide ed entri in {name}.",
@@ -1676,6 +1678,51 @@ export const it_IT: EnTranslations = {
       "toolSlips": "Quello strumento scivola via da questa serratura.",
       "lockJammed": "La serratura è inceppata oltre ogni possibilità di scasso: completa di nuovo l'incursione per un altro tentativo.",
       "lastPickSnaps": "L'ultimo grimaldello si spezza. La serratura si inceppa: lo scrigno è perduto, a meno che tu non completi di nuovo l'incursione."
+    }
+  },
+  "lockpickUi": {
+    "pickTitle": "Scassina la Serratura",
+    "cofferTitle": "Forziere Ricolmo",
+    "cache": "Scrigno {tier}",
+    "pickBlurb": "Uno scrigno più ricco è sigillato dietro più serrature. Le serrature più facili concedono più tentativi e più tempo; un tentativo fallito reimposta la serratura finché non esaurisci i tentativi.",
+    "cofferBlurb": "Questo sigillo cede solo alla mano di un maestro: solo la via Difficile, Pregiata può aprirlo. Forza tutte e tre le serrature per il premio esclusivo.",
+    "pagesAria": "{count} serrature",
+    "tries": "{count} tentativi",
+    "triesOne": "1 tentativo",
+    "perLock": "{seconds}s / serratura",
+    "seconds": "{seconds}s",
+    "boardTitle": "Via del Cilindro: scrigno {tier}",
+    "closeAria": "Chiudi",
+    "withdrawAria": "Ritirati",
+    "timerAria": "Tempo rimanente",
+    "lockOf": "Serratura {page}/{total}",
+    "lockOfAria": "Serratura {page} di {total}",
+    "triesOf": "Tentativi {tries}/{total}",
+    "triesOfAria": "{tries} di {total} tentativi rimasti",
+    "ward": "Guardia {col} / {total}",
+    "withdraw": "Ritirati (Esc)",
+    "action": {
+      "hardSet": "Spinta Decisa",
+      "set": "Spingi",
+      "steady": "Mantieni",
+      "ease": "Allenta",
+      "drop": "Rilascia"
+    },
+    "feedback": {
+      "advanced": "Il perno cede...",
+      "slip": "Una guardia morde, il grimaldello scivola!",
+      "bind": "Il cilindro si blocca: profondità sbagliata!",
+      "trap": "Una falsa guardia scatta, la serratura si inceppa!",
+      "retry": "La serratura si reimposta. Prepara un nuovo tentativo.",
+      "pageCleared": "Una fila di perni cede. La serratura successiva si presenta.",
+      "success": "Il chiavistello scatta, lo scrigno è tuo!",
+      "fail": "La serratura si blocca. Non si muoverà più."
+    },
+    "summary": {
+      "success": "Serratura forzata, scrigno {tier} reclamato.",
+      "successGeneric": "Serratura forzata, lo scrigno è reclamato.",
+      "fail": "La serratura è rovinata. Completa di nuovo l'incursione per un altro tentativo.",
+      "abandoned": "Sfili di nuovo i grimaldelli. La serratura attende."
     }
   },
   "delveUi": {
@@ -4924,9 +4971,6 @@ export const it_IT: EnTranslations = {
       "acolyte_tessa": {
         "name": "Accolita Tessa"
       },
-      "placeholder_boss": {
-        "name": "Custode della Prova"
-      },
       "elder_bristleback": {
         "name": "Bristleback anziano"
       },
@@ -6259,11 +6303,6 @@ export const it_IT: EnTranslations = {
         "name": "Il Reliquiario Crollato",
         "enterText": "Scendi nel reliquiario crollato.",
         "leaveText": "Risali da Fratello Halven, alla rovina del reliquiario."
-      },
-      "delve_placeholder": {
-        "name": "Cripta di Prova Superficiale",
-        "enterText": "Scendi nella poco profonda cripta di prova.",
-        "leaveText": "Risali in superficie."
       }
     }
   },

@@ -1638,6 +1638,8 @@ export const zh_TW: EnTranslations = {
       "bossChest": "首領倒下了。一只受守護的聖物庫寶箱自祭壇升起，撬開它的鎖以取得你的戰利品。",
       "surfaceStairs": "一道通往地面的階梯開啟了。在階梯處按 F 離開。",
       "moduleEnter": "{name}：{objective}",
+      "objectiveClearRoom": "清空房間。",
+      "objectiveDefeatBoss": "擊敗首領。",
       "tombstoneHint": "房間清空後，一條墓碑通道會在北方開啟。",
       "tombstoneOpen": "一條被封的墓碑通道在北方軋軋開啟。走進其中以繼續前進。",
       "tombstoneInto": "你穿過墓碑進入 {name}。",
@@ -1676,6 +1678,51 @@ export const zh_TW: EnTranslations = {
       "toolSlips": "那件工具從這道鎖上滑開了。",
       "lockJammed": "這道鎖已卡死到無法撬開，再次通關秘探以獲得另一次嘗試。",
       "lastPickSnaps": "最後一根撬棒折斷了。鎖卡死了，除非你再次通關這場秘探，否則寶箱將就此失去。"
+    }
+  },
+  "lockpickUi": {
+    "pickTitle": "撬開鎖具",
+    "cofferTitle": "豐饒寶櫃",
+    "cache": "{tier}戰利品",
+    "pickBlurb": "更豐厚的戰利品封在更多道鎖之後。較簡單的鎖給你更多嘗試次數與時間；一次失敗會重置該鎖，直到你的嘗試次數用盡。",
+    "cofferBlurb": "這道封印只屈服於大師之手：唯有困難的上等路線才能開啟。解開全部三道鎖，奪取招牌大獎。",
+    "pagesAria": "{count}道鎖",
+    "tries": "{count}次嘗試",
+    "triesOne": "1次嘗試",
+    "perLock": "每道鎖 {seconds}s",
+    "seconds": "{seconds}s",
+    "boardTitle": "轉珠之路：{tier}戰利品",
+    "closeAria": "關閉",
+    "withdrawAria": "收手",
+    "timerAria": "剩餘時間",
+    "lockOf": "鎖 {page}/{total}",
+    "lockOfAria": "第 {page} 道鎖，共 {total} 道",
+    "triesOf": "嘗試 {tries}/{total}",
+    "triesOfAria": "剩餘 {tries}/{total} 次嘗試",
+    "ward": "鎖簧 {col}/{total}",
+    "withdraw": "收手 (Esc)",
+    "action": {
+      "hardSet": "重壓",
+      "set": "頂起",
+      "steady": "穩住",
+      "ease": "鬆放",
+      "drop": "放下"
+    },
+    "feedback": {
+      "advanced": "鎖銷鬆動了……",
+      "slip": "鎖簧一咬，撬棒滑脫了！",
+      "bind": "轉珠卡住了：深度不對！",
+      "trap": "一道假鎖簧突然閉合，鎖卡死了！",
+      "retry": "鎖已重置。重新對準，再試一次。",
+      "pageCleared": "一排轉珠落定。下一道鎖現身了。",
+      "success": "鎖閂彈開，戰利品歸你了！",
+      "fail": "鎖卡死了，再也撬不動。"
+    },
+    "summary": {
+      "success": "鎖已開啟，{tier}戰利品已入手。",
+      "successGeneric": "鎖已開啟，戰利品已入手。",
+      "fail": "鎖已毀壞。再次通關這場秘探以獲得另一次嘗試。",
+      "abandoned": "你把撬棒輕輕抽了回來。鎖仍在等待。"
     }
   },
   "delveUi": {
@@ -4924,9 +4971,6 @@ export const zh_TW: EnTranslations = {
       "acolyte_tessa": {
         "name": "侍僧泰莎"
       },
-      "placeholder_boss": {
-        "name": "試煉守衛"
-      },
       "elder_bristleback": {
         "name": "年長硬鬃"
       },
@@ -6259,11 +6303,6 @@ export const zh_TW: EnTranslations = {
         "name": "崩塌的聖物庫",
         "enterText": "你向下深入崩塌的聖物庫。",
         "leaveText": "你爬回聖物庫遺墟處的哈爾文修士身邊。"
-      },
-      "delve_placeholder": {
-        "name": "淺層試煉墓穴",
-        "enterText": "你向下深入淺層試煉墓穴。",
-        "leaveText": "你爬回地面。"
       }
     }
   },

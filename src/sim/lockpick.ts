@@ -109,7 +109,6 @@ export interface LockSession {
   triesLeft: number; // attempts remaining (this one included); chest jams at 0
   triesTotal: number; // = ANTE_TO_TRIES[ante]
   state: LockSessionState;
-  lastActionTick: number;
 }
 
 /** 'pageCleared' = current page seated, more pages remain; 'success' = last page

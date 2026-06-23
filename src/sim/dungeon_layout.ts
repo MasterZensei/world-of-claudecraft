@@ -53,7 +53,7 @@ export interface DungeonLayout {
   floorHalfX?: number;
   /** entrance archway z position; renderer places gate props here when set */
   doorZ?: number;
-  /** floor scatter positions — renderer places props here AND collision circles back them */
+  /** floor scatter positions, renderer places props here AND collision circles back them */
   clutter?: GridPoint[];
 }
 

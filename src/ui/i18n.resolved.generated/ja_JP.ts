@@ -1638,6 +1638,8 @@ export const ja_JP: EnTranslations = {
       "bossChest": "ボスが倒れる。守りの聖遺物庫の宝箱が祭壇にせり上がる。錠を開けて戦利品を手に入れろ。",
       "surfaceStairs": "地上への階段が開く。階段でFを押して出よ。",
       "moduleEnter": "{name}: {objective}",
+      "objectiveClearRoom": "部屋を制圧せよ。",
+      "objectiveDefeatBoss": "ボスを討て。",
       "tombstoneHint": "部屋を制圧すると、北へ墓石の通路が開く。",
       "tombstoneOpen": "封じられた墓石の通路が北へきしみながら開く。中へ歩み入って進め。",
       "tombstoneInto": "あなたは墓石を抜けて{name}へ入る。",
@@ -1676,6 +1678,51 @@ export const ja_JP: EnTranslations = {
       "toolSlips": "その道具はこの錠から滑り落ちる。",
       "lockJammed": "錠は開けられないほど固まっている。もう一度デルヴを踏破すれば再挑戦できる。",
       "lastPickSnaps": "最後のピックが折れる。錠が固まった。もう一度デルヴを踏破しない限り、この宝箱は失われる。"
+    }
+  },
+  "lockpickUi": {
+    "pickTitle": "錠を開ける",
+    "cofferTitle": "豊穣の宝庫",
+    "cache": "{tier}の宝庫",
+    "pickBlurb": "より豊かな宝庫ほど、多くの錠で封じられている。易しい錠ほど挑戦回数も時間も多い。失敗すると錠はリセットされ、挑戦回数が尽きるまで続く。",
+    "cofferBlurb": "この封印は達人の手にのみ応じる。難関、極上の道だけが開くことができる。3つの錠をすべて解いて至高の褒賞を手にせよ。",
+    "pagesAria": "錠{count}個",
+    "tries": "挑戦{count}回",
+    "triesOne": "挑戦1回",
+    "perLock": "{seconds}s / 錠",
+    "seconds": "{seconds}s",
+    "boardTitle": "錠前の道: {tier}の宝庫",
+    "closeAria": "閉じる",
+    "withdrawAria": "手を引く",
+    "timerAria": "残り時間",
+    "lockOf": "錠 {page}/{total}",
+    "lockOfAria": "錠 {page}/{total}",
+    "triesOf": "挑戦 {tries}/{total}",
+    "triesOfAria": "残り挑戦 {tries}/{total}",
+    "ward": "ウォード {col}/{total}",
+    "withdraw": "手を引く (Esc)",
+    "action": {
+      "hardSet": "強く押し込む",
+      "set": "押し込む",
+      "steady": "保つ",
+      "ease": "緩める",
+      "drop": "離す"
+    },
+    "feedback": {
+      "advanced": "ピンが動いた……",
+      "slip": "ウォードが食い込み、ピックが滑る!",
+      "bind": "タンブラーが噛む: 深さが違う!",
+      "trap": "偽のウォードが弾けて閉じ、錠が固まる!",
+      "retry": "錠がリセットされる。改めて狙いを定めろ。",
+      "pageCleared": "タンブラー列が落ちる。次の錠が現れる。",
+      "success": "閂が外れた、宝庫はあなたのものだ!",
+      "fail": "錠が固まった。もう二度と動かない。"
+    },
+    "summary": {
+      "success": "錠が開いた。{tier}の宝庫を獲得。",
+      "successGeneric": "錠が開いた。宝庫を獲得。",
+      "fail": "錠が壊れた。もう一度デルヴを踏破すれば再挑戦できる。",
+      "abandoned": "あなたはピックをそっと引き抜く。錠は待っている。"
     }
   },
   "delveUi": {
@@ -4924,9 +4971,6 @@ export const ja_JP: EnTranslations = {
       "acolyte_tessa": {
         "name": "侍祭テッサ"
       },
-      "placeholder_boss": {
-        "name": "試練の守護者"
-      },
       "elder_bristleback": {
         "name": "老ブリストルバック"
       },
@@ -6259,11 +6303,6 @@ export const ja_JP: EnTranslations = {
         "name": "崩れた聖遺物庫",
         "enterText": "あなたは崩れた聖遺物庫へと降りていく。",
         "leaveText": "あなたは聖遺物庫の廃墟にいるハルヴェン修道士のもとへ登り戻る。"
-      },
-      "delve_placeholder": {
-        "name": "浅い試練の墓所",
-        "enterText": "あなたは浅い試練の墓所へと降りていく。",
-        "leaveText": "あなたは地上へ登り戻る。"
       }
     }
   },

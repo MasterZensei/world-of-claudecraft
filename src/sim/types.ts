@@ -1076,7 +1076,7 @@ export type SimEvent = { pid?: number } & (
   | { type: 'delveLoreUnlock'; loreId: string }
   | { type: 'companionBark'; barkId: string; pid?: number }
   // Lockpicking minigame ("Tumbler's Path"). All personal (pid-scoped). The sim
-  // emits structured data only — the client builds every visible string. Cells
+  // emits structured data only, the client builds every visible string. Cells
   // are always limited to the fog window (anti-cheat: the full lock is never
   // serialized).
   | { type: 'lockpickOffer'; objectId: number; bountiful: boolean }
@@ -1324,7 +1324,7 @@ export function armorReduction(armor: number, attackerLevel: number): number {
 }
 
 // ---------------------------------------------------------------------------
-// Delves — replayable modular instances (see docs/prd/delves.md)
+// Delves, replayable modular instances (see docs/prd/delves.md)
 // ---------------------------------------------------------------------------
 
 export type DelveTheme = 'crypt' | 'cave' | 'mine' | 'ruin' | 'sewer' | 'vault' | 'lair';
@@ -1449,7 +1449,7 @@ export interface DelveRun {
   companionBarks: string[];
   /** True when the current module exit portal is active (trash cleared + plate if any). */
   exitPortalOpen: boolean;
-  /** §7.6 — this run rolled Bountiful (ultra-rare): the reward chest is a purple
+  /** §7.6, this run rolled Bountiful (ultra-rare): the reward chest is a purple
    * Coffer that only yields to a Hard-tier + Premium-ante lockpick solve and
    * guarantees a signature rare. Rolled once at run start (Heroic 5% / Normal 2%). */
   bountiful: boolean;
@@ -1490,12 +1490,14 @@ export interface DelveObjectState {
   open: boolean;
   // Lockpick chest gating (kind === 'locked_chest'). attemptAvailable is granted
   // when the chest spawns (boss defeated) and consumed on a SUCCESS or FAILED
-  // attempt — a FAILED chest can only be retried by re-clearing the delve.
+  // attempt, a FAILED chest can only be retried by re-clearing the delve.
   attemptAvailable?: boolean;
   looted?: boolean;
   lootedTier?: LootTier;
   /** Item slots waiting on the post-unlock loot screen. */
   pendingLoot?: { itemId: string; count: number }[];
+  /** Entity id of the player who picked the lock; only they may collect the loot. */
+  lootOwnerId?: number;
 }
 
 export interface DelveRaiseDeadChannel {

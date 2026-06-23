@@ -126,6 +126,19 @@ describe('delve companions', () => {
     expect(meta.copper).toBe(100);
   });
 
+  it('companion upgrade is a no-op without enough marks or for an unknown companion', () => {
+    const sim = makeSim();
+    const meta = (sim as any).players.get(sim.playerId);
+    meta.companionUpgrades.companion_tessa = 1;
+    meta.delveMarks = 2; // rank 2 costs 3 Marks, so this is short
+    sim.companionUpgrade('companion_tessa');
+    expect(meta.companionUpgrades.companion_tessa).toBe(1); // rank unchanged
+    expect(meta.delveMarks).toBe(2);                        // marks not debited
+    sim.companionUpgrade('no_such_companion');
+    expect(meta.companionUpgrades.companion_tessa).toBe(1);
+    expect(meta.delveMarks).toBe(2);
+  });
+
   it('companion heals owner on interval', () => {
     const sim = makeSim();
     sim.setPlayerLevel(10);
