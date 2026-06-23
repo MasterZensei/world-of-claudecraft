@@ -253,6 +253,8 @@ export const ko_KR: EnTranslations = {
       "interfaceModeNote": "자동은 기기에 따라 데스크톱 또는 터치 조작을 선택합니다. 데스크톱을 선택하면 키보드와 마우스로 고정되며(키보드가 있는 태블릿 등에 유용), 터치를 선택하면 화면 조작이 됩니다.",
       "footstepSounds": "발소리",
       "clickFeedback": "클릭 표시",
+      "lockCursorOnRotate": "회전 중 커서 고정",
+      "keybindHelpLockCursorOnRotate": "드래그하여 카메라를 회전하는 동안 마우스 커서를 창 안에 유지하여 화면 가장자리에 닿거나 다른 모니터로 이동하지 않도록 합니다. 자유로운 커서를 원하면 끄세요.",
       "showWalletOnCharacterScreen": "캐릭터 화면에 지갑 표시",
       "showWalletOnPlayerCard": "플레이어 카드에 지갑 표시",
       "uiScale": "UI 배율",
@@ -2113,6 +2115,11 @@ export const ko_KR: EnTranslations = {
     "high": "높음",
     "medium": "보통",
     "low": "낮음",
+    "popTipLow": "낮은 인구：현재 접속자 15명 미만. 여유롭고 새로 시작하기에 좋습니다.",
+    "popTipMedium": "보통 인구：현재 접속자 15~39명. 건강하고 활발한 서버입니다.",
+    "popTipHigh": "높은 인구：현재 접속자 40~79명. 붐비고 플레이어가 많습니다.",
+    "popTipFull": "포화 인구：현재 접속자 80명 이상. 매우 붐비며 로그인 대기열이 있을 수 있습니다.",
+    "popTipOffline": "오프라인：이 서버는 현재 연결할 수 없어 입장할 수 없습니다.",
     "characterCountOne": "캐릭터 {count}개",
     "characterCountOther": "캐릭터 {count}개",
     "selectedRealm": "렐름: {name}",
@@ -4024,6 +4031,9 @@ export const ko_KR: EnTranslations = {
       "ridge_stalker_pelt": {
         "name": "산등성이 추적자 가죽"
       },
+      "pristine_ridge_stalker_pelt": {
+        "name": "온전한 산등성이 추적자 가죽"
+      },
       "glowing_wax": {
         "name": "빛나는 밀랍"
       },
@@ -4464,6 +4474,9 @@ export const ko_KR: EnTranslations = {
       },
       "cragmaw_prowlboots": {
         "name": "크래그모의 잠행 장화"
+      },
+      "cragmaw_huntcord": {
+        "name": "크래그모의 사냥 허리끈"
       },
       "drowned_tide_scepter": {
         "name": "익사한 조수의 셉터"

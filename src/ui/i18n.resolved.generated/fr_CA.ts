@@ -253,6 +253,8 @@ export const fr_CA: EnTranslations = {
       "interfaceModeNote": "Auto choisit les commandes Desktop ou Touch selon votre appareil. Choisissez Desktop pour forcer le clavier et la souris (utile sur une tablette avec clavier), ou Touch pour les commandes à l'écran.",
       "footstepSounds": "Sons de pas",
       "clickFeedback": "Repère de clic",
+      "lockCursorOnRotate": "Lock Cursor While Rotating",
+      "keybindHelpLockCursorOnRotate": "Keeps the mouse cursor inside the window while you drag to rotate the camera, so it cannot reach the screen edge or move to another monitor. Turn off if you prefer a free cursor.",
       "showWalletOnCharacterScreen": "Afficher le portefeuille sur l’écran des personnages",
       "showWalletOnPlayerCard": "Afficher le portefeuille sur la carte de joueur",
       "uiScale": "Échelle de l’interface",
@@ -2113,6 +2115,11 @@ export const fr_CA: EnTranslations = {
     "high": "Élevée",
     "medium": "Moyenne",
     "low": "Faible",
+    "popTipLow": "Low population: fewer than 15 players online right now. Plenty of room; great for a fresh start.",
+    "popTipMedium": "Medium population: 15 to 39 players online right now. A healthy, active realm.",
+    "popTipHigh": "High population: 40 to 79 players online right now. Busy, with lots of players around.",
+    "popTipFull": "Full population: 80 or more players online right now. Very busy; you may wait in a login queue.",
+    "popTipOffline": "Offline: this realm is unreachable right now and cannot be joined.",
     "characterCountOne": "{count} personnage",
     "characterCountOther": "{count} personnages",
     "selectedRealm": "Royaume: {name}",
@@ -4024,6 +4031,9 @@ export const fr_CA: EnTranslations = {
       "ridge_stalker_pelt": {
         "name": "Peau de rôdeur de la crête"
       },
+      "pristine_ridge_stalker_pelt": {
+        "name": "Peau immaculée de rôdeur de la crête"
+      },
       "glowing_wax": {
         "name": "Cire luisante"
       },
@@ -4464,6 +4474,9 @@ export const fr_CA: EnTranslations = {
       },
       "cragmaw_prowlboots": {
         "name": "Bottes rôdeuses de Cragmaw"
+      },
+      "cragmaw_huntcord": {
+        "name": "Ceinturon de chasse de Cragmaw"
       },
       "drowned_tide_scepter": {
         "name": "Sceptre de la marée noyée"

@@ -253,6 +253,8 @@ export const es: EnTranslations = {
       "interfaceModeNote": "Auto elige los controles Desktop o Touch según tu dispositivo. Elige Desktop para forzar teclado y ratón (útil en una tableta con teclado), o Touch para los controles en pantalla.",
       "footstepSounds": "Sonidos de pasos",
       "clickFeedback": "Marcador de clic",
+      "lockCursorOnRotate": "Lock Cursor While Rotating",
+      "keybindHelpLockCursorOnRotate": "Keeps the mouse cursor inside the window while you drag to rotate the camera, so it cannot reach the screen edge or move to another monitor. Turn off if you prefer a free cursor.",
       "showWalletOnCharacterScreen": "Mostrar cartera en la pantalla de personajes",
       "showWalletOnPlayerCard": "Mostrar cartera en la tarjeta de jugador",
       "uiScale": "Escala de la interfaz",
@@ -2113,6 +2115,11 @@ export const es: EnTranslations = {
     "high": "Alta",
     "medium": "Media",
     "low": "Baja",
+    "popTipLow": "Low population: fewer than 15 players online right now. Plenty of room; great for a fresh start.",
+    "popTipMedium": "Medium population: 15 to 39 players online right now. A healthy, active realm.",
+    "popTipHigh": "High population: 40 to 79 players online right now. Busy, with lots of players around.",
+    "popTipFull": "Full population: 80 or more players online right now. Very busy; you may wait in a login queue.",
+    "popTipOffline": "Offline: this realm is unreachable right now and cannot be joined.",
     "characterCountOne": "{count} personaje",
     "characterCountOther": "{count} personajes",
     "selectedRealm": "Reino: {name}",
@@ -4024,6 +4031,9 @@ export const es: EnTranslations = {
       "ridge_stalker_pelt": {
         "name": "Piel de acechador de la cresta"
       },
+      "pristine_ridge_stalker_pelt": {
+        "name": "Piel prístina de acechador de la cresta"
+      },
       "glowing_wax": {
         "name": "Cera resplandeciente"
       },
@@ -4464,6 +4474,9 @@ export const es: EnTranslations = {
       },
       "cragmaw_prowlboots": {
         "name": "Botas acechadoras de Cragmaw"
+      },
+      "cragmaw_huntcord": {
+        "name": "Cinto de caza de Cragmaw"
       },
       "drowned_tide_scepter": {
         "name": "Cetro de la marea ahogada"

@@ -253,6 +253,8 @@ export const ja_JP: EnTranslations = {
       "interfaceModeNote": "自動では、デバイスに応じてデスクトップ操作かタッチ操作を選びます。デスクトップを選ぶとキーボードとマウスに固定され（キーボード付きタブレットなどに便利）、タッチを選ぶと画面上の操作になります。",
       "footstepSounds": "足音",
       "clickFeedback": "クリックマーカー",
+      "lockCursorOnRotate": "回転中はカーソルを固定",
+      "keybindHelpLockCursorOnRotate": "ドラッグでカメラを回転させている間、マウスカーソルをウィンドウ内に固定し、画面の端や別のモニターに移動しないようにします。自由なカーソルを好む場合はオフにしてください。",
       "showWalletOnCharacterScreen": "キャラクター画面にウォレットを表示",
       "showWalletOnPlayerCard": "プレイヤーカードにウォレットを表示",
       "uiScale": "UIスケール",
@@ -2113,6 +2115,11 @@ export const ja_JP: EnTranslations = {
     "high": "高",
     "medium": "中",
     "low": "低",
+    "popTipLow": "低人口：現在オンラインのプレイヤーは15人未満。余裕があり、新規スタートに最適です。",
+    "popTipMedium": "中人口：現在オンラインのプレイヤーは15〜39人。健全で活発なサーバーです。",
+    "popTipHigh": "高人口：現在オンラインのプレイヤーは40〜79人。混雑しており、多くのプレイヤーがいます。",
+    "popTipFull": "満員：現在オンラインのプレイヤーは80人以上。非常に混雑しており、ログイン待ちが発生する場合があります。",
+    "popTipOffline": "オフライン：このサーバーは現在接続できず、参加できません。",
     "characterCountOne": "{count}キャラクター",
     "characterCountOther": "{count}キャラクター",
     "selectedRealm": "レルム: {name}",
@@ -4024,6 +4031,9 @@ export const ja_JP: EnTranslations = {
       "ridge_stalker_pelt": {
         "name": "尾根の追跡者の毛皮"
       },
+      "pristine_ridge_stalker_pelt": {
+        "name": "極上の尾根の追跡者の毛皮"
+      },
       "glowing_wax": {
         "name": "光る蝋"
       },
@@ -4464,6 +4474,9 @@ export const ja_JP: EnTranslations = {
       },
       "cragmaw_prowlboots": {
         "name": "クラッグモウの忍び歩きブーツ"
+      },
+      "cragmaw_huntcord": {
+        "name": "クラッグモウの狩猟帯"
       },
       "drowned_tide_scepter": {
         "name": "溺れた潮の笏"

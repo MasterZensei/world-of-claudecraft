@@ -253,6 +253,8 @@ export const de_DE: EnTranslations = {
       "interfaceModeNote": "Auto wählt je nach Gerät die Desktop- oder Touch-Steuerung. Wähle Desktop, um Tastatur und Maus zu erzwingen (praktisch bei einem Tablet mit Tastatur), oder Touch für die Bildschirmsteuerung.",
       "footstepSounds": "Schrittgeräusche",
       "clickFeedback": "Klickmarkierung",
+      "lockCursorOnRotate": "Lock Cursor While Rotating",
+      "keybindHelpLockCursorOnRotate": "Keeps the mouse cursor inside the window while you drag to rotate the camera, so it cannot reach the screen edge or move to another monitor. Turn off if you prefer a free cursor.",
       "showWalletOnCharacterScreen": "Wallet auf dem Charakterbildschirm anzeigen",
       "showWalletOnPlayerCard": "Wallet auf der Spielerkarte anzeigen",
       "uiScale": "UI-Skalierung",
@@ -2113,6 +2115,11 @@ export const de_DE: EnTranslations = {
     "high": "Hoch",
     "medium": "Mittel",
     "low": "Niedrig",
+    "popTipLow": "Low population: fewer than 15 players online right now. Plenty of room; great for a fresh start.",
+    "popTipMedium": "Medium population: 15 to 39 players online right now. A healthy, active realm.",
+    "popTipHigh": "High population: 40 to 79 players online right now. Busy, with lots of players around.",
+    "popTipFull": "Full population: 80 or more players online right now. Very busy; you may wait in a login queue.",
+    "popTipOffline": "Offline: this realm is unreachable right now and cannot be joined.",
     "characterCountOne": "{count} Charakter",
     "characterCountOther": "{count} Charaktere",
     "selectedRealm": "Realm: {name}",
@@ -4024,6 +4031,9 @@ export const de_DE: EnTranslations = {
       "ridge_stalker_pelt": {
         "name": "Balg eines Gratpirschers"
       },
+      "pristine_ridge_stalker_pelt": {
+        "name": "Makelloser Balg eines Gratpirschers"
+      },
       "glowing_wax": {
         "name": "Glühendes Wachs"
       },
@@ -4464,6 +4474,9 @@ export const de_DE: EnTranslations = {
       },
       "cragmaw_prowlboots": {
         "name": "Schleicherstiefel von Cragmaw"
+      },
+      "cragmaw_huntcord": {
+        "name": "Jagdgurt von Cragmaw"
       },
       "drowned_tide_scepter": {
         "name": "Zepter der ertrunkenen Flut"
