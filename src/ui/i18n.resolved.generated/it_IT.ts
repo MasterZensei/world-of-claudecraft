@@ -175,25 +175,25 @@ export const it_IT: EnTranslations = {
       "done": "Fine"
     },
     "theme": {
-      "preset": "UI Theme",
-      "customColors": "Custom Colors",
-      "reset": "Reset",
+      "preset": "Tema interfaccia",
+      "customColors": "Colori personalizzati",
+      "reset": "Ripristina",
       "presets": {
-        "classic": "Classic Gold",
-        "midnight": "Midnight",
-        "parchment": "Parchment",
-        "highContrast": "High Contrast"
+        "classic": "Oro classico",
+        "midnight": "Mezzanotte",
+        "parchment": "Pergamena",
+        "highContrast": "Contrasto elevato"
       },
       "knob": {
-        "accent": "Accent",
-        "border": "Border",
-        "panel": "Frame",
-        "text": "Text",
-        "textMuted": "Muted Text",
-        "hp": "Health",
+        "accent": "Accento",
+        "border": "Bordo",
+        "panel": "Pannello",
+        "text": "Testo",
+        "textMuted": "Testo attenuato",
+        "hp": "Salute",
         "mana": "Mana",
-        "rage": "Rage",
-        "energy": "Energy"
+        "rage": "Rabbia",
+        "energy": "Energia"
       }
     },
     "questTracker": {
@@ -275,8 +275,8 @@ export const it_IT: EnTranslations = {
       "interfaceModeNote": "Auto sceglie i controlli Desktop o Touch in base al tuo dispositivo. Scegli Desktop per forzare tastiera e mouse (utile su un tablet con tastiera), oppure Touch per i controlli a schermo.",
       "footstepSounds": "Suoni dei passi",
       "clickFeedback": "Indicatore di clic",
-      "lockCursorOnRotate": "Lock Cursor While Rotating",
-      "keybindHelpLockCursorOnRotate": "Keeps the mouse cursor inside the window while you drag to rotate the camera, so it cannot reach the screen edge or move to another monitor. Turn off if you prefer a free cursor.",
+      "lockCursorOnRotate": "Blocca cursore durante la rotazione",
+      "keybindHelpLockCursorOnRotate": "Mantiene il cursore del mouse all'interno della finestra mentre trascini per ruotare la fotocamera, così non può raggiungere il bordo dello schermo o spostarsi su un altro monitor. Disattiva se preferisci un cursore libero.",
       "showWalletOnCharacterScreen": "Mostra portafoglio nella schermata personaggi",
       "showWalletOnPlayerCard": "Mostra portafoglio nella scheda giocatore",
       "uiScale": "Scala dell'interfaccia",
@@ -2189,11 +2189,11 @@ export const it_IT: EnTranslations = {
     "high": "Alta",
     "medium": "Media",
     "low": "Bassa",
-    "popTipLow": "Low population: fewer than 15 players online right now. Plenty of room; great for a fresh start.",
-    "popTipMedium": "Medium population: 15 to 39 players online right now. A healthy, active realm.",
-    "popTipHigh": "High population: 40 to 79 players online right now. Busy, with lots of players around.",
-    "popTipFull": "Full population: 80 or more players online right now. Very busy; you may wait in a login queue.",
-    "popTipOffline": "Offline: this realm is unreachable right now and cannot be joined.",
+    "popTipLow": "Popolazione bassa: meno di 15 giocatori online in questo momento. Molto spazio disponibile, ottimo per un nuovo inizio.",
+    "popTipMedium": "Popolazione media: da 15 a 39 giocatori online in questo momento. Un reame sano e attivo.",
+    "popTipHigh": "Popolazione alta: da 40 a 79 giocatori online in questo momento. Affollato, con molti giocatori intorno.",
+    "popTipFull": "Popolazione massima: 80 o più giocatori online in questo momento. Molto affollato, potresti essere in coda di attesa all'accesso.",
+    "popTipOffline": "Offline: questo reame non è raggiungibile in questo momento e non può essere raggiunto.",
     "characterCountOne": "{count} personaggio",
     "characterCountOther": "{count} personaggi",
     "selectedRealm": "Reame: {name}",
