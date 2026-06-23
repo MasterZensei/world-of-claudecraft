@@ -4463,7 +4463,6 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
     "lockpickUi.pagesAria": "자물쇠 {count}개",
     "lockpickUi.tries": "시도 {count}회",
     "lockpickUi.triesOne": "시도 1회",
-    "lockpickUi.perLock": "{seconds}s / 자물쇠",
     "lockpickUi.seconds": "{seconds}s",
     "lockpickUi.boardTitle": "열쇠공의 길: {tier} 상자",
     "lockpickUi.closeAria": "닫기",

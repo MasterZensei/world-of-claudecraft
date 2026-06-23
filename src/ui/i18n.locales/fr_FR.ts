@@ -4617,7 +4617,6 @@ export const fr_FR: Partial<Record<TranslationKey, string>> = {
     "lockpickUi.pagesAria": "{count} serrures",
     "lockpickUi.tries": "{count} essais",
     "lockpickUi.triesOne": "1 essai",
-    "lockpickUi.perLock": "{seconds}s / serrure",
     "lockpickUi.seconds": "{seconds}s",
     "lockpickUi.boardTitle": "Voie du crocheteur : cachette {tier}",
     "lockpickUi.closeAria": "Fermer",

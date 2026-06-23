@@ -154,8 +154,8 @@ export interface AnteOption {
   margin: string;
   /** Per-move time budget in seconds (authoritative, from the ante's
    * ANTE_TO_STEP_TIMEOUT_MS). The clock is an ante/difficulty dial: hard 3s /
-   * medium 6s / easy 9s per move. */
-  timerSeconds: number | null;
+   * medium 6s / easy 9s per move. Always set (every ante has a clock). */
+  timerSeconds: number;
 }
 
 /** The three ante choices shown in the engage selector. Ante == loot tier ==

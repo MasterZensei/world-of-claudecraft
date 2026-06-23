@@ -1769,7 +1769,7 @@ export const zh_CN: EnTranslations = {
     "pagesAria": "{count}道锁",
     "tries": "{count}次尝试",
     "triesOne": "1次尝试",
-    "perLock": "每道锁{seconds}s",
+    "perMove": "{seconds}s / move",
     "seconds": "{seconds}s",
     "boardTitle": "锁簧之径：{tier}储藏",
     "closeAria": "关闭",

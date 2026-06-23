@@ -4452,7 +4452,6 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
     "lockpickUi.pagesAria": "錠{count}個",
     "lockpickUi.tries": "挑戦{count}回",
     "lockpickUi.triesOne": "挑戦1回",
-    "lockpickUi.perLock": "{seconds}s / 錠",
     "lockpickUi.seconds": "{seconds}s",
     "lockpickUi.boardTitle": "錠前の道: {tier}の宝庫",
     "lockpickUi.closeAria": "閉じる",

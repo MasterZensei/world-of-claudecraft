@@ -1769,7 +1769,7 @@ export const ko_KR: EnTranslations = {
     "pagesAria": "자물쇠 {count}개",
     "tries": "시도 {count}회",
     "triesOne": "시도 1회",
-    "perLock": "{seconds}s / 자물쇠",
+    "perMove": "{seconds}s / move",
     "seconds": "{seconds}s",
     "boardTitle": "열쇠공의 길: {tier} 상자",
     "closeAria": "닫기",

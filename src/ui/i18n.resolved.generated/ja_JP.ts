@@ -1769,7 +1769,7 @@ export const ja_JP: EnTranslations = {
     "pagesAria": "錠{count}個",
     "tries": "挑戦{count}回",
     "triesOne": "挑戦1回",
-    "perLock": "{seconds}s / 錠",
+    "perMove": "{seconds}s / move",
     "seconds": "{seconds}s",
     "boardTitle": "錠前の道: {tier}の宝庫",
     "closeAria": "閉じる",

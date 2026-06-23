@@ -16,6 +16,7 @@ export const pending: Record<string, readonly string[]> = {
     "hudChrome.raidConvert.toPartyDone",
     "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
+    "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
     "worldContent.delveRewardChestInteract",
     "worldContent.delveSurfaceExitInteract"
@@ -27,6 +28,7 @@ export const pending: Record<string, readonly string[]> = {
     "hudChrome.raidConvert.toPartyDone",
     "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
+    "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
     "worldContent.delveRewardChestInteract",
     "worldContent.delveSurfaceExitInteract"
@@ -38,6 +40,7 @@ export const pending: Record<string, readonly string[]> = {
     "hudChrome.raidConvert.toPartyDone",
     "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
+    "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
     "worldContent.delveRewardChestInteract",
     "worldContent.delveSurfaceExitInteract"
@@ -49,6 +52,7 @@ export const pending: Record<string, readonly string[]> = {
     "hudChrome.raidConvert.toPartyDone",
     "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
+    "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
     "worldContent.delveRewardChestInteract",
     "worldContent.delveSurfaceExitInteract"
@@ -61,6 +65,7 @@ export const pending: Record<string, readonly string[]> = {
     "hudChrome.raidConvert.toPartyDone",
     "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
+    "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
     "worldContent.delveRewardChestInteract",
     "worldContent.delveSurfaceExitInteract"
@@ -72,6 +77,7 @@ export const pending: Record<string, readonly string[]> = {
     "hudChrome.raidConvert.toPartyDone",
     "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
+    "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
     "worldContent.delveRewardChestInteract",
     "worldContent.delveSurfaceExitInteract"
@@ -83,6 +89,7 @@ export const pending: Record<string, readonly string[]> = {
     "hudChrome.raidConvert.toPartyDone",
     "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
+    "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
     "worldContent.delveRewardChestInteract",
     "worldContent.delveSurfaceExitInteract"
@@ -94,6 +101,7 @@ export const pending: Record<string, readonly string[]> = {
     "hudChrome.raidConvert.toPartyDone",
     "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
+    "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
     "worldContent.delveRewardChestInteract",
     "worldContent.delveSurfaceExitInteract"
@@ -105,6 +113,7 @@ export const pending: Record<string, readonly string[]> = {
     "hudChrome.raidConvert.toPartyDone",
     "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
+    "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
     "worldContent.delveRewardChestInteract",
     "worldContent.delveSurfaceExitInteract"
@@ -116,6 +125,7 @@ export const pending: Record<string, readonly string[]> = {
     "hudChrome.raidConvert.toPartyDone",
     "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
+    "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
     "worldContent.delveRewardChestInteract",
     "worldContent.delveSurfaceExitInteract"
@@ -127,6 +137,7 @@ export const pending: Record<string, readonly string[]> = {
     "hudChrome.raidConvert.toPartyDone",
     "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
+    "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
     "worldContent.delveRewardChestInteract",
     "worldContent.delveSurfaceExitInteract"
@@ -138,6 +149,7 @@ export const pending: Record<string, readonly string[]> = {
     "hudChrome.raidConvert.toPartyDone",
     "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
+    "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
     "worldContent.delveRewardChestInteract",
     "worldContent.delveSurfaceExitInteract"

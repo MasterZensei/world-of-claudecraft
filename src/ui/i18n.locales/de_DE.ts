@@ -4601,7 +4601,6 @@ export const de_DE: Partial<Record<TranslationKey, string>> = {
     "lockpickUi.pagesAria": "{count} Schlösser",
     "lockpickUi.tries": "{count} Versuche",
     "lockpickUi.triesOne": "1 Versuch",
-    "lockpickUi.perLock": "{seconds}s / Schloss",
     "lockpickUi.seconds": "{seconds}s",
     "lockpickUi.boardTitle": "Pfad der Stifte: {tier} Hort",
     "lockpickUi.closeAria": "Schließen",

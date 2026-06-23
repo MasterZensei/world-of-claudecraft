@@ -1769,7 +1769,7 @@ export const fr_FR: EnTranslations = {
     "pagesAria": "{count} serrures",
     "tries": "{count} essais",
     "triesOne": "1 essai",
-    "perLock": "{seconds}s / serrure",
+    "perMove": "{seconds}s / move",
     "seconds": "{seconds}s",
     "boardTitle": "Voie du crocheteur : cachette {tier}",
     "closeAria": "Fermer",

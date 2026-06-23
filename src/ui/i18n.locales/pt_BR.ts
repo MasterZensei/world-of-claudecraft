@@ -4568,7 +4568,6 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
     "lockpickUi.pagesAria": "{count} fechaduras",
     "lockpickUi.tries": "{count} tentativas",
     "lockpickUi.triesOne": "1 tentativa",
-    "lockpickUi.perLock": "{seconds}s / fechadura",
     "lockpickUi.seconds": "{seconds}s",
     "lockpickUi.boardTitle": "Caminho dos Pinos: reserva {tier}",
     "lockpickUi.closeAria": "Fechar",

@@ -4579,7 +4579,6 @@ export const it_IT: Partial<Record<TranslationKey, string>> = {
     "lockpickUi.pagesAria": "{count} serrature",
     "lockpickUi.tries": "{count} tentativi",
     "lockpickUi.triesOne": "1 tentativo",
-    "lockpickUi.perLock": "{seconds}s / serratura",
     "lockpickUi.seconds": "{seconds}s",
     "lockpickUi.boardTitle": "Via del Cilindro: scrigno {tier}",
     "lockpickUi.closeAria": "Chiudi",

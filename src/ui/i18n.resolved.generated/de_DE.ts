@@ -1769,7 +1769,7 @@ export const de_DE: EnTranslations = {
     "pagesAria": "{count} Schlösser",
     "tries": "{count} Versuche",
     "triesOne": "1 Versuch",
-    "perLock": "{seconds}s / Schloss",
+    "perMove": "{seconds}s / move",
     "seconds": "{seconds}s",
     "boardTitle": "Pfad der Stifte: {tier} Hort",
     "closeAria": "Schließen",

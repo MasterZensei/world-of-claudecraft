@@ -1769,7 +1769,7 @@ export const pt_BR: EnTranslations = {
     "pagesAria": "{count} fechaduras",
     "tries": "{count} tentativas",
     "triesOne": "1 tentativa",
-    "perLock": "{seconds}s / fechadura",
+    "perMove": "{seconds}s / move",
     "seconds": "{seconds}s",
     "boardTitle": "Caminho dos Pinos: reserva {tier}",
     "closeAria": "Fechar",

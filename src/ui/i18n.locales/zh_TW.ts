@@ -4230,7 +4230,6 @@ export const zh_TW: Partial<Record<TranslationKey, string>> = {
     "lockpickUi.pagesAria": "{count}道鎖",
     "lockpickUi.tries": "{count}次嘗試",
     "lockpickUi.triesOne": "1次嘗試",
-    "lockpickUi.perLock": "每道鎖 {seconds}s",
     "lockpickUi.seconds": "{seconds}s",
     "lockpickUi.boardTitle": "轉珠之路：{tier}戰利品",
     "lockpickUi.closeAria": "關閉",

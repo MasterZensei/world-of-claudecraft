@@ -1769,7 +1769,7 @@ export const ru_RU: EnTranslations = {
     "pagesAria": "Замков: {count}",
     "tries": "Попыток: {count}",
     "triesOne": "1 попытка",
-    "perLock": "{seconds}с / замок",
+    "perMove": "{seconds}s / move",
     "seconds": "{seconds}с",
     "boardTitle": "Путь штифтов: {tier} тайник",
     "closeAria": "Закрыть",

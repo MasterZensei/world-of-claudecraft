@@ -1096,11 +1096,12 @@ export function buildProps(seed: number, delveLabel?: (delveId: string) => strin
     ctx.textBaseline = 'middle';
     const label = (delveLabel ? delveLabel(dm.delveId) : dm.delveId).toUpperCase();
     const maxTextW = CW - 44; // inside the 6px stroke + breathing room
+    // Step down until it fits (kerning/hinting make a single proportional guess
+    // unreliable for wide-glyph locales, e.g. CJK names), with a 16px floor.
     let fontPx = 34;
     ctx.font = `bold ${fontPx}px Georgia, "Times New Roman", serif`;
-    const measured = ctx.measureText(label).width;
-    if (measured > maxTextW) {
-      fontPx = Math.max(16, Math.floor(fontPx * (maxTextW / measured)));
+    while (fontPx > 16 && ctx.measureText(label).width > maxTextW) {
+      fontPx -= 1;
       ctx.font = `bold ${fontPx}px Georgia, "Times New Roman", serif`;
     }
     ctx.fillStyle = '#120f0b';

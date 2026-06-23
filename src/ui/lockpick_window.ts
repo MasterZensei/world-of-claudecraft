@@ -80,7 +80,7 @@ export class LockpickWindow {
       + `<span class="lp-ante-pages" aria-label="${esc(t('lockpickUi.pagesAria', { count: formatNumber(o.pages, NUM0) }))}">${esc(formatNumber(o.pages, NUM0))}</span>`
       + `<span class="lp-ante-tries">${esc(o.tries > 1 ? t('lockpickUi.tries', { count: formatNumber(o.tries, NUM0) }) : t('lockpickUi.triesOne'))}</span>`
       + `</span>`
-      + (o.timerSeconds != null ? `<span class="lp-ante-timer">${esc(t('lockpickUi.perLock', { seconds: formatNumber(o.timerSeconds, NUM0) }))}</span>` : '')
+      + `<span class="lp-ante-timer">${esc(t('lockpickUi.perMove', { seconds: formatNumber(o.timerSeconds, NUM0) }))}</span>`
       + `</button>`).join('');
     const title = coffer ? t('lockpickUi.cofferTitle') : t('lockpickUi.pickTitle');
     const blurb = coffer ? t('lockpickUi.cofferBlurb') : t('lockpickUi.pickBlurb');

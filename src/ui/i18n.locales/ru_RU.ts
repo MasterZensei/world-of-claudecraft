@@ -4551,7 +4551,6 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
     "lockpickUi.pagesAria": "Замков: {count}",
     "lockpickUi.tries": "Попыток: {count}",
     "lockpickUi.triesOne": "1 попытка",
-    "lockpickUi.perLock": "{seconds}с / замок",
     "lockpickUi.seconds": "{seconds}с",
     "lockpickUi.boardTitle": "Путь штифтов: {tier} тайник",
     "lockpickUi.closeAria": "Закрыть",

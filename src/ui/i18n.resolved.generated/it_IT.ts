@@ -1769,7 +1769,7 @@ export const it_IT: EnTranslations = {
     "pagesAria": "{count} serrature",
     "tries": "{count} tentativi",
     "triesOne": "1 tentativo",
-    "perLock": "{seconds}s / serratura",
+    "perMove": "{seconds}s / move",
     "seconds": "{seconds}s",
     "boardTitle": "Via del Cilindro: scrigno {tier}",
     "closeAria": "Chiudi",

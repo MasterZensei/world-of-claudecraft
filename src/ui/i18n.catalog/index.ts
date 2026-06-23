@@ -448,7 +448,7 @@ export const en = {
     pagesAria: "{count} locks",
     tries: "{count} tries",
     triesOne: "1 try",
-    perLock: "{seconds}s / lock",
+    perMove: "{seconds}s / move",
     seconds: "{seconds}s",
     boardTitle: "Tumbler's Path: {tier} cache",
     closeAria: "Close",

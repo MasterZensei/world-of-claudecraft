@@ -1769,7 +1769,7 @@ export const es_ES: EnTranslations = {
     "pagesAria": "{count} cerraduras",
     "tries": "{count} intentos",
     "triesOne": "1 intento",
-    "perLock": "{seconds}s / cerradura",
+    "perMove": "{seconds}s / move",
     "seconds": "{seconds}s",
     "boardTitle": "Senda del Tambor: botín {tier}",
     "closeAria": "Cerrar",

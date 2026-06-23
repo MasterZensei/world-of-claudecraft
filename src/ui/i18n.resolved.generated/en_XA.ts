@@ -1769,7 +1769,7 @@ export const en_XA: EnTranslations = {
     "pagesAria": "[{count} ļóçķš]",
     "tries": "[{count} ţŕíéš]",
     "triesOne": "[1 ţŕý]",
-    "perLock": "[{seconds}š / ļóçķ]",
+    "perMove": "[{seconds}š / ɱóʋé]",
     "seconds": "[{seconds}š]",
     "boardTitle": "[Ţúɱƀļéŕ'š Þáţĥ: {tier} çáçĥé]",
     "closeAria": "[Çļóšé]",

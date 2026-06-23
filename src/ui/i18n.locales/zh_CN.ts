@@ -4229,7 +4229,6 @@ export const zh_CN: Partial<Record<TranslationKey, string>> = {
     "lockpickUi.pagesAria": "{count}道锁",
     "lockpickUi.tries": "{count}次尝试",
     "lockpickUi.triesOne": "1次尝试",
-    "lockpickUi.perLock": "每道锁{seconds}s",
     "lockpickUi.seconds": "{seconds}s",
     "lockpickUi.boardTitle": "锁簧之径：{tier}储藏",
     "lockpickUi.closeAria": "关闭",
