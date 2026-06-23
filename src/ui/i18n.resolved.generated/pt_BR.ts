@@ -1626,7 +1626,7 @@ export const pt_BR: EnTranslations = {
       "duringArena": "Você não pode entrar em uma incursão durante uma partida de arena.",
       "unknownTier": "Nível de incursão desconhecido.",
       "levelRequired": "Você precisa ser nível {level} para entrar em {name}.",
-      "levelRequiredTier": "You must be level {level} to enter {name} on {tier}.",
+      "levelRequiredTier": "Você precisa ser nível {level} para entrar em {name} no {tier}.",
       "instancesBusy": "Todas as instâncias de {name} estão ocupadas. Tente novamente em breve.",
       "runFailed": "A incursão {name} falhou.",
       "complete": "{name} concluída.",
@@ -1653,9 +1653,9 @@ export const pt_BR: EnTranslations = {
       "companionMaxRank": "Esta companheira já está totalmente aprimorada.",
       "companionMarksRequired": "Você precisa de {marks} Selos de Incursão para melhorar {name}.",
       "cannotAffordCompanionUpgrade": "Você não pode pagar por esta melhoria.",
-      "shopItemLocked": "You have not unlocked that item yet.",
-      "shopMarksRequired": "You need {marks} Delve Marks to buy {name}.",
-      "shopSealPremiumOnly": "This seal yields only to a master's hand — only the Premium ante can open it.",
+      "shopItemLocked": "Você ainda não desbloqueou esse item.",
+      "shopMarksRequired": "Você precisa de {marks} Selos de Incursão para comprar {name}.",
+      "shopSealPremiumOnly": "Este selo só cede à mão de um mestre: apenas a aposta Superior pode abri-lo.",
       "passageSealed": "A passagem está selada.",
       "moveCloserPassage": "Aproxime-se da passagem.",
       "moveCloserChest": "Aproxime-se do baú.",
@@ -1694,21 +1694,21 @@ export const pt_BR: EnTranslations = {
         "pick": "Escolha uma companheira",
         "tessa": "Acólita Tessa",
         "rank": "Grau {rank}",
-        "boon": "Heals the party between fights. Rank 3 revives a fallen ally once per run.",
-        "upgrade": "Upgrade to Rank {rank} ({marks} Marks)",
-        "upgradeAria": "Upgrade {name} to rank {rank} for {marks} Delve Marks",
-        "maxRank": "Fully upgraded"
+        "boon": "Cura o grupo entre os combates. O grau 3 reanima um aliado caído uma vez por incursão.",
+        "upgrade": "Melhorar para o grau {rank} ({marks} Selos)",
+        "upgradeAria": "Melhorar {name} para o grau {rank} por {marks} Selos de Incursão",
+        "maxRank": "Totalmente aprimorada"
       },
-      "tabDelve": "Delve",
-      "tabShop": "Shop"
+      "tabDelve": "Incursão",
+      "tabShop": "Loja"
     },
     "shop": {
-      "price": "{marks} Marks",
-      "buy": "Buy",
-      "buyAria": "Buy {item} for {marks} Delve Marks",
-      "reqHeroic": "Requires a Heroic clear",
-      "reqClears": "Requires {count} clears",
-      "empty": "Nothing in stock."
+      "price": "{marks} Selos",
+      "buy": "Comprar",
+      "buyAria": "Comprar {item} por {marks} Selos de Incursão",
+      "reqHeroic": "Requer uma conclusão heroica",
+      "reqClears": "Requer {count} conclusões",
+      "empty": "Nada em estoque."
     },
     "tracker": {
       "title": "Incursão",

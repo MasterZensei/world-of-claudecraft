@@ -1626,7 +1626,7 @@ export const it_IT: EnTranslations = {
       "duringArena": "Non puoi entrare in un'incursione durante una partita d'arena.",
       "unknownTier": "Difficoltà d'incursione sconosciuta.",
       "levelRequired": "Devi essere di livello {level} per entrare in {name}.",
-      "levelRequiredTier": "You must be level {level} to enter {name} on {tier}.",
+      "levelRequiredTier": "Devi essere di livello {level} per entrare in {name} a {tier}.",
       "instancesBusy": "Tutte le istanze di {name} sono occupate. Riprova tra poco.",
       "runFailed": "Incursione di {name} fallita.",
       "complete": "{name} completata.",
@@ -1653,9 +1653,9 @@ export const it_IT: EnTranslations = {
       "companionMaxRank": "Questo compagno è già completamente potenziato.",
       "companionMarksRequired": "Ti servono {marks} Sigilli d'Incursione per potenziare {name}.",
       "cannotAffordCompanionUpgrade": "Non puoi permetterti questo potenziamento.",
-      "shopItemLocked": "You have not unlocked that item yet.",
-      "shopMarksRequired": "You need {marks} Delve Marks to buy {name}.",
-      "shopSealPremiumOnly": "This seal yields only to a master's hand — only the Premium ante can open it.",
+      "shopItemLocked": "Non hai ancora sbloccato quell'oggetto.",
+      "shopMarksRequired": "Ti servono {marks} Sigilli d'Incursione per comprare {name}.",
+      "shopSealPremiumOnly": "Questo sigillo cede solo alla mano di un maestro: solo la puntata Pregiata può aprirlo.",
       "passageSealed": "Il passaggio è sigillato.",
       "moveCloserPassage": "Avvicinati al passaggio.",
       "moveCloserChest": "Avvicinati allo scrigno.",
@@ -1694,21 +1694,21 @@ export const it_IT: EnTranslations = {
         "pick": "Scegli un compagno",
         "tessa": "Accolita Tessa",
         "rank": "Grado {rank}",
-        "boon": "Heals the party between fights. Rank 3 revives a fallen ally once per run.",
-        "upgrade": "Upgrade to Rank {rank} ({marks} Marks)",
-        "upgradeAria": "Upgrade {name} to rank {rank} for {marks} Delve Marks",
-        "maxRank": "Fully upgraded"
+        "boon": "Cura il gruppo tra uno scontro e l'altro. Il grado 3 rianima un alleato caduto una volta per incursione.",
+        "upgrade": "Potenzia al grado {rank} ({marks} Sigilli)",
+        "upgradeAria": "Potenzia {name} al grado {rank} per {marks} Sigilli d'Incursione",
+        "maxRank": "Completamente potenziato"
       },
-      "tabDelve": "Delve",
-      "tabShop": "Shop"
+      "tabDelve": "Incursione",
+      "tabShop": "Negozio"
     },
     "shop": {
-      "price": "{marks} Marks",
-      "buy": "Buy",
-      "buyAria": "Buy {item} for {marks} Delve Marks",
-      "reqHeroic": "Requires a Heroic clear",
-      "reqClears": "Requires {count} clears",
-      "empty": "Nothing in stock."
+      "price": "{marks} Sigilli",
+      "buy": "Compra",
+      "buyAria": "Compra {item} per {marks} Sigilli d'Incursione",
+      "reqHeroic": "Richiede un'incursione eroica completata",
+      "reqClears": "Richiede {count} incursioni completate",
+      "empty": "Niente in magazzino."
     },
     "tracker": {
       "title": "Incursione",

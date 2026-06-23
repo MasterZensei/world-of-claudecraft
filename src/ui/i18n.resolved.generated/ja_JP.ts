@@ -1700,11 +1700,11 @@ export const ja_JP: EnTranslations = {
         "maxRank": "最大ランク"
       },
       "tabDelve": "デルヴ",
-      "tabShop": "Shop"
+      "tabShop": "ショップ"
     },
     "shop": {
       "price": "刻印{marks}個",
-      "buy": "Buy",
+      "buy": "購入",
       "buyAria": "デルヴの刻印{marks}個で{item}を購入",
       "reqHeroic": "ヒロイッククリアが必要",
       "reqClears": "{count}回のクリアが必要",

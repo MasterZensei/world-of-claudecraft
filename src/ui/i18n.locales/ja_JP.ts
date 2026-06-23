@@ -3108,6 +3108,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   "delveUi.shop.reqHeroic": "ヒロイッククリアが必要",
   "delveUi.shop.reqClears": "{count}回のクリアが必要",
   "delveUi.shop.empty": "在庫がありません。",
+  "delveUi.shop.buy": "購入",
   "sim.delve.levelRequiredTier": "{tier}で{name}に入るにはレベル{level}が必要だ。",
   "sim.delve.shopItemLocked": "そのアイテムはまだ解放されていない。",
   "sim.delve.shopMarksRequired": "{name}を購入するにはデルヴの刻印が{marks}個必要だ。",
@@ -3116,6 +3117,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   "delveUi.board.companion.upgrade": "ランク{rank}に強化（刻印{marks}個）",
   "delveUi.board.companion.upgradeAria": "デルヴの刻印{marks}個で{name}をランク{rank}に強化",
   "delveUi.board.companion.maxRank": "最大ランク",
+  "delveUi.board.tabShop": "ショップ",
   // Guide (/guide) localization.
   "guide.brand": "World of ClaudeCraft",
   "guide.brandShort": "ClaudeCraft",

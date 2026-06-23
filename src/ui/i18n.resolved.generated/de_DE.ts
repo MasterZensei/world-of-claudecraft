@@ -1626,7 +1626,7 @@ export const de_DE: EnTranslations = {
       "duringArena": "Du kannst während eines Arenakampfes keinen Tiefgang betreten.",
       "unknownTier": "Unbekannte Tiefgang-Stufe.",
       "levelRequired": "Du musst Stufe {level} sein, um {name} zu betreten.",
-      "levelRequiredTier": "You must be level {level} to enter {name} on {tier}.",
+      "levelRequiredTier": "Du musst Stufe {level} sein, um {name} auf {tier} zu betreten.",
       "instancesBusy": "Alle Instanzen von {name} sind belegt. Versuche es bald erneut.",
       "runFailed": "Lauf von {name} gescheitert.",
       "complete": "{name} abgeschlossen.",
@@ -1653,9 +1653,9 @@ export const de_DE: EnTranslations = {
       "companionMaxRank": "Dieser Gefährte ist bereits vollständig verbessert.",
       "companionMarksRequired": "Du benötigst {marks} Tiefgang-Marken, um {name} zu verbessern.",
       "cannotAffordCompanionUpgrade": "Du kannst dir diese Verbesserung nicht leisten.",
-      "shopItemLocked": "You have not unlocked that item yet.",
-      "shopMarksRequired": "You need {marks} Delve Marks to buy {name}.",
-      "shopSealPremiumOnly": "This seal yields only to a master's hand — only the Premium ante can open it.",
+      "shopItemLocked": "Du hast diesen Gegenstand noch nicht freigeschaltet.",
+      "shopMarksRequired": "Du benötigst {marks} Tiefgang-Marken, um {name} zu kaufen.",
+      "shopSealPremiumOnly": "Dieses Siegel weicht nur der Hand eines Meisters: Nur der Erlesene Einsatz kann es öffnen.",
       "passageSealed": "Der Durchgang ist versiegelt.",
       "moveCloserPassage": "Geh näher an den Durchgang heran.",
       "moveCloserChest": "Geh näher an die Truhe heran.",
@@ -1694,21 +1694,21 @@ export const de_DE: EnTranslations = {
         "pick": "Wähle einen Gefährten",
         "tessa": "Akolythin Tessa",
         "rank": "Rang {rank}",
-        "boon": "Heals the party between fights. Rank 3 revives a fallen ally once per run.",
-        "upgrade": "Upgrade to Rank {rank} ({marks} Marks)",
-        "upgradeAria": "Upgrade {name} to rank {rank} for {marks} Delve Marks",
-        "maxRank": "Fully upgraded"
+        "boon": "Heilt die Gruppe zwischen den Kämpfen. Rang 3 belebt einen gefallenen Verbündeten einmal pro Lauf wieder.",
+        "upgrade": "Auf Rang {rank} verbessern ({marks} Marken)",
+        "upgradeAria": "{name} für {marks} Tiefgang-Marken auf Rang {rank} verbessern",
+        "maxRank": "Vollständig verbessert"
       },
-      "tabDelve": "Delve",
-      "tabShop": "Shop"
+      "tabDelve": "Tiefgang",
+      "tabShop": "Laden"
     },
     "shop": {
-      "price": "{marks} Marks",
-      "buy": "Buy",
-      "buyAria": "Buy {item} for {marks} Delve Marks",
-      "reqHeroic": "Requires a Heroic clear",
-      "reqClears": "Requires {count} clears",
-      "empty": "Nothing in stock."
+      "price": "{marks} Marken",
+      "buy": "Kaufen",
+      "buyAria": "{item} für {marks} Tiefgang-Marken kaufen",
+      "reqHeroic": "Erfordert einen heroischen Abschluss",
+      "reqClears": "Erfordert {count} Abschlüsse",
+      "empty": "Nichts vorrätig."
     },
     "tracker": {
       "title": "Tiefgang",

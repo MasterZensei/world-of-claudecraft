@@ -1700,11 +1700,11 @@ export const ru_RU: EnTranslations = {
         "maxRank": "Полностью улучшено"
       },
       "tabDelve": "Вылазка",
-      "tabShop": "Shop"
+      "tabShop": "Магазин"
     },
     "shop": {
       "price": "{marks} меток",
-      "buy": "Buy",
+      "buy": "Купить",
       "buyAria": "Купить {item} за {marks} Меток Вылазок",
       "reqHeroic": "Требуется героическое прохождение",
       "reqClears": "Требуется прохождений: {count}",

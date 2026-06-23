@@ -1626,7 +1626,7 @@ export const es_ES: EnTranslations = {
       "duringArena": "No puedes entrar en una Profundidad durante un combate de arena.",
       "unknownTier": "Nivel de Profundidad desconocido.",
       "levelRequired": "Debes ser nivel {level} para entrar en {name}.",
-      "levelRequiredTier": "You must be level {level} to enter {name} on {tier}.",
+      "levelRequiredTier": "Debes ser nivel {level} para entrar a {name} en {tier}.",
       "instancesBusy": "Todas las instancias de {name} están ocupadas. Inténtalo de nuevo pronto.",
       "runFailed": "La incursión a {name} ha fracasado.",
       "complete": "{name} completada.",
@@ -1653,9 +1653,9 @@ export const es_ES: EnTranslations = {
       "companionMaxRank": "Este compañero ya está completamente mejorado.",
       "companionMarksRequired": "Necesitas {marks} Marcas de Profundidad para mejorar a {name}.",
       "cannotAffordCompanionUpgrade": "No puedes permitirte esta mejora.",
-      "shopItemLocked": "You have not unlocked that item yet.",
-      "shopMarksRequired": "You need {marks} Delve Marks to buy {name}.",
-      "shopSealPremiumOnly": "This seal yields only to a master's hand — only the Premium ante can open it.",
+      "shopItemLocked": "Aún no has desbloqueado ese objeto.",
+      "shopMarksRequired": "Necesitas {marks} Marcas de Expedición para comprar {name}.",
+      "shopSealPremiumOnly": "Este sello solo cede a la mano de un maestro: solo la apuesta Selecta puede abrirlo.",
       "passageSealed": "El pasaje está sellado.",
       "moveCloserPassage": "Acércate más al pasaje.",
       "moveCloserChest": "Acércate más al cofre.",
@@ -1694,21 +1694,21 @@ export const es_ES: EnTranslations = {
         "pick": "Elige un compañero",
         "tessa": "Acólita Tessa",
         "rank": "Rango {rank}",
-        "boon": "Heals the party between fights. Rank 3 revives a fallen ally once per run.",
-        "upgrade": "Upgrade to Rank {rank} ({marks} Marks)",
-        "upgradeAria": "Upgrade {name} to rank {rank} for {marks} Delve Marks",
-        "maxRank": "Fully upgraded"
+        "boon": "Cura al grupo entre combates. El rango 3 revive a un aliado caído una vez por incursión.",
+        "upgrade": "Mejorar al rango {rank} ({marks} Marcas)",
+        "upgradeAria": "Mejorar a {name} al rango {rank} por {marks} Marcas de Expedición",
+        "maxRank": "Mejorado al máximo"
       },
-      "tabDelve": "Delve",
-      "tabShop": "Shop"
+      "tabDelve": "Expedición",
+      "tabShop": "Tienda"
     },
     "shop": {
-      "price": "{marks} Marks",
-      "buy": "Buy",
-      "buyAria": "Buy {item} for {marks} Delve Marks",
-      "reqHeroic": "Requires a Heroic clear",
-      "reqClears": "Requires {count} clears",
-      "empty": "Nothing in stock."
+      "price": "{marks} Marcas",
+      "buy": "Comprar",
+      "buyAria": "Comprar {item} por {marks} Marcas de Expedición",
+      "reqHeroic": "Requiere una incursión heroica completada",
+      "reqClears": "Requiere {count} incursiones completadas",
+      "empty": "No hay nada en existencias."
     },
     "tracker": {
       "title": "Profundidad",

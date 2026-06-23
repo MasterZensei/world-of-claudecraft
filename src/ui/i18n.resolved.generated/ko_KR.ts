@@ -1700,11 +1700,11 @@ export const ko_KR: EnTranslations = {
         "maxRank": "최대 강화"
       },
       "tabDelve": "탐굴",
-      "tabShop": "Shop"
+      "tabShop": "상점"
     },
     "shop": {
       "price": "증표 {marks}개",
-      "buy": "Buy",
+      "buy": "구매",
       "buyAria": "탐굴 증표 {marks}개로 {item} 구매",
       "reqHeroic": "영웅 난이도 클리어 필요",
       "reqClears": "{count}회 클리어 필요",

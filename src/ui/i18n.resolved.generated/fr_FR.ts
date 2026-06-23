@@ -1626,7 +1626,7 @@ export const fr_FR: EnTranslations = {
       "duringArena": "Vous ne pouvez pas entrer dans une plongée pendant un match d'arène.",
       "unknownTier": "Palier de plongée inconnu.",
       "levelRequired": "Vous devez être niveau {level} pour entrer dans {name}.",
-      "levelRequiredTier": "You must be level {level} to enter {name} on {tier}.",
+      "levelRequiredTier": "Vous devez être niveau {level} pour entrer dans {name} en {tier}.",
       "instancesBusy": "Toutes les instances de {name} sont occupées. Réessayez bientôt.",
       "runFailed": "Plongée {name} échouée.",
       "complete": "{name} terminée.",
@@ -1653,9 +1653,9 @@ export const fr_FR: EnTranslations = {
       "companionMaxRank": "Ce compagnon est déjà entièrement amélioré.",
       "companionMarksRequired": "Il vous faut {marks} Marques de plongée pour améliorer {name}.",
       "cannotAffordCompanionUpgrade": "Vous ne pouvez pas vous offrir cette amélioration.",
-      "shopItemLocked": "You have not unlocked that item yet.",
-      "shopMarksRequired": "You need {marks} Delve Marks to buy {name}.",
-      "shopSealPremiumOnly": "This seal yields only to a master's hand — only the Premium ante can open it.",
+      "shopItemLocked": "Vous n'avez pas encore débloqué cet objet.",
+      "shopMarksRequired": "Il vous faut {marks} Marques de plongée pour acheter {name}.",
+      "shopSealPremiumOnly": "Ce sceau ne cède qu'à la main d'un maître : seule la mise Supérieure peut l'ouvrir.",
       "passageSealed": "Le passage est scellé.",
       "moveCloserPassage": "Rapprochez-vous du passage.",
       "moveCloserChest": "Rapprochez-vous du coffre.",
@@ -1694,21 +1694,21 @@ export const fr_FR: EnTranslations = {
         "pick": "Choisir un compagnon",
         "tessa": "Acolyte Tessa",
         "rank": "Rang {rank}",
-        "boon": "Heals the party between fights. Rank 3 revives a fallen ally once per run.",
-        "upgrade": "Upgrade to Rank {rank} ({marks} Marks)",
-        "upgradeAria": "Upgrade {name} to rank {rank} for {marks} Delve Marks",
-        "maxRank": "Fully upgraded"
+        "boon": "Soigne le groupe entre les combats. Le rang 3 ressuscite un allié tombé une fois par plongée.",
+        "upgrade": "Améliorer au rang {rank} ({marks} Marques)",
+        "upgradeAria": "Améliorer {name} au rang {rank} pour {marks} Marques de plongée",
+        "maxRank": "Entièrement amélioré"
       },
-      "tabDelve": "Delve",
-      "tabShop": "Shop"
+      "tabDelve": "Plongée",
+      "tabShop": "Boutique"
     },
     "shop": {
-      "price": "{marks} Marks",
-      "buy": "Buy",
-      "buyAria": "Buy {item} for {marks} Delve Marks",
-      "reqHeroic": "Requires a Heroic clear",
-      "reqClears": "Requires {count} clears",
-      "empty": "Nothing in stock."
+      "price": "{marks} Marques",
+      "buy": "Acheter",
+      "buyAria": "Acheter {item} pour {marks} Marques de plongée",
+      "reqHeroic": "Nécessite une plongée héroïque réussie",
+      "reqClears": "Nécessite {count} plongées réussies",
+      "empty": "Rien en stock."
     },
     "tracker": {
       "title": "Plongée",

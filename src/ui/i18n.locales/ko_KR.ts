@@ -3108,6 +3108,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   "delveUi.shop.reqHeroic": "영웅 난이도 클리어 필요",
   "delveUi.shop.reqClears": "{count}회 클리어 필요",
   "delveUi.shop.empty": "재고가 없습니다.",
+  "delveUi.shop.buy": "구매",
   "sim.delve.levelRequiredTier": "{tier} 난이도로 {name}에 진입하려면 레벨 {level}이(가) 필요합니다.",
   "sim.delve.shopItemLocked": "아직 잠금 해제되지 않은 아이템입니다.",
   "sim.delve.shopMarksRequired": "{name}을(를) 구매하려면 탐굴 증표 {marks}개가 필요합니다.",
@@ -3116,6 +3117,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   "delveUi.board.companion.upgrade": "{rank}랭크로 강화 (증표 {marks}개)",
   "delveUi.board.companion.upgradeAria": "탐굴 증표 {marks}개로 {name}을(를) {rank}랭크로 강화",
   "delveUi.board.companion.maxRank": "최대 강화",
+  "delveUi.board.tabShop": "상점",
   // Guide (/guide) localization.
   "guide.brand": "World of ClaudeCraft",
   "guide.brandShort": "ClaudeCraft",

@@ -1700,11 +1700,11 @@ export const zh_CN: EnTranslations = {
         "maxRank": "已满级"
       },
       "tabDelve": "探秘",
-      "tabShop": "Shop"
+      "tabShop": "商店"
     },
     "shop": {
       "price": "{marks} 印记",
-      "buy": "Buy",
+      "buy": "购买",
       "buyAria": "用 {marks} 枚探秘印记购买 {item}",
       "reqHeroic": "需要英雄难度通关",
       "reqClears": "需要通关 {count} 次",

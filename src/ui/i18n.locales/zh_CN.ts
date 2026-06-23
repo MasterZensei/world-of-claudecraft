@@ -3108,6 +3108,7 @@ export const zh_CN: Partial<Record<TranslationKey, string>> = {
   "delveUi.shop.reqHeroic": "需要英雄难度通关",
   "delveUi.shop.reqClears": "需要通关 {count} 次",
   "delveUi.shop.empty": "暂无存货。",
+  "delveUi.shop.buy": "购买",
   "sim.delve.levelRequiredTier": "你必须达到 {level} 级才能以{tier}难度进入{name}。",
   "sim.delve.shopItemLocked": "你尚未解锁该物品。",
   "sim.delve.shopMarksRequired": "购买{name}需要 {marks} 枚探秘印记。",
@@ -3116,6 +3117,7 @@ export const zh_CN: Partial<Record<TranslationKey, string>> = {
   "delveUi.board.companion.upgrade": "升级到 {rank} 级（{marks} 印记）",
   "delveUi.board.companion.upgradeAria": "用 {marks} 枚探秘印记将{name}升级到 {rank} 级",
   "delveUi.board.companion.maxRank": "已满级",
+  "delveUi.board.tabShop": "商店",
   // Guide (/guide) localization.
   "guide.brand": "World of ClaudeCraft",
   "guide.brandShort": "ClaudeCraft",

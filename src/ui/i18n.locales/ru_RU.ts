@@ -3108,6 +3108,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   "delveUi.shop.reqHeroic": "Требуется героическое прохождение",
   "delveUi.shop.reqClears": "Требуется прохождений: {count}",
   "delveUi.shop.empty": "Нет товаров в наличии.",
+  "delveUi.shop.buy": "Купить",
   "sim.delve.levelRequiredTier": "Чтобы войти в {name} на сложности {tier}, нужен уровень {level}.",
   "sim.delve.shopItemLocked": "Вы ещё не открыли этот предмет.",
   "sim.delve.shopMarksRequired": "Чтобы купить {name}, нужно Меток Вылазок: {marks}.",
@@ -3116,6 +3117,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   "delveUi.board.companion.upgrade": "Улучшить до ранга {rank} ({marks} меток)",
   "delveUi.board.companion.upgradeAria": "Улучшить {name} до ранга {rank} за {marks} Меток Вылазок",
   "delveUi.board.companion.maxRank": "Полностью улучшено",
+  "delveUi.board.tabShop": "Магазин",
   // Guide (/guide) localization.
   "guide.brand": "World of ClaudeCraft",
   "guide.brandShort": "ClaudeCraft",
