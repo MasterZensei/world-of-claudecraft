@@ -1,9 +1,9 @@
-// "Tumbler's Path" lockpick panel — pure view helpers (no DOM/canvas), mirroring
+// "Tumbler's Path" lockpick panel: pure view helpers (no DOM/canvas), mirroring
 // the delve_map.ts pattern: take the fogged IWorld.LockpickView in, return plain
 // draw/layout data out. hud.ts owns the actual DOM. Snapshot-tested by
 // tests/lockpick_panel.test.ts.
 //
-// v2 redesign: NOT a grid of squares — a row of tumbler pin-tracks. Each lock
+// v2 redesign: NOT a grid of squares, a row of tumbler pin-tracks. Each lock
 // column is a brass tumbler; only its wards (open notches / gate / seat / trap)
 // are lit, the rest of the face is solid metal. Columns past the fog window are
 // a blank covered plate (unknown). The run is FLAWLESS across multiple pages
@@ -84,7 +84,7 @@ const ACTION_LABEL: Record<Exclude<PickAction, 'abort'>, string> = {
 function deltaGlyph(delta: number): string {
   if (delta <= -2) return '▲▲';
   if (delta === -1) return '▲';
-  if (delta === 0) return '—';
+  if (delta === 0) return '=';
   if (delta === 1) return '▼';
   return '▼▼';
 }
@@ -164,7 +164,7 @@ export interface AnteOption {
  * out.
  *
  * A Bountiful Coffer (§7.6) is purple and forces the Hard/Premium path: only the
- * Premium ante is offered — the lower difficulties are not an option. */
+ * Premium ante is offered, the lower difficulties are not an option. */
 export function anteOptions(coffer = false): AnteOption[] {
   const antes: Ante[] = coffer ? [1] : [1, 2, 3];
   return antes.map((ante) => {
@@ -173,7 +173,7 @@ export function anteOptions(coffer = false): AnteOption[] {
     const tries = ANTE_TO_TRIES[ante];
     const gauntlet = pages > 1 ? `${pages}-lock gauntlet` : 'Single lock';
     const triesText = tries > 1 ? `${tries} tries` : '1 try';
-    const margin = `${gauntlet} — ${triesText}`;
+    const margin = `${gauntlet}, ${triesText}`;
     return { ante, tier, tierLabel: TIER_LABEL[tier], pages, tries, margin, timerSeconds: TIER_TIMER_SECONDS[tier] };
   });
 }
@@ -181,13 +181,13 @@ export function anteOptions(coffer = false): AnteOption[] {
 /** Short diegetic feedback + tone for a step outcome (drives toast + SFX). */
 export function stepFeedback(result: StepResult): { text: string; tone: 'good' | 'bad' | 'win' } {
   switch (result) {
-    case 'advanced': return { text: 'The pin gives…', tone: 'good' };
-    case 'slip': return { text: 'A ward bites — the pick slips!', tone: 'bad' };
-    case 'bind': return { text: 'The tumbler binds — wrong depth!', tone: 'bad' };
-    case 'trap': return { text: 'A false ward snaps shut — the lock jams!', tone: 'bad' };
-    case 'retry': return { text: 'The lock resets — line up a fresh attempt.', tone: 'bad' };
-    case 'pageCleared': return { text: 'A tumbler bank falls — the next lock turns up.', tone: 'win' };
-    case 'success': return { text: 'The bolt throws — the cache is yours!', tone: 'win' };
+    case 'advanced': return { text: 'The pin gives...', tone: 'good' };
+    case 'slip': return { text: 'A ward bites, the pick slips!', tone: 'bad' };
+    case 'bind': return { text: 'The tumbler binds: wrong depth!', tone: 'bad' };
+    case 'trap': return { text: 'A false ward snaps shut, the lock jams!', tone: 'bad' };
+    case 'retry': return { text: 'The lock resets. Line up a fresh attempt.', tone: 'bad' };
+    case 'pageCleared': return { text: 'A tumbler bank falls. The next lock turns up.', tone: 'win' };
+    case 'success': return { text: 'The bolt throws, the cache is yours!', tone: 'win' };
     case 'fail': return { text: "The lock seizes. It won't budge again.", tone: 'bad' };
     default: return { text: '', tone: 'good' };
   }
@@ -195,7 +195,7 @@ export function stepFeedback(result: StepResult): { text: string; tone: 'good' |
 
 /** End-of-attempt summary line for the result banner. */
 export function endSummary(outcome: 'success' | 'fail' | 'abandoned', tier?: LootTier): string {
-  if (outcome === 'success') return `Lock sprung — ${tier ? TIER_LABEL[tier] : 'a'} cache claimed.`;
+  if (outcome === 'success') return `Lock sprung, ${tier ? TIER_LABEL[tier] : 'a'} cache claimed.`;
   if (outcome === 'fail') return 'The lock is ruined. Clear the delve again for another attempt.';
   return 'You ease the picks back out. The lock waits.';
 }

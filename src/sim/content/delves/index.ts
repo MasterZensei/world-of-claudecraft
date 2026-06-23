@@ -13,11 +13,11 @@ export const BROTHER_HALVEN: NpcDef = {
   name: 'Brother Halven',
   title: 'Reliquary Keeper',
   pos: { x: -5, z: -52 },
-  // Faces +z (north) — toward the town/hub up the road — so he greets arrivals
+  // Faces +z (north), toward the town/hub up the road, so he greets arrivals
   // with the glowing delve mouth framed behind him (was Math.PI, facing away).
   facing: 0,
   // Near-black charcoal: the hooded keeper reads dark/dirty under the 'entity'
-  // tint of npc_reliquary_keeper (was 0xd4c5a0 light tan — too friendly).
+  // tint of npc_reliquary_keeper (was 0xd4c5a0 light tan, too friendly).
   color: 0x2b2620,
   questIds: [],
   greeting: 'The reliquary below has shifted again.',

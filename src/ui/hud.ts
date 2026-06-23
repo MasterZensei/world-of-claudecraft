@@ -3917,7 +3917,8 @@ export class Hud {
     if (inDelve && run) {
       const modId = run.modules[run.moduleIndex];
       const delveName = delveDisplayName(run.delveId);
-      $('#zone-label').textContent = delveAreaLabel(delveName, modId);
+      const modName = modId ? t(`delveUi.moduleName.${modId}` as TranslationKey) : '';
+      $('#zone-label').textContent = delveAreaLabel(delveName, modName);
     } else {
       $('#zone-label').textContent = zoneDisplayName(zoneAt(p.pos.z).id);
     }
@@ -4442,7 +4443,8 @@ export class Hud {
 
       // Module title at top
       const delveName = delveDisplayName(run.delveId);
-      const areaLabel = delveAreaLabel(delveName, modId);
+      const modName = modId ? t(`delveUi.moduleName.${modId}` as TranslationKey) : '';
+      const areaLabel = delveAreaLabel(delveName, modName);
       ctx.font = 'bold 14px Georgia';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';

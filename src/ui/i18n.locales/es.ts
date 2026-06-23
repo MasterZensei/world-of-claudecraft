@@ -1,4 +1,4 @@
-﻿// Flat dotted-key translation overlay for "es".
+// Flat dotted-key translation overlay for "es".
 //
 // One key per leaf of the authoritative nested `en` (src/ui/i18n.catalog), keys
 // in `en`'s leaf order. This is the translator-edited source: edit a value to
@@ -3041,6 +3041,10 @@ export const es: Partial<Record<TranslationKey, string>> = {
   "delveUi.module.reliquary_finale": "La campana enterrada tañe una vez bajo tus botas.",
   "delveUi.module.reliquary_saintless_hall": "Estatuas con los rostros cincelados con cuidadoso odio.",
   "delveUi.module.reliquary_sunken_ossuary": "El agua se filtra por los estantes funerarios, arrastrando ceniza vieja en regueros de plata y negro.",
+  "delveUi.moduleName.reliquary_sunken_ossuary": "El Osario Hundido",
+  "delveUi.moduleName.reliquary_bell_niche": "La Hornacina de la Campana",
+  "delveUi.moduleName.reliquary_saintless_hall": "La Sala sin Santos",
+  "delveUi.moduleName.reliquary_finale": "La Cámara de la Campana Enterrada",
   "delveUi.npc.halven.greeting": "El relicario de abajo ha vuelto a desplazarse. Oímos cánticos a través del suelo después de medianoche, y la Acólita Tessa jura que los registros funerarios cambian su propia tinta. Si tienes valor suficiente, {playerName}, toma una vela y baja. No confíes en cada voz que oigas allá abajo. Algunas conocían tu nombre antes de que nacieras.",
   "delveUi.objective.kill_boss": "Da muerte a {boss}",
   "delveUi.objective.clear_room": "Despeja la sala",
@@ -3086,6 +3090,7 @@ export const es: Partial<Record<TranslationKey, string>> = {
   "sim.delve.mechanismOpen": "Un mecanismo se abre con un chasquido cerca. Un pasaje se abre al norte: busca el portal de salida más adelante.",
   "sim.delve.moduleEnter": "{name}: {objective}",
   "sim.delve.moveCloserChest": "Acércate al cofre.",
+  "sim.delve.nothingToTake": "Ya no queda nada que llevarse.",
   "sim.delve.moveCloserPassage": "Acércate al pasaje.",
   "sim.delve.moveCloserStairs": "Acércate a las escaleras.",
   "sim.delve.notInDelve": "No estás en una expedición.",

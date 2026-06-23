@@ -350,12 +350,21 @@ export function delveSlotAt(
   return best;
 }
 
+// Memoized: the default chain is a pure function of the static DELVES table, and
+// callers (collision/camera fallback) hit it per-frame inside the delve band, so
+// cache one frozen array per delve id instead of reallocating each call.
+const DEFAULT_DELVE_MODULES = new Map<string, readonly string[]>();
+
 /** Default module chain for a delve when no active run is available. */
-export function defaultDelveModules(delveId: string): string[] {
+export function defaultDelveModules(delveId: string): readonly string[] {
+  const cached = DEFAULT_DELVE_MODULES.get(delveId);
+  if (cached) return cached;
   const delve = DELVES[delveId];
-  if (!delve) return ['reliquary_sunken_ossuary'];
-  const count = delve.moduleCount[0] ?? delve.modules.length;
-  return [...delve.modules.slice(0, count), delve.finaleModuleId];
+  const chain = delve
+    ? Object.freeze([...delve.modules.slice(0, delve.moduleCount[0] ?? delve.modules.length), delve.finaleModuleId])
+    : Object.freeze(['reliquary_sunken_ossuary']);
+  DEFAULT_DELVE_MODULES.set(delveId, chain);
+  return chain;
 }
 
 /** Map world position to the active delve module band (instance-local coords). */

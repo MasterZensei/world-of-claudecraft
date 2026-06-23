@@ -1659,6 +1659,7 @@ export const es_ES: EnTranslations = {
       "passageSealed": "El pasaje está sellado.",
       "moveCloserPassage": "Acércate más al pasaje.",
       "moveCloserChest": "Acércate más al cofre.",
+      "nothingToTake": "Ya no queda nada que llevarse.",
       "wayOutNotOpen": "La salida aún no está abierta.",
       "moveCloserStairs": "Acércate más a las escaleras."
     },
@@ -1750,6 +1751,12 @@ export const es_ES: EnTranslations = {
       "reliquary_bell_niche": "Decenas de campanillas cuelgan en silencio, cada una atada con paño funerario.",
       "reliquary_saintless_hall": "Estatuas con los rostros cincelados con un odio meticuloso.",
       "reliquary_finale": "La campana enterrada tañe una vez bajo tus botas."
+    },
+    "moduleName": {
+      "reliquary_sunken_ossuary": "El Osario Hundido",
+      "reliquary_bell_niche": "La Hornacina de la Campana",
+      "reliquary_saintless_hall": "La Sala sin Santos",
+      "reliquary_finale": "La Cámara de la Campana Enterrada"
     },
     "companion": {
       "barkLine": "{name}: {line}",

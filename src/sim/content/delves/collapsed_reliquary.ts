@@ -14,7 +14,7 @@ const OSSUARY_SPAWNS = {
 };
 
 // Bell Niche: pure Ringers in the first pack, Ringer + Acolyte in the second.
-// Acolyte applies mortal strike — kill it first or Tessa's heals suffer.
+// Acolyte applies mortal strike, kill it first or Tessa's heals suffer.
 // Watch chime overlap when both Ringers pulse simultaneously.
 const BELL_NICHE_SPAWNS = {
   id: 'bell_niche_trash',
@@ -28,7 +28,7 @@ const BELL_NICHE_SPAWNS = {
 };
 
 // Saintless Hall: Acolyte + Ringer guard the entrance; the Effigy waits at
-// the back. Effigy is ccImmune and cleaves — tank it alone, others stay clear.
+// the back. Effigy is ccImmune and cleaves, tank it alone, others stay clear.
 const SAINTLESS_HALL_SPAWNS = {
   id: 'saintless_hall_trash',
   weight: 1,

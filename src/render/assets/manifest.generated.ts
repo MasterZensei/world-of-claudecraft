@@ -395,7 +395,6 @@ export const MEDIA_ASSETS: Record<string, string> =
   "models/dungeon/torch_lit.glb": "/media/models/dungeon/torch_lit.06539c708884.glb",
   "models/dungeon/torch_mounted.glb": "/media/models/dungeon/torch_mounted.65981b684ec5.glb",
   "models/dungeon/tractor.glb": "/media/models/dungeon/tractor.31f0df37dfa0.glb",
-  "models/dungeon/treasure_chest_open.glb": "/media/models/dungeon/treasure_chest_open.52df56a353fc.glb",
   "models/dungeon/tree_dead_large.glb": "/media/models/dungeon/tree_dead_large.3c6720c912cb.glb",
   "models/dungeon/tree_dead_large_decorated.glb": "/media/models/dungeon/tree_dead_large_decorated.42e23072403a.glb",
   "models/dungeon/tree_dead_medium.glb": "/media/models/dungeon/tree_dead_medium.04ba373551c9.glb",

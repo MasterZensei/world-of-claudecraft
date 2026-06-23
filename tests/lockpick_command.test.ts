@@ -1,4 +1,4 @@
-// Lockpicking minigame — server-authoritative sim path (engage/action/abort,
+// Lockpicking minigame, server-authoritative sim path (engage/action/abort,
 // ante→loot-tier, fog boundary, fail-locks-out, abandon-preserves).
 
 import { describe, expect, it } from 'vitest';
@@ -62,7 +62,7 @@ function solveLock(sim: Sim, run: { lockpick: any }): void {
   }
 }
 
-describe('lockpick — engage + ante→tier', () => {
+describe('lockpick, engage + ante→tier', () => {
   it('engage at ante 1 emits a session with full board (normal tier) and premium tier', () => {
     const sim = makeSim();
     const run = enterFinale(sim);
@@ -105,7 +105,7 @@ describe('lockpick — engage + ante→tier', () => {
   });
 });
 
-describe('lockpick — failure & abandon', () => {
+describe('lockpick, failure & abandon', () => {
   it('ante 1, one slip → FAILED, chest lost, re-engage rejected until re-clear', () => {
     const sim = makeSim();
     const run = enterFinale(sim);
@@ -184,7 +184,7 @@ describe('lockpick — failure & abandon', () => {
   });
 });
 
-describe('lockpick — fog boundary (anti-cheat)', () => {
+describe('lockpick, fog boundary (anti-cheat)', () => {
   it('a fogged (heroic) lock never serializes cells beyond the window', () => {
     const sim = makeSim();
     // Enter heroic for the fogged preset (heroic now has a minPlayerLevel gate).
@@ -240,7 +240,7 @@ function forceFail(sim: Sim, run: { lockpick: any }): SimEvent[] {
   return [];
 }
 
-describe('lockpick — tries (easy 3 / medium 2 / hard 1)', () => {
+describe('lockpick, tries (easy 3 / medium 2 / hard 1)', () => {
   it('engage reports the right tries per difficulty', () => {
     const sim = makeSim();
     const run = enterFinale(sim);
@@ -320,7 +320,7 @@ describe('lockpick — tries (easy 3 / medium 2 / hard 1)', () => {
   });
 });
 
-describe('lockpick — determinism', () => {
+describe('lockpick, determinism', () => {
   it('same seed ⇒ same lock + same outcome', () => {
     const run = (seed: number) => {
       const sim = makeSim(seed);

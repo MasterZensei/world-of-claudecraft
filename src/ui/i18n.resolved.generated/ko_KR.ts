@@ -1659,6 +1659,7 @@ export const ko_KR: EnTranslations = {
       "passageSealed": "통로가 봉인되어 있습니다.",
       "moveCloserPassage": "통로에 더 가까이 다가가세요.",
       "moveCloserChest": "상자에 더 가까이 다가가세요.",
+      "nothingToTake": "이제 가져갈 것이 없습니다.",
       "wayOutNotOpen": "나가는 길이 아직 열리지 않았습니다.",
       "moveCloserStairs": "계단에 더 가까이 다가가세요."
     },
@@ -1750,6 +1751,12 @@ export const ko_KR: EnTranslations = {
       "reliquary_bell_niche": "수십 개의 손종이 침묵 속에 매달려 있고, 저마다 장례 천으로 묶여 있습니다.",
       "reliquary_saintless_hall": "정성스러운 증오로 얼굴이 깎여 나간 조각상들.",
       "reliquary_finale": "묻혀 있던 종이 당신의 발밑에서 한 번 울립니다."
+    },
+    "moduleName": {
+      "reliquary_sunken_ossuary": "물에 잠긴 납골당",
+      "reliquary_bell_niche": "종의 감실",
+      "reliquary_saintless_hall": "성인 없는 회랑",
+      "reliquary_finale": "종이 묻힌 방"
     },
     "companion": {
       "barkLine": "{name}: {line}",

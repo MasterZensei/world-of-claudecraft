@@ -1,19 +1,19 @@
 import type { ItemDef, PlayerClass } from '../../types';
 
-// Archetype groups — mirrors the pattern in content/items.ts so class-locked
+// Archetype groups, mirrors the pattern in content/items.ts so class-locked
 // delve rewards admit the whole archetype (warrior/paladin/shaman etc.).
 const WAR: PlayerClass[] = ['warrior', 'paladin', 'shaman'];
 const MAG: PlayerClass[] = ['mage', 'priest', 'warlock', 'druid'];
 const ROG: PlayerClass[] = ['rogue', 'hunter'];
 
 // ---------------------------------------------------------------------------
-// Delve items — Collapsed Reliquary loot & Marks vendor stock
+// Delve items, Collapsed Reliquary loot & Marks vendor stock
 // ---------------------------------------------------------------------------
 //
 // Tuned to sit a clear notch ABOVE the silver-vendor armor of the same tier so
 // running the delve is worth it. Smith Haldren's commons (levels 3-7) are the
 // baseline: chainmail vest 60 armor / leather jerkin 40 / cloth robe 22 / wool
-// trousers 24 — all plain white with no stats. Each delve piece below is the
+// trousers 24, all plain white with no stats. Each delve piece below is the
 // uncommon-or-rare upgrade in that slot: more armor PLUS stat bonuses, and a
 // higher sellValue than the common it replaces (greens are worth more silver
 // than the whites they outclass). Marks prices live in shop.ts.
@@ -49,7 +49,7 @@ export const DELVE_ITEMS: Record<string, ItemDef> = {
     id: 'reliquary_gloves_rog', name: 'Bonewarden Grips', kind: 'armor', slot: 'gloves',
     quality: 'uncommon', stats: { armor: 36, agi: 2, sta: 1 }, sellValue: 190, requiredClass: ROG,
   },
-  // --- rare (blue) signature drops — Heroic-gated ---
+  // --- rare (blue) signature drops, Heroic-gated ---
   deacon_reliquary_helm: {
     id: 'deacon_reliquary_helm', name: "Deacon's Reliquary Helm", kind: 'armor', slot: 'helmet',
     quality: 'rare', stats: { armor: 105, sta: 4, str: 3 }, sellValue: 540, requiredClass: WAR,

@@ -1,4 +1,4 @@
-﻿// Flat dotted-key translation overlay for "fr_FR".
+// Flat dotted-key translation overlay for "fr_FR".
 //
 // One key per leaf of the authoritative nested `en` (src/ui/i18n.catalog), keys
 // in `en`'s leaf order. This is the translator-edited source: edit a value to
@@ -3041,6 +3041,10 @@ export const fr_FR: Partial<Record<TranslationKey, string>> = {
   "delveUi.module.reliquary_finale": "La cloche enfouie sonne une fois sous tes bottes.",
   "delveUi.module.reliquary_saintless_hall": "Des statues aux visages burinés par une haine méticuleuse.",
   "delveUi.module.reliquary_sunken_ossuary": "L'eau suinte à travers les étagères funéraires, charriant de vieilles cendres en filets d'argent et de noir.",
+  "delveUi.moduleName.reliquary_sunken_ossuary": "L'Ossuaire englouti",
+  "delveUi.moduleName.reliquary_bell_niche": "La Niche de la cloche",
+  "delveUi.moduleName.reliquary_saintless_hall": "La Salle sans saints",
+  "delveUi.moduleName.reliquary_finale": "La Chambre de la cloche enfouie",
   "delveUi.npc.halven.greeting": "Le reliquaire d'en bas a de nouveau bougé. Nous entendons des chants à travers le sol après minuit, et l'acolyte Tessa jure que l'encre des registres funéraires change d'elle-même. Si tu as assez de courage, {playerName}, prends une chandelle et descends. Ne te fie pas à toutes les voix que tu entendras là en bas. Certaines connaissaient ton nom avant ta naissance.",
   "delveUi.objective.kill_boss": "Tuer {boss}",
   "delveUi.objective.clear_room": "Nettoyer la salle",
@@ -3086,6 +3090,7 @@ export const fr_FR: Partial<Record<TranslationKey, string>> = {
   "sim.delve.mechanismOpen": "Un mécanisme s'ouvre avec un déclic à proximité. Un passage s'ouvre au nord : trouvez le portail de sortie devant vous.",
   "sim.delve.moduleEnter": "{name} : {objective}",
   "sim.delve.moveCloserChest": "Rapprochez-vous du coffre.",
+  "sim.delve.nothingToTake": "Il ne reste plus rien à prendre.",
   "sim.delve.moveCloserPassage": "Rapprochez-vous du passage.",
   "sim.delve.moveCloserStairs": "Rapprochez-vous de l'escalier.",
   "sim.delve.notInDelve": "Vous n'êtes pas dans une plongée.",

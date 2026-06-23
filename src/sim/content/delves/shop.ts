@@ -1,19 +1,19 @@
 // ---------------------------------------------------------------------------
-// Delve Marks vendor stock — Collapsed Reliquary (Brother Halven)
+// Delve Marks vendor stock, Collapsed Reliquary (Brother Halven)
 // ---------------------------------------------------------------------------
 //
 // Gate semantics:
-//   'available'      — purchasable from the first time Brother Halven opens
+//   'available'     , purchasable from the first time Brother Halven opens
 //                      the vendor (no run requirement).
-//   'clears:N'       — unlocks after the player has completed N runs of this
+//   'clears:N'      , unlocks after the player has completed N runs of this
 //                      delve (any difficulty; counts Normal + Heroic clears).
-//   'heroicClear'    — unlocks after the player completes at least one Heroic
+//   'heroicClear'   , unlocks after the player completes at least one Heroic
 //                      (difficulty ≥ 2) run.
 //
 // Pricing intent (the Collapsed Reliquary is the ENTRY-tier delve):
 //   Marks income is ~3 Marks/day for a Normal-only player and ~6-8 for a
 //   dedicated Heroic runner (see `delveMarkPayout` in sim.ts). Prices here are
-//   deliberately STEEP relative to that income — the reward gear is a clear
+//   deliberately STEEP relative to that income, the reward gear is a clear
 //   upgrade over the silver-vendor armor of the same tier (Smith Haldren's
 //   commons: chainmail vest 60 armor, leather jerkin 40, robe 22, trousers 24),
 //   so each piece is uncommon-or-rare quality with stat bonuses on top. A casual

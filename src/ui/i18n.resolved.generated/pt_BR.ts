@@ -1659,6 +1659,7 @@ export const pt_BR: EnTranslations = {
       "passageSealed": "A passagem está selada.",
       "moveCloserPassage": "Aproxime-se da passagem.",
       "moveCloserChest": "Aproxime-se do baú.",
+      "nothingToTake": "Não resta nada para levar.",
       "wayOutNotOpen": "A saída ainda não está aberta.",
       "moveCloserStairs": "Aproxime-se das escadas."
     },
@@ -1750,6 +1751,12 @@ export const pt_BR: EnTranslations = {
       "reliquary_bell_niche": "Dezenas de sinos de mão pendem em silêncio, cada um atado com pano fúnebre.",
       "reliquary_saintless_hall": "Estátuas com os rostos cinzelados por um ódio meticuloso.",
       "reliquary_finale": "O sino enterrado dobra uma vez sob as suas botas."
+    },
+    "moduleName": {
+      "reliquary_sunken_ossuary": "O Ossuário Afundado",
+      "reliquary_bell_niche": "O Nicho do Sino",
+      "reliquary_saintless_hall": "O Salão sem Santos",
+      "reliquary_finale": "A Câmara do Sino Enterrado"
     },
     "companion": {
       "barkLine": "{name}: {line}",

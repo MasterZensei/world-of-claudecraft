@@ -1,4 +1,4 @@
-﻿// Flat dotted-key translation overlay for "pt_BR".
+// Flat dotted-key translation overlay for "pt_BR".
 //
 // One key per leaf of the authoritative nested `en` (src/ui/i18n.catalog), keys
 // in `en`'s leaf order. This is the translator-edited source: edit a value to
@@ -3041,6 +3041,10 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   "delveUi.module.reliquary_finale": "O sino enterrado dobra uma vez sob as suas botas.",
   "delveUi.module.reliquary_saintless_hall": "Estátuas com os rostos cinzelados por um ódio meticuloso.",
   "delveUi.module.reliquary_sunken_ossuary": "A água escorre pelas prateleiras funerárias, carregando cinzas antigas em correntes prateadas e negras.",
+  "delveUi.moduleName.reliquary_sunken_ossuary": "O Ossuário Afundado",
+  "delveUi.moduleName.reliquary_bell_niche": "O Nicho do Sino",
+  "delveUi.moduleName.reliquary_saintless_hall": "O Salão sem Santos",
+  "delveUi.moduleName.reliquary_finale": "A Câmara do Sino Enterrado",
   "delveUi.npc.halven.greeting": "O relicário lá embaixo se moveu de novo. Ouvimos cânticos através do chão depois da meia-noite, e a Acólita Tessa jura que os registros de sepultamento estão mudando a própria tinta. Se tiver coragem suficiente, {playerName}, pegue uma vela e desça. Não confie em toda voz que ouvir lá embaixo. Algumas delas sabiam o seu nome antes mesmo de você nascer.",
   "delveUi.objective.kill_boss": "Abata {boss}",
   "delveUi.objective.clear_room": "Limpe a sala",
@@ -3086,6 +3090,7 @@ export const pt_BR: Partial<Record<TranslationKey, string>> = {
   "sim.delve.mechanismOpen": "Um mecanismo se destrava com um clique por perto. Uma passagem se abre ao norte: encontre o portal de saída adiante.",
   "sim.delve.moduleEnter": "{name}: {objective}",
   "sim.delve.moveCloserChest": "Aproxime-se do baú.",
+  "sim.delve.nothingToTake": "Não resta nada para levar.",
   "sim.delve.moveCloserPassage": "Aproxime-se da passagem.",
   "sim.delve.moveCloserStairs": "Aproxime-se das escadas.",
   "sim.delve.notInDelve": "Você não está em uma incursão.",

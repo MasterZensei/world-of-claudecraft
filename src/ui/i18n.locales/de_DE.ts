@@ -1,4 +1,4 @@
-﻿// Flat dotted-key translation overlay for "de_DE".
+// Flat dotted-key translation overlay for "de_DE".
 //
 // One key per leaf of the authoritative nested `en` (src/ui/i18n.catalog), keys
 // in `en`'s leaf order. This is the translator-edited source: edit a value to
@@ -3041,6 +3041,10 @@ export const de_DE: Partial<Record<TranslationKey, string>> = {
   "delveUi.module.reliquary_finale": "Die vergrabene Glocke läutet einmal unter deinen Stiefeln.",
   "delveUi.module.reliquary_saintless_hall": "Statuen, deren Gesichter mit sorgfältigem Hass weggemeißelt wurden.",
   "delveUi.module.reliquary_sunken_ossuary": "Wasser sickert durch die Grabregale und führt alte Asche in silberschwarzen Rinnsalen mit sich.",
+  "delveUi.moduleName.reliquary_sunken_ossuary": "Das versunkene Beinhaus",
+  "delveUi.moduleName.reliquary_bell_niche": "Die Glockennische",
+  "delveUi.moduleName.reliquary_saintless_hall": "Die heiligenlose Halle",
+  "delveUi.moduleName.reliquary_finale": "Die glockenvergrabene Kammer",
   "delveUi.npc.halven.greeting": "Das Reliquiar unten hat sich erneut verschoben. Nach Mitternacht hören wir Gesänge durch den Boden, und Akolythin Tessa schwört, die Bestattungsverzeichnisse änderten ihre eigene Tinte. Wenn du mutig genug bist, {playerName}, nimm eine Kerze und steig hinab. Vertraue nicht jeder Stimme, die du dort unten hörst. Manche kannten deinen Namen, bevor du geboren wurdest.",
   "delveUi.objective.kill_boss": "{boss} erschlagen",
   "delveUi.objective.clear_room": "Den Raum räumen",
@@ -3086,6 +3090,7 @@ export const de_DE: Partial<Record<TranslationKey, string>> = {
   "sim.delve.mechanismOpen": "Ein Mechanismus klickt in der Nähe auf. Ein Durchgang öffnet sich nach Norden. Finde das Ausgangsportal vor dir.",
   "sim.delve.moduleEnter": "{name}: {objective}",
   "sim.delve.moveCloserChest": "Geh näher an die Truhe heran.",
+  "sim.delve.nothingToTake": "Es ist nichts mehr zum Mitnehmen da.",
   "sim.delve.moveCloserPassage": "Geh näher an den Durchgang heran.",
   "sim.delve.moveCloserStairs": "Geh näher an die Treppe heran.",
   "sim.delve.notInDelve": "Du bist in keinem Tiefgang.",

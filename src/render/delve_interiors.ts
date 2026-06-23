@@ -1,4 +1,4 @@
-// Delve module interior placement — v1 reuses the crypt KayKit kit.
+// Delve module interior placement, v1 reuses the crypt KayKit kit.
 import { DELVE_MODULES } from '../sim/data';
 import { type DelveModuleId } from '../sim/delve_layout';
 import { DungeonInteriors } from './dungeon';

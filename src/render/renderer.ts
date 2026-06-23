@@ -936,7 +936,7 @@ export class Renderer {
     this.scene.add(this.birds.group);
     this.impactSite = buildImpactSite(this.sim.cfg.seed);
     this.scene.add(this.impactSite.group);
-    const props = buildProps(this.sim.cfg.seed);
+    const props = buildProps(this.sim.cfg.seed, (delveId) => tEntity({ kind: 'delve', id: delveId, field: 'name' }));
     setRenderCategory(props.group, 'props');
     this.scene.add(props.group);
     this.flames = props.flames;
@@ -3603,8 +3603,11 @@ export class Renderer {
     } else {
       // Camera collision for non-hideable blockers. Camera-ghost props are left
       // at the requested zoom and hidden in props.ts while keeping their shadows.
-      let hardT = cameraOcclusion(seed, px, eyeY, pz, cx, cy, cz, CAMERA_COLLIDER_PAD);
-      let softT = cameraOcclusion(seed, px, eyeY, pz, cx, cy, cz, CAMERA_SOFT_COLLIDER_PAD);
+      // Thread the active run's module chain so camera collision matches the
+      // delve's actual (possibly Heroic/varied) layout, not just the default.
+      const delveMods = this.sim.delveRun?.modules;
+      let hardT = cameraOcclusion(seed, px, eyeY, pz, cx, cy, cz, CAMERA_COLLIDER_PAD, delveMods);
+      let softT = cameraOcclusion(seed, px, eyeY, pz, cx, cy, cz, CAMERA_SOFT_COLLIDER_PAD, delveMods);
       const segLen = Math.hypot(cx - px, cy - eyeY, cz - pz);
       if (segLen > 1e-3) {
         const minT = CAMERA_MIN_DIST / segLen;

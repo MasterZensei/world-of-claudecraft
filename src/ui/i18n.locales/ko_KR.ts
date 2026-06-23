@@ -1,4 +1,4 @@
-﻿// Flat dotted-key translation overlay for "ko_KR".
+// Flat dotted-key translation overlay for "ko_KR".
 //
 // One key per leaf of the authoritative nested `en` (src/ui/i18n.catalog), keys
 // in `en`'s leaf order. This is the translator-edited source: edit a value to
@@ -3034,6 +3034,10 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   "delveUi.module.reliquary_finale": "묻혀 있던 종이 당신의 발밑에서 한 번 울립니다.",
   "delveUi.module.reliquary_saintless_hall": "정성스러운 증오로 얼굴이 깎여 나간 조각상들.",
   "delveUi.module.reliquary_sunken_ossuary": "물이 매장 선반 사이로 스며들며 은빛 검은 줄기로 오래된 재를 실어 나릅니다.",
+  "delveUi.moduleName.reliquary_sunken_ossuary": "물에 잠긴 납골당",
+  "delveUi.moduleName.reliquary_bell_niche": "종의 감실",
+  "delveUi.moduleName.reliquary_saintless_hall": "성인 없는 회랑",
+  "delveUi.moduleName.reliquary_finale": "종이 묻힌 방",
   "delveUi.npc.halven.greeting": "아래의 성물실이 또 움직였소. 자정이 지나면 바닥 너머로 영창 소리가 들리고, 수련사제 테사는 매장 명부가 스스로 잉크를 바꾼다고 단언하오. 용기가 있다면, {playerName}, 촛불을 들고 아래로 내려가시오. 거기서 들리는 모든 목소리를 믿지는 마시오. 그중 몇은 그대가 태어나기도 전에 그대의 이름을 알고 있었으니.",
   "delveUi.objective.kill_boss": "{boss} 처치",
   "delveUi.objective.clear_room": "방 정리",
@@ -3073,6 +3077,7 @@ export const ko_KR: Partial<Record<TranslationKey, string>> = {
   "sim.delve.mechanismOpen": "근처에서 기계 장치가 철컥 열립니다. 북쪽으로 통로가 열립니다. 앞쪽의 출구 차원문을 찾으세요.",
   "sim.delve.moduleEnter": "{name}: {objective}",
   "sim.delve.moveCloserChest": "상자에 더 가까이 다가가세요.",
+  "sim.delve.nothingToTake": "이제 가져갈 것이 없습니다.",
   "sim.delve.moveCloserPassage": "통로에 더 가까이 다가가세요.",
   "sim.delve.moveCloserStairs": "계단에 더 가까이 다가가세요.",
   "sim.delve.notInDelve": "탐굴 중이 아닙니다.",

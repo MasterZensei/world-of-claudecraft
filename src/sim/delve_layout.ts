@@ -1,5 +1,5 @@
-// Compact delve module layouts as plain numbers — mirrors dungeon_layout.ts for
-// modular 10–20 minute instances (~40yd wide, ~80yd deep). Sim layer: no
+// Compact delve module layouts as plain numbers, mirrors dungeon_layout.ts for
+// modular 10 to 20 minute instances (~40yd wide, ~80yd deep). Sim layer: no
 // three.js imports.
 import type { Collider } from './colliders';
 import { type DungeonLayout, layoutColliders } from './dungeon_layout';
@@ -31,7 +31,7 @@ function grid(zFrom: number, zTo: number, zStep: number, xs: readonly number[]):
 }
 
 // Shared footprint: side walls at |x|=25 (delve-local, wider than base crypt kit),
-// z -19..91 (110u deep — 37% larger than the legacy 80u rooms).
+// z -19..91 (110u deep, 37% larger than the legacy 80u rooms).
 const Z_MIN = -19;
 const Z_MAX = 91;
 const SIDE_Z = 36;   // side-slab centre (midpoint of extended wall run)
@@ -71,7 +71,7 @@ const FINALE_CLUTTER: GridPoint[] = [
   { x:  9.2, z: 40.5 },
 ];
 
-/** The Sunken Ossuary — burial shelves along the walls, three pillar rows. */
+/** The Sunken Ossuary, burial shelves along the walls, three pillar rows. */
 export const RELIQUARY_SUNKEN_OSSUARY_LAYOUT: DungeonLayout = {
   zMin: Z_MIN,
   zMax: Z_MAX,
@@ -86,7 +86,7 @@ export const RELIQUARY_SUNKEN_OSSUARY_LAYOUT: DungeonLayout = {
   clutter: AISLE_CLUTTER,
 };
 
-/** The Bell Niche — two pairs of deep alcoves for handbells, open centre passage. */
+/** The Bell Niche, two pairs of deep alcoves for handbells, open centre passage. */
 export const RELIQUARY_BELL_NICHE_LAYOUT: DungeonLayout = {
   zMin: Z_MIN,
   zMax: Z_MAX,
@@ -106,7 +106,7 @@ export const RELIQUARY_BELL_NICHE_LAYOUT: DungeonLayout = {
   clutter: BELL_NICHE_CLUTTER,
 };
 
-/** The Saintless Hall — defaced saint-statue alcoves and three colonnade rows. */
+/** The Saintless Hall, defaced saint-statue alcoves and three colonnade rows. */
 export const RELIQUARY_SAINTLESS_HALL_LAYOUT: DungeonLayout = {
   zMin: Z_MIN,
   zMax: Z_MAX,
@@ -121,7 +121,7 @@ export const RELIQUARY_SAINTLESS_HALL_LAYOUT: DungeonLayout = {
   clutter: AISLE_CLUTTER,
 };
 
-/** The Bell-Buried Chamber — boss arena; clutter south, cleared fighting ring north. */
+/** The Bell-Buried Chamber, boss arena; clutter south, cleared fighting ring north. */
 export const RELIQUARY_FINALE_LAYOUT: DungeonLayout = {
   zMin: Z_MIN,
   zMax: Z_MAX,
@@ -159,7 +159,7 @@ export function delveModuleEntry(layout: DungeonLayout): { x: number; z: number 
   return { x: 0, z: layout.zMin + 8 };
 }
 
-/** Walkable depth of a module — matches KayKit floor/wall placement (zMin..zMax). */
+/** Walkable depth of a module, matches KayKit floor/wall placement (zMin..zMax). */
 export function delveModuleSpan(moduleId: DelveModuleId): number {
   const layout = DELVE_MODULE_LAYOUTS[moduleId];
   return layout.zMax - layout.zMin;

@@ -21,7 +21,7 @@ const TIERS: Record<string, LockTierSpec> = {
 
 const SEEDS = Array.from({ length: 200 }, (_, i) => i * 2654435761);
 
-describe('generateLock — invariants', () => {
+describe('generateLock, invariants', () => {
   for (const [name, tier] of Object.entries(TIERS)) {
     describe(`tier ${name}`, () => {
       it('every generated lock is solvable (flawless ante-1 is always fair)', () => {
@@ -122,7 +122,7 @@ describe('generateLock — invariants', () => {
   });
 });
 
-describe('visibleCells — fog boundary (anti-cheat)', () => {
+describe('visibleCells, fog boundary (anti-cheat)', () => {
   it('full-visibility tier reveals the whole board', () => {
     const spec = generateLock(7, TIERS.easy);
     const cells = visibleCells(spec, 0, TIERS.easy.visibilityWindow);
@@ -154,7 +154,7 @@ describe('visibleCells — fog boundary (anti-cheat)', () => {
 
   it('hides ward-traps from the fog: visibleCells never tags a trap, yet stepLock still jams', () => {
     // The shipped reliquary tiers carry traps (normal 3 / heroic 5). Ward-traps
-    // "look open but jam on contact" — they must NOT be telegraphed across the
+    // "look open but jam on contact", they must NOT be telegraphed across the
     // anti-cheat boundary, but the server must still jam when the pick touches one.
     const trapTier: LockTierSpec = {
       cols: 12, rows: 6, width: 1, gateCount: 2, visibilityWindow: 99, trapCount: 4, allowedActions: ALL_ACTIONS,

@@ -1659,6 +1659,7 @@ export const fr_CA: EnTranslations = {
       "passageSealed": "Le passage est scellé.",
       "moveCloserPassage": "Rapprochez-vous du passage.",
       "moveCloserChest": "Rapprochez-vous du coffre.",
+      "nothingToTake": "Il ne reste plus rien à prendre.",
       "wayOutNotOpen": "La sortie n'est pas encore ouverte.",
       "moveCloserStairs": "Rapprochez-vous de l'escalier."
     },
@@ -1750,6 +1751,12 @@ export const fr_CA: EnTranslations = {
       "reliquary_bell_niche": "Des dizaines de clochettes pendent en silence, chacune nouée d'un linge funéraire.",
       "reliquary_saintless_hall": "Des statues dont les visages ont été burinés avec une haine méticuleuse.",
       "reliquary_finale": "La cloche enfouie sonne une seule fois sous vos bottes."
+    },
+    "moduleName": {
+      "reliquary_sunken_ossuary": "L'Ossuaire englouti",
+      "reliquary_bell_niche": "La Niche de la cloche",
+      "reliquary_saintless_hall": "La Salle sans saints",
+      "reliquary_finale": "La Chambre de la cloche enfouie"
     },
     "companion": {
       "barkLine": "{name} : {line}",

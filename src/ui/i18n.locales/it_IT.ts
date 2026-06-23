@@ -1,4 +1,4 @@
-﻿// Flat dotted-key translation overlay for "it_IT".
+// Flat dotted-key translation overlay for "it_IT".
 //
 // One key per leaf of the authoritative nested `en` (src/ui/i18n.catalog), keys
 // in `en`'s leaf order. This is the translator-edited source: edit a value to
@@ -3041,6 +3041,10 @@ export const it_IT: Partial<Record<TranslationKey, string>> = {
   "delveUi.module.reliquary_finale": "La campana sepolta rintocca una volta sotto i tuoi stivali.",
   "delveUi.module.reliquary_saintless_hall": "Statue con i volti scalpellati via con accurato odio.",
   "delveUi.module.reliquary_sunken_ossuary": "L'acqua filtra attraverso gli scaffali sepolcrali, trascinando cenere antica in rivoli argento-neri.",
+  "delveUi.moduleName.reliquary_sunken_ossuary": "L'Ossario Sommerso",
+  "delveUi.moduleName.reliquary_bell_niche": "La Nicchia della Campana",
+  "delveUi.moduleName.reliquary_saintless_hall": "La Sala senza Santi",
+  "delveUi.moduleName.reliquary_finale": "La Stanza della Campana Sepolta",
   "delveUi.npc.halven.greeting": "Il reliquiario sottostante si è spostato di nuovo. Sentiamo nenie attraverso il pavimento dopo mezzanotte, e l'Accolita Tessa giura che i registri funebri stanno cambiando il proprio inchiostro. Se hai abbastanza coraggio, {playerName}, prendi una candela e scendi laggiù. Non fidarti di ogni voce che sentirai là sotto. Alcune di esse conoscevano il tuo nome prima che tu nascessi.",
   "delveUi.objective.kill_boss": "Uccidi {boss}",
   "delveUi.objective.clear_room": "Ripulisci la stanza",
@@ -3086,6 +3090,7 @@ export const it_IT: Partial<Record<TranslationKey, string>> = {
   "sim.delve.mechanismOpen": "Un meccanismo scatta aprendosi nelle vicinanze. Un passaggio si apre a nord: trova il portale d'uscita più avanti.",
   "sim.delve.moduleEnter": "{name}: {objective}",
   "sim.delve.moveCloserChest": "Avvicinati allo scrigno.",
+  "sim.delve.nothingToTake": "Non è rimasto nulla da prendere.",
   "sim.delve.moveCloserPassage": "Avvicinati al passaggio.",
   "sim.delve.moveCloserStairs": "Avvicinati alle scale.",
   "sim.delve.notInDelve": "Non sei in un'incursione.",

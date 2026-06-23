@@ -1659,6 +1659,7 @@ export const ru_RU: EnTranslations = {
       "passageSealed": "Проход запечатан.",
       "moveCloserPassage": "Подойдите ближе к проходу.",
       "moveCloserChest": "Подойдите ближе к сундуку.",
+      "nothingToTake": "Забирать больше нечего.",
       "wayOutNotOpen": "Выход ещё не открыт.",
       "moveCloserStairs": "Подойдите ближе к лестнице."
     },
@@ -1750,6 +1751,12 @@ export const ru_RU: EnTranslations = {
       "reliquary_bell_niche": "Десятки ручных колоколов висят в тишине, каждый перевязан погребальной тканью.",
       "reliquary_saintless_hall": "Статуи, чьи лица сточены с тщательной ненавистью.",
       "reliquary_finale": "Погребённый колокол единожды звонит у тебя под ногами."
+    },
+    "moduleName": {
+      "reliquary_sunken_ossuary": "Затопленная Костница",
+      "reliquary_bell_niche": "Колокольная Ниша",
+      "reliquary_saintless_hall": "Зал без Святых",
+      "reliquary_finale": "Зал Погребённого Колокола"
     },
     "companion": {
       "barkLine": "{name}: {line}",

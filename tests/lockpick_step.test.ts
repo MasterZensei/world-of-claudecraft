@@ -18,9 +18,9 @@ const spec: LockSpec = {
   open: [
     [1, 2, 3], // col 0
     [1, 2, 3], // col 1
-    [3], // col 2 — GATE (single)
+    [3], // col 2, GATE (single)
     [2, 3, 4], // col 3
-    [3], // col 4 — bolt seat
+    [3], // col 4, bolt seat
   ],
   gates: [2],
   traps: [[], [], [], [], []],
@@ -28,7 +28,7 @@ const spec: LockSpec = {
   seatRow: 3,
 };
 
-describe('stepLock — outcomes', () => {
+describe('stepLock, outcomes', () => {
   it('advances when landing on an open cell (steady)', () => {
     const s = stepLock(spec, 0, 2, 'steady');
     expect(s.result).toBe('advanced');
@@ -84,7 +84,7 @@ describe('stepLock — outcomes', () => {
   });
 
   it('jams on a ward-trap (open-looking cell flagged as a trap)', () => {
-    // Same board, but col1 row1 is a trap. hardSet (-1... ) — use a trapped spec.
+    // Same board, but col1 row1 is a trap. hardSet (-1... ), use a trapped spec.
     const trapped: LockSpec = { ...spec, traps: [[], [1], [], [], []] };
     // From col0 row2, set (-1) -> row1 at col1, which is OPEN but a TRAP -> jam.
     const s = stepLock(trapped, 0, 2, 'set');
@@ -93,7 +93,7 @@ describe('stepLock — outcomes', () => {
   });
 });
 
-describe('generateLock — traps + multi-page', () => {
+describe('generateLock, traps + multi-page', () => {
   it('places exactly trapCount traps, none on the solution path, lock still solvable', async () => {
     const { generateLock, solveLockPath, solveLockActions, stepLock } = await import('../src/sim/lockpick');
     const t: LockTierSpec = { cols: 14, rows: 6, width: 1, gateCount: 2, visibilityWindow: 4, trapCount: 4, allowedActions: ['hardSet', 'set', 'steady', 'ease', 'drop'] };

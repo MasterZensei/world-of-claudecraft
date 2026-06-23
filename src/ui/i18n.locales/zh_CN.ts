@@ -1,4 +1,4 @@
-﻿// Flat dotted-key translation overlay for "zh_CN".
+// Flat dotted-key translation overlay for "zh_CN".
 //
 // One key per leaf of the authoritative nested `en` (src/ui/i18n.catalog), keys
 // in `en`'s leaf order. This is the translator-edited source: edit a value to
@@ -3034,6 +3034,10 @@ export const zh_CN: Partial<Record<TranslationKey, string>> = {
   "delveUi.module.reliquary_finale": "埋藏的钟在你脚下鸣响了一声。",
   "delveUi.module.reliquary_saintless_hall": "一座座雕像的脸面被人以审慎的仇恨凿去。",
   "delveUi.module.reliquary_sunken_ossuary": "水从葬架间渗出，挟着陈年灰烬汇成银黑色的细流。",
+  "delveUi.moduleName.reliquary_sunken_ossuary": "沉没的藏骨堂",
+  "delveUi.moduleName.reliquary_bell_niche": "鸣钟壁龛",
+  "delveUi.moduleName.reliquary_saintless_hall": "无圣之厅",
+  "delveUi.moduleName.reliquary_finale": "埋钟之厅",
   "delveUi.npc.halven.greeting": "下方的圣物库又移位了。每到午夜过后，我们便能透过地板听见诵唱，侍僧泰莎更发誓说葬礼名册正在自行改写墨迹。若你有足够的勇气，{playerName}，就拿上一支蜡烛下去吧。别相信下面听到的每一个声音。它们中有些，早在你出生之前就知道你的名字了。",
   "delveUi.objective.kill_boss": "击杀{boss}",
   "delveUi.objective.clear_room": "清空房间",
@@ -3073,6 +3077,7 @@ export const zh_CN: Partial<Record<TranslationKey, string>> = {
   "sim.delve.mechanismOpen": "附近一处机关咔哒一声开启。一条通道向北敞开，前去寻找前方的出口传送门。",
   "sim.delve.moduleEnter": "{name}：{objective}",
   "sim.delve.moveCloserChest": "靠近宝箱一些。",
+  "sim.delve.nothingToTake": "这里已经没有可拿的东西了。",
   "sim.delve.moveCloserPassage": "靠近通道一些。",
   "sim.delve.moveCloserStairs": "靠近楼梯一些。",
   "sim.delve.notInDelve": "你不在探秘之中。",

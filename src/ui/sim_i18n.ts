@@ -3779,11 +3779,11 @@ const RULES: Rule[] = [
   { re: /^You cannot enter a delve during a duel\.$/, build: () => t('sim.delve.duringDuel') },
   { re: /^You cannot enter a delve during an arena match\.$/, build: () => t('sim.delve.duringArena') },
   { re: /^Unknown delve tier\.$/, build: () => t('sim.delve.unknownTier') },
-  { re: /^A mechanism clicks open nearby\. A passage opens to the north — find the exit portal ahead\.$/, build: () => t('sim.delve.mechanismOpen') },
+  { re: /^A mechanism clicks open nearby\. A passage opens to the north\. Find the exit portal ahead\.$/, build: () => t('sim.delve.mechanismOpen') },
   { re: /^The grave rite falters\.$/, build: () => t('sim.delve.graveFalters') },
   { re: /^The dead answer Deacon Varric's call!$/, build: () => t('delveUi.boss.varric.raise.interrupt_fail') },
   { re: /^The door is already open\.$/, build: () => t('sim.delve.doorAlreadyOpen') },
-  { re: /^The boss falls\. A warded reliquary chest rises on the dais — pick its lock to claim your spoils\.$/, build: () => t('sim.delve.bossChest') },
+  { re: /^The boss falls\. A warded reliquary chest rises on the dais\. Pick its lock to claim your spoils\.$/, build: () => t('sim.delve.bossChest') },
   { re: /^A stairway to the surface opens\. Press F at the stairs to leave\.$/, build: () => t('sim.delve.surfaceStairs') },
   { re: /^A tombstone passage opens to the north when the room is cleared\.$/, build: () => t('sim.delve.tombstoneHint') },
   { re: /^A sealed tombstone passage grinds open to the north\. Walk into it to continue\.$/, build: () => t('sim.delve.tombstoneOpen') },
@@ -3801,6 +3801,7 @@ const RULES: Rule[] = [
   { re: /^The passage is sealed\.$/, build: () => t('sim.delve.passageSealed') },
   { re: /^Move closer to the passage\.$/, build: () => t('sim.delve.moveCloserPassage') },
   { re: /^Move closer to the chest\.$/, build: () => t('sim.delve.moveCloserChest') },
+  { re: /^There is nothing left to take\.$/, build: () => t('sim.delve.nothingToTake') },
   { re: /^The way out is not yet open\.$/, build: () => t('sim.delve.wayOutNotOpen') },
   { re: /^Move closer to the stairs\.$/, build: () => t('sim.delve.moveCloserStairs') },
   // Lockpicking minigame (exact lines).
@@ -3810,11 +3811,11 @@ const RULES: Rule[] = [
   { re: /^No lock attempt in progress\.$/, build: () => t('sim.lockpick.noAttempt') },
   { re: /^That is not your lock\.$/, build: () => t('sim.lockpick.notYours') },
   { re: /^That tool slips off this lock\.$/, build: () => t('sim.lockpick.toolSlips') },
-  // Chest-loss lockpick lines (contain em-dashes: must precede the broad module-enter rule).
-  { re: /^The lock is jammed beyond picking — clear the delve again for another attempt\.$/, build: () => t('sim.lockpick.lockJammed') },
-  { re: /^The last pick snaps\. The lock jams — the chest is lost unless you clear the delve again\.$/, build: () => t('sim.lockpick.lastPickSnaps') },
-  // Bountiful seal (purple coffer) — requires Premium ante.
-  { re: /^This seal yields only to a master's hand — only the Premium ante can open it\.$/, build: () => t('sim.delve.shopSealPremiumOnly') },
+  // Chest-loss lockpick lines.
+  { re: /^The lock is jammed beyond picking\. Clear the delve again for another attempt\.$/, build: () => t('sim.lockpick.lockJammed') },
+  { re: /^The last pick snaps\. The lock jams\. The chest is lost unless you clear the delve again\.$/, build: () => t('sim.lockpick.lastPickSnaps') },
+  // Bountiful seal (purple coffer): requires Premium ante.
+  { re: /^This seal yields only to a master's hand\. Only the Premium ante can open it\.$/, build: () => t('sim.delve.shopSealPremiumOnly') },
   // Interpolated delve / lockpick lines.
   // levelRequired with tier label (must precede the two-arg form without tier).
   { re: /^You must be level (\d+) to enter (.+) on (.+)\.$/, build: (m) => t('sim.delve.levelRequiredTier', { level: m[1], name: m[2], tier: m[3] }) },

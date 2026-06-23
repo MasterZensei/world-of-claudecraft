@@ -1659,6 +1659,7 @@ export const ja_JP: EnTranslations = {
       "passageSealed": "通路は封じられている。",
       "moveCloserPassage": "通路にもっと近づけ。",
       "moveCloserChest": "宝箱にもっと近づけ。",
+      "nothingToTake": "もう取れるものは何も残っていない。",
       "wayOutNotOpen": "出口はまだ開いていない。",
       "moveCloserStairs": "階段にもっと近づけ。"
     },
@@ -1750,6 +1751,12 @@ export const ja_JP: EnTranslations = {
       "reliquary_bell_niche": "数十の手鐘が静寂の中に吊られ、それぞれに葬儀の布が結ばれている。",
       "reliquary_saintless_hall": "丹念な憎しみで顔を削り取られた像の数々。",
       "reliquary_finale": "埋もれた鐘が、あなたのブーツの下で一度だけ鳴る。"
+    },
+    "moduleName": {
+      "reliquary_sunken_ossuary": "沈んだ納骨堂",
+      "reliquary_bell_niche": "鐘の壁龕",
+      "reliquary_saintless_hall": "聖人なき広間",
+      "reliquary_finale": "鐘を埋めし聖堂"
     },
     "companion": {
       "barkLine": "{name}: {line}",

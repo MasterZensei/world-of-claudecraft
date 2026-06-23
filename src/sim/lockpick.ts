@@ -1,10 +1,10 @@
-// "Tumbler's Path" — the delve lockpicking minigame core.
+// "Tumbler's Path", the delve lockpicking minigame core.
 //
 // Pure, deterministic, host-agnostic (no DOM/Three/net). The marker (pick tip)
 // advances exactly one column per player input and chooses a discrete vertical
 // delta; it must thread a partly-hidden channel of open rows, seat on each
 // tumbler gate, and finish on the bolt seat. Because advancement is input-driven
-// there is no timer and no tick loop — every step is a request/response, which
+// there is no timer and no tick loop, every step is a request/response, which
 // makes the whole thing trivially server-authoritative.
 //
 // See docs/prd/DELVE_LOCKPICK_MINIGAME.md. All randomness flows through Rng
@@ -35,15 +35,15 @@ export const PICK_ACTIONS: Exclude<PickAction, 'abort'>[] = [
 ];
 
 /** Lives the player commits up front. The ante IS the loot tier (see
- * ANTE_TO_TIER) — fixing it at engage time removes the "burn lives to climb
+ * ANTE_TO_TIER), fixing it at engage time removes the "burn lives to climb
  * tiers" exploit, since a slip is trivially self-inflicted. */
 export type Ante = 1 | 2 | 3;
 export type LootTier = 'premium' | 'medium' | 'low';
 
 export const ANTE_TO_TIER: Record<Ante, LootTier> = {
-  1: 'premium', // flawless — 3 pages
-  2: 'medium', // flawless — 2 pages
-  3: 'low', // flawless — 1 page
+  1: 'premium', // flawless, 3 pages
+  2: 'medium', // flawless, 2 pages
+  3: 'low', // flawless, 1 page
 };
 
 /** How many sequential lock "pages" each ante must clear back-to-back. The whole
@@ -59,16 +59,16 @@ export const ANTE_TO_PAGES: Record<Ante, number> = {
  * good. Easy (modest/ante 3) is forgiving with 3 tries; hard (premium/ante 1)
  * is one-and-done. A failed try regenerates the board and restarts the timer. */
 export const ANTE_TO_TRIES: Record<Ante, number> = {
-  1: 1, // premium — hard: one try
+  1: 1, // premium, hard: one try
   2: 2, // medium: two tries
-  3: 3, // modest — easy: three tries
+  3: 3, // modest, easy: three tries
 };
 
 /** Puzzle difficulty dials. Scales with the delve's level band; lives are the
  * player's ante, never a difficulty dial. */
 export interface LockTierSpec {
-  cols: number; // W — run length
-  rows: number; // H — channel depth
+  cols: number; // W, run length
+  rows: number; // H, channel depth
   width: 1 | 2; // open-row band around the solution path (forgiveness)
   gateCount: number; // number of exact tumbler checkpoints
   visibilityWindow: number; // columns revealed ahead; >= cols means full reveal
@@ -78,7 +78,7 @@ export interface LockTierSpec {
   stepTimeoutMs?: number; // omit for no clock (default)
 }
 
-/** Server-only full lock layout. Never serialized whole when fogged — only
+/** Server-only full lock layout. Never serialized whole when fogged, only
  * visibleCells() inside the window is ever sent to a client. */
 export interface LockSpec {
   seed: number;
@@ -139,7 +139,7 @@ function sampleGates(rng: Rng, cols: number, count: number): number[] {
   // Candidate gate columns exclude column 0 (start) and the last column (seat).
   const candidates: number[] = [];
   for (let c = 1; c <= cols - 2; c++) candidates.push(c);
-  // Fisher–Yates with the seeded rng.
+  // Fisher-Yates with the seeded rng.
   for (let i = candidates.length - 1; i > 0; i--) {
     const j = rng.int(0, i);
     const tmp = candidates[i];
@@ -153,7 +153,7 @@ function sampleGates(rng: Rng, cols: number, count: number): number[] {
  * Reverse construction: carve a guaranteed solution path first (one row per
  * column, respecting allowed deltas + bounds), then wrap open-row bands around
  * it. This guarantees at least one solution exists, so an ante of 1 (flawless)
- * is always fair — the layout is always perfectly solvable; the ante only sets
+ * is always fair, the layout is always perfectly solvable; the ante only sets
  * the error budget.
  */
 export function generateLock(seed: number, tier: LockTierSpec): LockSpec {
@@ -216,7 +216,7 @@ export function generateLock(seed: number, tier: LockTierSpec): LockSpec {
   //    Never on the solution path (path[c] is always safe), never in a gate/seat
   //    column (those hold a single open row = the path). They shrink the
   //    forgiveness band so the player must read and thread the true path, not just
-  //    any open cell — the heart of the puzzle.
+  //    any open cell, the heart of the puzzle.
   const traps: number[][] = open.map(() => []);
   const trapBudget = Math.max(0, tier.trapCount ?? 0);
   if (trapBudget > 0) {
@@ -264,7 +264,7 @@ export function solveLock(spec: LockSpec): boolean {
 export function solveLockPath(spec: LockSpec): number[] | null {
   const deltas = legalDeltas(spec.tier);
   const W = spec.open.length;
-  // A trap row is reachable but jams — never route a solution through one.
+  // A trap row is reachable but jams, never route a solution through one.
   const safe = (c: number, r: number): boolean =>
     spec.open[c].includes(r) && !spec.traps?.[c]?.includes(r);
   if (!safe(0, spec.startRow)) return null;
@@ -339,12 +339,12 @@ export function stepLock(
 
 /**
  * The render-safe slice: every open cell in columns [0, col + window]. This is
- * the single source of truth for fog AND the anti-cheat boundary — the server
+ * the single source of truth for fog AND the anti-cheat boundary, the server
  * never serializes anything beyond what this returns. A window >= tier.cols
  * reveals the whole board (full-visibility easy locks).
  *
  * Ward-traps are deliberately reported as `kind: 'open'`, never `'trap'`: they
- * "look open but jam on contact" (the heart of the puzzle — the player must read
+ * "look open but jam on contact" (the heart of the puzzle, the player must read
  * and thread the true path). stepLock() enforces the jam server-side, so the fog
  * never telegraphs a trap to the client. The 'trap' CellKind exists only as a
  * step RESULT (the toast shown after the pick touches one).

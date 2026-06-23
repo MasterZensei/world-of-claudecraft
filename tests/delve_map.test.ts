@@ -1,7 +1,6 @@
-// Unit tests for src/ui/delve_map.ts — pure logic, no DOM/canvas.
+// Unit tests for src/ui/delve_map.ts: pure logic, no DOM/canvas.
 import { describe, expect, it } from 'vitest';
 import {
-  DELVE_MODULE_DISPLAY_NAMES,
   delveAreaLabel,
   delveSchematicPlayer,
   delveSchematicStatic,
@@ -12,31 +11,14 @@ import { DELVE_MODULE_LAYOUTS, type DelveModuleId } from '../src/sim/delve_layou
 // ---- Label composition -------------------------------------------------------
 
 describe('delveAreaLabel', () => {
-  it('returns "DelveName — ModuleName" when both are known', () => {
-    const label = delveAreaLabel('The Collapsed Reliquary', 'reliquary_sunken_ossuary');
-    expect(label).toBe('The Collapsed Reliquary — The Sunken Ossuary');
+  it('joins the delve name and the (already localized) module name with a colon', () => {
+    const label = delveAreaLabel('The Collapsed Reliquary', 'The Sunken Ossuary');
+    expect(label).toBe('The Collapsed Reliquary: The Sunken Ossuary');
   });
 
-  it('falls back to the module id when not in the display-name map', () => {
-    const label = delveAreaLabel('The Collapsed Reliquary', 'unknown_module_id');
-    expect(label).toBe('The Collapsed Reliquary — unknown_module_id');
-  });
-
-  it('returns only the delve name when moduleId is undefined', () => {
-    const label = delveAreaLabel('The Collapsed Reliquary', undefined);
+  it('returns only the delve name when the module name is empty', () => {
+    const label = delveAreaLabel('The Collapsed Reliquary', '');
     expect(label).toBe('The Collapsed Reliquary');
-  });
-
-  it('covers all four reliquary modules in the display-name map', () => {
-    const expected: Record<string, string> = {
-      reliquary_sunken_ossuary: 'The Sunken Ossuary',
-      reliquary_bell_niche: 'The Bell Niche',
-      reliquary_saintless_hall: 'The Saintless Hall',
-      reliquary_finale: 'The Bell-Buried Chamber',
-    };
-    for (const [id, name] of Object.entries(expected)) {
-      expect(DELVE_MODULE_DISPLAY_NAMES[id]).toBe(name);
-    }
   });
 });
 

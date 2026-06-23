@@ -1,6 +1,6 @@
 // Lockpicking difficulty presets + loot-tier reward scaling, keyed to the
 // delve's tier id. Puzzle difficulty scales with the delve band; the player's
-// ante (lives) is a separate axis and is the loot tier — see lockpick.ts.
+// ante (lives) is a separate axis and is the loot tier, see lockpick.ts.
 //
 // Data-as-code: tune the numbers HERE, never inline in sim.ts.
 
@@ -9,7 +9,7 @@ import type { PlayerClass } from '../../types';
 import type { Rng } from '../../rng';
 
 /**
- * When false (default), the lock layout is identical across antes — a lower
+ * When false (default), the lock layout is identical across antes, a lower
  * ante is a pure error-margin gamble and premium is skill-gated on the same
  * puzzle. Flip to true (and wire anteScaledPreset) to make premium also a
  * harder board. Kept here as a single, reversible switch.
@@ -22,7 +22,7 @@ export const LOCKPICK_TIER_PRESETS: Record<string, LockTierSpec> = {
   normal: {
     cols: 12,
     rows: 6,
-    width: 1, // tight forgiveness band — must thread the true path
+    width: 1, // tight forgiveness band, must thread the true path
     gateCount: 2,
     visibilityWindow: 4, // fogged: only the next few wards are lit
     trapCount: 3, // ward-traps that jam on contact
@@ -62,15 +62,15 @@ const LOOT_ARCHETYPE: Record<PlayerClass, 'WAR' | 'ROG' | 'MAG'> = {
 };
 
 /**
- * Item loot awarded in the post-unlock chest — real Collapsed Reliquary gear (Tier 1),
+ * Item loot awarded in the post-unlock chest, real Collapsed Reliquary gear (Tier 1),
  * tuned to the looter's class archetype and the loot tier (ante). Premium yields a
  * rare-or-green signature, medium a class-appropriate green chest, low a class-neutral
  * green. Deterministic: every roll draws from the caller's seeded `rng`.
  *
  * `bountiful` (§7.6): a solved Bountiful Coffer GUARANTEES the signature rare plus a
- * premium green — strictly better than the 50% rare chance of a normal premium chest.
+ * premium green, strictly better than the 50% rare chance of a normal premium chest.
  * (Rogue/hunter has no signature rare in this tier yet, so they get the two best
- * greens — a known content gap to fill when a ROG rare ships.)
+ * greens, a known content gap to fill when a ROG rare ships.)
  */
 export function delveChestItemsForTier(
   tier: LootTier,

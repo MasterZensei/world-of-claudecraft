@@ -1,4 +1,4 @@
-﻿// Flat dotted-key translation overlay for "ja_JP".
+// Flat dotted-key translation overlay for "ja_JP".
 //
 // One key per leaf of the authoritative nested `en` (src/ui/i18n.catalog), keys
 // in `en`'s leaf order. This is the translator-edited source: edit a value to
@@ -3034,6 +3034,10 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   "delveUi.module.reliquary_finale": "埋もれた鐘が、あなたのブーツの下で一度だけ鳴る。",
   "delveUi.module.reliquary_saintless_hall": "丹念な憎しみで顔を削り取られた像の数々。",
   "delveUi.module.reliquary_sunken_ossuary": "水が埋葬棚から染み出し、古い灰を銀黒の流れとなって運んでいく。",
+  "delveUi.moduleName.reliquary_sunken_ossuary": "沈んだ納骨堂",
+  "delveUi.moduleName.reliquary_bell_niche": "鐘の壁龕",
+  "delveUi.moduleName.reliquary_saintless_hall": "聖人なき広間",
+  "delveUi.moduleName.reliquary_finale": "鐘を埋めし聖堂",
   "delveUi.npc.halven.greeting": "下の聖遺物庫がまた動いた。真夜中を過ぎると床越しに詠唱が聞こえ、侍祭テッサは埋葬台帳が自らインクを書き換えていると言って譲らぬ。勇気があるなら、{playerName}、蝋燭を持って下りてくれ。そこで聞こえる声をすべて信じるな。その中には、お前が生まれる前からお前の名を知っていた者もいる。",
   "delveUi.objective.kill_boss": "{boss}を討て",
   "delveUi.objective.clear_room": "部屋を制圧せよ",
@@ -3073,6 +3077,7 @@ export const ja_JP: Partial<Record<TranslationKey, string>> = {
   "sim.delve.mechanismOpen": "近くで機構がカチリと開く。北へ通路が開いた。先にある出口のポータルを探せ。",
   "sim.delve.moduleEnter": "{name}: {objective}",
   "sim.delve.moveCloserChest": "宝箱にもっと近づけ。",
+  "sim.delve.nothingToTake": "もう取れるものは何も残っていない。",
   "sim.delve.moveCloserPassage": "通路にもっと近づけ。",
   "sim.delve.moveCloserStairs": "階段にもっと近づけ。",
   "sim.delve.notInDelve": "あなたはデルヴの中にいない。",

@@ -39,7 +39,7 @@ function glowMat(color: number, opacity = 0.28): THREE.Material {
 }
 
 // ---------------------------------------------------------------------------
-// delve_locked_door — iron portcullis spanning the full aisle
+// delve_locked_door, iron portcullis spanning the full aisle
 //
 // The collider uses hw=14 (~28 units wide), floor to ceiling (~8 units tall).
 // The portcullis MUST visually cover that span so the invisible wall is not
@@ -55,7 +55,7 @@ function buildLockedDoor(): { group: THREE.Group; height: number } {
   const darkIron = ironMat(0x2a2a2e, 0x3a1810, 0.08);
   const rustyIron = ironMat(0x3a2820, 0x200a04, 0.05);
 
-  // Top lintel bar — thick horizontal beam spanning the full width.
+  // Top lintel bar, thick horizontal beam spanning the full width.
   const lintel = new THREE.Mesh(
     new THREE.BoxGeometry(totalW, 0.55, 0.45),
     darkIron,
@@ -65,7 +65,7 @@ function buildLockedDoor(): { group: THREE.Group; height: number } {
   lintel.receiveShadow = true;
   group.add(lintel);
 
-  // Bottom threshold bar — matches lintel.
+  // Bottom threshold bar, matches lintel.
   const threshold = new THREE.Mesh(
     new THREE.BoxGeometry(totalW, 0.45, 0.45),
     darkIron,
@@ -96,7 +96,7 @@ function buildLockedDoor(): { group: THREE.Group; height: number } {
     group.add(post);
   }
 
-  // Vertical bars — one every 2.5 units across the inner span.
+  // Vertical bars, one every 2.5 units across the inner span.
   const barW = 0.28;
   const barH = totalH - 0.9; // leaves gap at top/bottom for lintel/threshold
   const barSpacing = 2.5;
@@ -149,7 +149,7 @@ function buildLockedDoor(): { group: THREE.Group; height: number } {
 }
 
 // ---------------------------------------------------------------------------
-// delve_pressure_plate — flush stone floor plate, low profile
+// delve_pressure_plate, flush stone floor plate, low profile
 // ---------------------------------------------------------------------------
 function buildPressurePlate(triggered: boolean, entityId: number): { group: THREE.Group; height: number } {
   const group = new THREE.Group();
@@ -160,7 +160,7 @@ function buildPressurePlate(triggered: boolean, entityId: number): { group: THRE
   const slabMat = stoneMat(triggered ? 0x3a4830 : 0x6a6460);
   const rimMat = stoneMat(triggered ? 0x505c3a : 0x504c48);
 
-  // Main slab — large, nearly flush with floor.
+  // Main slab, large, nearly flush with floor.
   const slab = new THREE.Mesh(
     new THREE.BoxGeometry(2.8, 0.12, 2.8),
     slabMat,
@@ -219,7 +219,7 @@ function buildPressurePlate(triggered: boolean, entityId: number): { group: THRE
 }
 
 // ---------------------------------------------------------------------------
-// delve_cracked_grave — broken/tilted tombstone over disturbed earth
+// delve_cracked_grave, broken/tilted tombstone over disturbed earth
 // ---------------------------------------------------------------------------
 function buildCrackedGrave(entityId: number): { group: THREE.Group; height: number } {
   const group = new THREE.Group();
@@ -239,7 +239,7 @@ function buildCrackedGrave(entityId: number): { group: THREE.Group; height: numb
   mound.receiveShadow = true;
   group.add(mound);
 
-  // Main stone body — tilted.
+  // Main stone body, tilted.
   const stone = new THREE.Mesh(
     new THREE.BoxGeometry(0.9, 1.8, 0.22),
     stoneDark,
@@ -288,7 +288,7 @@ function buildCrackedGrave(entityId: number): { group: THREE.Group; height: numb
 }
 
 // ---------------------------------------------------------------------------
-// delve_module_exit — sealed passage / rubble-blocked doorway
+// delve_module_exit, sealed passage / rubble-blocked doorway
 // ---------------------------------------------------------------------------
 function buildModuleExit(): { group: THREE.Group; height: number } {
   const group = new THREE.Group();
@@ -297,7 +297,7 @@ function buildModuleExit(): { group: THREE.Group; height: number } {
   const rubbleMat = stoneMat(0x5a5450);
   const mortarMat = stoneMat(0x807a74);
 
-  // Arch surround — simplified portal frame.
+  // Arch surround, simplified portal frame.
   // Side pillars.
   for (const sx of [-1.8, 1.8]) {
     const pillar = new THREE.Mesh(
@@ -319,7 +319,7 @@ function buildModuleExit(): { group: THREE.Group; height: number } {
   lintel.castShadow = true;
   group.add(lintel);
 
-  // Rubble fill inside the arch — staggered blocks.
+  // Rubble fill inside the arch, staggered blocks.
   const rubbleLayout: [number, number, number][] = [
     [-0.9, 0.25, 0], [0.2, 0.25, 0], [0.9, 0.35, 0],
     [-0.5, 0.95, 0], [0.5, 0.85, 0], [-1.0, 0.9, 0],
@@ -347,7 +347,7 @@ function buildModuleExit(): { group: THREE.Group; height: number } {
 }
 
 // ---------------------------------------------------------------------------
-// delve_reward_chest / delve_locked_chest — reliquary chest.
+// delve_reward_chest / delve_locked_chest, reliquary chest.
 //
 // Prefer the real KayKit GLB (chest_gold) so it matches the dungeon dressing;
 // fall back to procedural geometry when the interior kit has not loaded yet.
@@ -492,7 +492,7 @@ function buildProceduralRewardChest(entityId: number): { group: THREE.Group; hei
 }
 
 // ---------------------------------------------------------------------------
-// delve_locked_chest — warded reliquary chest (chest + glowing ward seal)
+// delve_locked_chest, warded reliquary chest (chest + glowing ward seal)
 // ---------------------------------------------------------------------------
 function buildProceduralLockedChest(entityId: number): { group: THREE.Group; height: number } {
   const { group } = buildProceduralRewardChest(entityId);
@@ -544,7 +544,7 @@ function buildProceduralLockedChest(entityId: number): { group: THREE.Group; hei
 }
 
 // ---------------------------------------------------------------------------
-// delve_surface_exit — ascending stairs / stairwell upward
+// delve_surface_exit, ascending stairs / stairwell upward
 // ---------------------------------------------------------------------------
 function buildSurfaceExit(): { group: THREE.Group; height: number } {
   const group = new THREE.Group();
@@ -624,7 +624,7 @@ function buildSurfaceExit(): { group: THREE.Group; height: number } {
 }
 
 // ---------------------------------------------------------------------------
-// delve_destructible_wall — cracked masonry wall section (80 HP breakable)
+// delve_destructible_wall, cracked masonry wall section (80 HP breakable)
 // ---------------------------------------------------------------------------
 function buildDestructibleWall(entityId: number): { group: THREE.Group; height: number } {
   const group = new THREE.Group();
@@ -633,7 +633,7 @@ function buildDestructibleWall(entityId: number): { group: THREE.Group; height: 
   const crackMat = stoneMat(0x3a3632);
   const chunkMat = stoneMat(0x5a5450);
 
-  // Main wall section — wide and tall, slightly less than the aisle width.
+  // Main wall section, wide and tall, slightly less than the aisle width.
   const wall = new THREE.Mesh(
     new THREE.BoxGeometry(7.0, 6.0, 0.8),
     wallMat,

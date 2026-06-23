@@ -1630,12 +1630,12 @@ export const en_CA: EnTranslations = {
       "instancesBusy": "All instances of {name} are busy. Try again soon.",
       "runFailed": "{name} run failed.",
       "complete": "{name} complete.",
-      "mechanismOpen": "A mechanism clicks open nearby. A passage opens to the north — find the exit portal ahead.",
+      "mechanismOpen": "A mechanism clicks open nearby. A passage opens to the north. Find the exit portal ahead.",
       "raiseDead": "{name} begins Raise Dead.",
       "graveFalters": "The grave rite falters.",
       "doorAlreadyOpen": "The door is already open.",
       "companionRankUp": "{name} reaches rank {rank}.",
-      "bossChest": "The boss falls. A warded reliquary chest rises on the dais — pick its lock to claim your spoils.",
+      "bossChest": "The boss falls. A warded reliquary chest rises on the dais. Pick its lock to claim your spoils.",
       "surfaceStairs": "A stairway to the surface opens. Press F at the stairs to leave.",
       "moduleEnter": "{name} — {objective}",
       "tombstoneHint": "A tombstone passage opens to the north when the room is cleared.",
@@ -1655,10 +1655,11 @@ export const en_CA: EnTranslations = {
       "cannotAffordCompanionUpgrade": "You cannot afford this upgrade.",
       "shopItemLocked": "You have not unlocked that item yet.",
       "shopMarksRequired": "You need {marks} Delve Marks to buy {name}.",
-      "shopSealPremiumOnly": "This seal yields only to a master's hand — only the Premium ante can open it.",
+      "shopSealPremiumOnly": "This seal yields only to a master's hand. Only the Premium ante can open it.",
       "passageSealed": "The passage is sealed.",
       "moveCloserPassage": "Move closer to the passage.",
       "moveCloserChest": "Move closer to the chest.",
+      "nothingToTake": "There is nothing left to take.",
       "wayOutNotOpen": "The way out is not yet open.",
       "moveCloserStairs": "Move closer to the stairs."
     },
@@ -1673,8 +1674,8 @@ export const en_CA: EnTranslations = {
       "noAttempt": "No lock attempt in progress.",
       "notYours": "That is not your lock.",
       "toolSlips": "That tool slips off this lock.",
-      "lockJammed": "The lock is jammed beyond picking — clear the delve again for another attempt.",
-      "lastPickSnaps": "The last pick snaps. The lock jams — the chest is lost unless you clear the delve again."
+      "lockJammed": "The lock is jammed beyond picking. Clear the delve again for another attempt.",
+      "lastPickSnaps": "The last pick snaps. The lock jams. The chest is lost unless you clear the delve again."
     }
   },
   "delveUi": {
@@ -1750,6 +1751,12 @@ export const en_CA: EnTranslations = {
       "reliquary_bell_niche": "Dozens of handbells hang in silence, each tied with funeral cloth.",
       "reliquary_saintless_hall": "Statues with faces chiseled away with careful hatred.",
       "reliquary_finale": "The buried bell tolls once beneath your boots."
+    },
+    "moduleName": {
+      "reliquary_sunken_ossuary": "The Sunken Ossuary",
+      "reliquary_bell_niche": "The Bell Niche",
+      "reliquary_saintless_hall": "The Saintless Hall",
+      "reliquary_finale": "The Bell-Buried Chamber"
     },
     "companion": {
       "barkLine": "{name}: {line}",

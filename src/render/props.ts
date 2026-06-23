@@ -98,8 +98,6 @@ const PROP_ASSET_DEFS: Record<string, PropAssetDef> = {
   anvil: { url: '/models/props/anvil.glb', kit: 'qprops' },
   weaponStand: { url: '/models/props/weapon_stand.glb', kit: 'qprops' },
   lanternWall: { url: '/models/props/lantern_wall.glb', kit: 'qprops' },
-  // dungeon-kit archway reused inside delve interiors (kept for dungeon.ts)
-  dungeonArch: { url: '/models/dungeon/arch.glb', kit: 'dungeon' },
   // Meshy-generated portal door used as the overworld Reliquary Hill marker;
   // has its own backing slab so the animated shader plane sits on the front face.
   // yaw: Math.PI if the model loads backwards after inspecting in-game.
@@ -487,7 +485,10 @@ function buildDelveEmbers(cx: number, baseY: number, cz: number, halfW: number, 
   return pts;
 }
 
-export function buildProps(seed: number): PropsResult {
+// `delveLabel` resolves a delve id to its localized display name for the carved
+// entrance sign. Passed in by renderer.ts (the only render-side i18n surface) so
+// props.ts itself stays string-table-free; falls back to the id if absent.
+export function buildProps(seed: number, delveLabel?: (delveId: string) => string): PropsResult {
   const group = new THREE.Group();
   const flames: THREE.Mesh[] = [];
   const fireLights: THREE.PointLight[] = [];
@@ -1092,10 +1093,11 @@ export function buildProps(seed: number): PropsResult {
     ctx.font = 'bold 34px Georgia, "Times New Roman", serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    const label = (delveLabel ? delveLabel(dm.delveId) : dm.delveId).toUpperCase();
     ctx.fillStyle = '#120f0b';
-    ctx.fillText(dm.label.toUpperCase(), CW / 2 + 2, CH / 2 + 2);
+    ctx.fillText(label, CW / 2 + 2, CH / 2 + 2);
     ctx.fillStyle = '#7d6e59';
-    ctx.fillText(dm.label.toUpperCase(), CW / 2, CH / 2);
+    ctx.fillText(label, CW / 2, CH / 2);
 
     const tex = new THREE.CanvasTexture(cv);
     const faceMat = new THREE.MeshBasicMaterial({ map: tex });

@@ -1,4 +1,4 @@
-﻿// Phase 1 placeholder delve â€” replaced by collapsed_reliquary.ts in Phase 4.
+// Phase 1 placeholder delve, replaced by collapsed_reliquary.ts in Phase 4.
 
 import type { DelveDef, DelveModuleDef, MobTemplate } from '../../types';
 

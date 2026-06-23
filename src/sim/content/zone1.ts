@@ -1022,5 +1022,5 @@ export const ZONE1_PROPS: ZonePropsDef = {
     { x: -14, z: -14 },
     { x: 4, z: -56 },
   ],
-  delveMarkers: [{ x: -5, z: -52, label: 'The Collapsed Reliquary' }],
+  delveMarkers: [{ x: -5, z: -52, delveId: 'collapsed_reliquary' }],
 };

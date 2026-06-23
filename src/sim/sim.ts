@@ -12404,7 +12404,7 @@ export class Sim {
     for (const pid of this.partyMembersForKey(run.partyKey)) {
       this.emit({
         type: 'log',
-        text: 'The boss falls. A warded reliquary chest rises on the dais — pick its lock to claim your spoils.',
+        text: 'The boss falls. A warded reliquary chest rises on the dais. Pick its lock to claim your spoils.',
         color: '#8f8',
         pid,
       });
@@ -12764,7 +12764,7 @@ export class Sim {
           for (const party of this.partyMembersForKey(run.partyKey)) {
             this.emit({
               type: 'log',
-              text: 'A mechanism clicks open nearby. A passage opens to the north — find the exit portal ahead.',
+              text: 'A mechanism clicks open nearby. A passage opens to the north. Find the exit portal ahead.',
               color: '#cc9',
               pid: party,
             });
@@ -13034,7 +13034,7 @@ export class Sim {
         return;
       }
       if (!state.attemptAvailable) {
-        this.error(r.meta.entityId, "The lock is jammed beyond picking — clear the delve again for another attempt.");
+        this.error(r.meta.entityId, "The lock is jammed beyond picking. Clear the delve again for another attempt.");
         return;
       }
       if (run.lockpick && run.lockpick.state === 'IN_PROGRESS') {
@@ -13119,7 +13119,7 @@ export class Sim {
     const { r, run, state } = got;
     if (ante !== 1 && ante !== 2 && ante !== 3) { this.error(r.meta.entityId, 'Choose 1, 2, or 3 picks.'); return; }
     if (state.looted) { this.emit({ type: 'log', text: 'The chest is empty.', color: '#aaa', pid: r.meta.entityId }); return; }
-    if (!state.attemptAvailable) { this.error(r.meta.entityId, "The lock is jammed beyond picking — clear the delve again for another attempt."); return; }
+    if (!state.attemptAvailable) { this.error(r.meta.entityId, "The lock is jammed beyond picking. Clear the delve again for another attempt."); return; }
     if (run.lockpick && run.lockpick.state === 'IN_PROGRESS') { this.error(r.meta.entityId, 'Someone is already working the lock.'); return; }
 
     // §7.6 Bountiful Coffer: a purple coffer only yields to a Hard-tier (heroic
@@ -13127,7 +13127,7 @@ export class Sim {
     // matter what ante the UI offered; the lower antes are not an option.
     const isCoffer = run.bountiful && objectId === run.rewardChestId;
     if (isCoffer && ante !== 1) {
-      this.error(r.meta.entityId, "This seal yields only to a master's hand — only the Premium ante can open it.");
+      this.error(r.meta.entityId, "This seal yields only to a master's hand. Only the Premium ante can open it.");
       return;
     }
 
@@ -13353,7 +13353,7 @@ export class Sim {
     this.emit({ type: 'lockpickEnd', sessionId: session.sessionId, outcome: 'fail', pid: session.ownerId });
     if (run.partyKey) {
       for (const pid of this.partyMembersForKey(run.partyKey)) {
-        this.emit({ type: 'log', text: 'The last pick snaps. The lock jams — the chest is lost unless you clear the delve again.', color: '#f88', pid });
+        this.emit({ type: 'log', text: 'The last pick snaps. The lock jams. The chest is lost unless you clear the delve again.', color: '#f88', pid });
       }
     }
     run.lockpick = null;

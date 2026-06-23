@@ -1,4 +1,4 @@
-// Delve system — spatial band, lifecycle, death rules, and pet stow (Phase 1).
+// Delve system, spatial band, lifecycle, death rules, and pet stow (Phase 1).
 
 import { describe, expect, it } from 'vitest';
 
@@ -153,7 +153,7 @@ describe('delve spatial band', () => {
     const origin = delveOrigin(0, 0); // { x: DELVE_X_MIN, z: ... }
 
     // West half of the room must still be a delve pos
-    expect(isDelvePos(origin.x - 2)).toBe(true);   // 4798 — exact repro coordinate
+    expect(isDelvePos(origin.x - 2)).toBe(true);   // 4798, exact repro coordinate
     expect(isDelvePos(origin.x - 22)).toBe(true);  // walkable west edge
     expect(isDelvePos(origin.x - 26)).toBe(true);  // west wall outer face (4774)
     expect(isDelvePos(origin.x)).toBe(true);        // room centre
@@ -165,7 +165,7 @@ describe('delve spatial band', () => {
     expect(isArenaPos(origin.x - 26)).toBe(false);
     expect(isArenaPos(origin.x)).toBe(false);
 
-    // Bands are mutually exclusive — no x where both are true
+    // Bands are mutually exclusive, no x where both are true
     expect(isDelvePos(DELVE_BAND_X_MIN) && isArenaPos(DELVE_BAND_X_MIN)).toBe(false);
     expect(isDelvePos(DELVE_BAND_X_MIN - 1) && isArenaPos(DELVE_BAND_X_MIN - 1)).toBe(false);
 
@@ -531,7 +531,7 @@ describe('delve interactables and affixes', () => {
     const run = sim.delveRunForPlayer(sim.playerId)!;
     run.affixes = ['bad_air'];
     run.badAirTimer = 0;
-    // Clear the module's trash so combat can't kill the player over the interval —
+    // Clear the module's trash so combat can't kill the player over the interval -
     // isolate the affix's periodic aura from any incidental damage.
     for (const id of [...run.mobIds]) (sim as any).dropEntity(id);
     run.mobIds = [];
@@ -627,7 +627,7 @@ describe('delve reward chest + surface exit flow', () => {
     const playerPosBefore = { ...sim.player.pos };
     killBoss(sim, run);
 
-    // run.completed still false — chest not yet opened
+    // run.completed still false, chest not yet opened
     expect(run.completed).toBe(false);
     // objective is marked complete
     expect(run.objective.complete).toBe(true);
@@ -687,7 +687,7 @@ describe('delve reward chest + surface exit flow', () => {
     const events = sim.tick();
     const offer = events.find((e) => e.type === 'lockpickOffer');
     expect(offer).toBeDefined();
-    // A normal (gold) chest is not a Coffer — the client shows every ante.
+    // A normal (gold) chest is not a Coffer, the client shows every ante.
     expect(offer && (offer as Extract<typeof offer, { type: 'lockpickOffer' }>).bountiful).toBe(false);
     expect(run.completed).toBe(false);
     expect(run.lockpick).toBeNull();
@@ -766,7 +766,7 @@ describe('delve reward chest + surface exit flow', () => {
     sim.player.pos = { ...chestEnt.pos };
     sim.player.prevPos = { ...chestEnt.pos };
 
-    // Lower antes are refused outright — no session starts.
+    // Lower antes are refused outright, no session starts.
     sim.lockpickEngage(run.rewardChestId!, 3);
     expect(run.lockpick).toBeNull();
     sim.lockpickEngage(run.rewardChestId!, 2);
@@ -952,7 +952,7 @@ describe('delve reward chest + surface exit flow', () => {
     const meta = (sim as any).players.get(sim.playerId);
     meta.delveDaily = { date: 'pinned', firstClearXp: new Set(['x']), markClears: 2 };
     (sim as any).refreshDelveDaily(meta);
-    expect(meta.delveDaily.date).toBe('pinned'); // unchanged — no wall-clock read
+    expect(meta.delveDaily.date).toBe('pinned'); // unchanged, no wall-clock read
     expect(meta.delveDaily.markClears).toBe(2);
   });
 
@@ -962,7 +962,7 @@ describe('delve reward chest + surface exit flow', () => {
     meta.delveDaily.firstClearXp = new Set();
     const runN = { tierId: 'normal' } as any;
     const runH = { tierId: 'heroic' } as any;
-    // First 3 completions/day (markClears < 3): full Marks — 1 Normal, 2 Heroic.
+    // First 3 completions/day (markClears < 3): full Marks, 1 Normal, 2 Heroic.
     for (const mc of [0, 1, 2]) {
       meta.delveDaily.markClears = mc;
       expect((sim as any).delveMarkPayout(runN, meta)).toBe(1);
@@ -1021,7 +1021,7 @@ describe('delve Heroic level gate (a L7 cannot run Heroic; L9+ can)', () => {
     expect(isDelvePos(sim.player.pos.x)).toBe(true);
   });
 
-  it('Normal has no gate above the delve floor — a level 7 enters', () => {
+  it('Normal has no gate above the delve floor, a level 7 enters', () => {
     const sim = makeSim('warrior');
     sim.setPlayerLevel(7);
     const door = DELVES.collapsed_reliquary.doorPos;
@@ -1113,7 +1113,7 @@ describe('Tessa percent-of-health heal + rank cap', () => {
     sim.companionUpgrade('companion_tessa');
     expect(meta.companionUpgrades.companion_tessa).toBe(3);
     expect(meta.delveMarks).toBe(92);
-    expect(meta.copper).toBe(100); // Marks only — copper untouched
+    expect(meta.copper).toBe(100); // Marks only, copper untouched
     sim.companionUpgrade('companion_tessa'); // already maxed
     expect(meta.companionUpgrades.companion_tessa).toBe(3);
     expect(meta.delveMarks).toBe(92);

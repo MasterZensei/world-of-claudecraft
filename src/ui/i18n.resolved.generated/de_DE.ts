@@ -1659,6 +1659,7 @@ export const de_DE: EnTranslations = {
       "passageSealed": "Der Durchgang ist versiegelt.",
       "moveCloserPassage": "Geh näher an den Durchgang heran.",
       "moveCloserChest": "Geh näher an die Truhe heran.",
+      "nothingToTake": "Es ist nichts mehr zum Mitnehmen da.",
       "wayOutNotOpen": "Der Ausweg ist noch nicht offen.",
       "moveCloserStairs": "Geh näher an die Treppe heran."
     },
@@ -1750,6 +1751,12 @@ export const de_DE: EnTranslations = {
       "reliquary_bell_niche": "Dutzende Handglocken hängen schweigend da, jede mit Leichentuch umwickelt.",
       "reliquary_saintless_hall": "Statuen, deren Gesichter mit sorgfältigem Hass weggemeißelt wurden.",
       "reliquary_finale": "Die vergrabene Glocke läutet einmal unter deinen Stiefeln."
+    },
+    "moduleName": {
+      "reliquary_sunken_ossuary": "Das versunkene Beinhaus",
+      "reliquary_bell_niche": "Die Glockennische",
+      "reliquary_saintless_hall": "Die heiligenlose Halle",
+      "reliquary_finale": "Die glockenvergrabene Kammer"
     },
     "companion": {
       "barkLine": "{name}: {line}",

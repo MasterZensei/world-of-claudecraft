@@ -1,28 +1,18 @@
-// Pure helper for delve minimap/world-map rendering. No DOM or canvas deps —
+// Pure helper for delve minimap/world-map rendering. No DOM or canvas deps:
 // takes plain data in, returns draw primitives or strings.
 // Imported by hud.ts; tested by tests/delve_map.test.ts.
 
 import type { DelveRunInfo } from '../world_api';
 import type { DungeonLayout } from '../sim/dungeon_layout';
 
-// Module display names: a local mirror of sim.ts DELVE_MODULE_NAMES (that
-// constant is private to sim.ts which the ui layer must not import). Kept in
-// sync with the four reliquary module ids in src/sim/delve_layout.ts.
-// If new modules are added to sim.ts, add them here too.
-export const DELVE_MODULE_DISPLAY_NAMES: Record<string, string> = {
-  reliquary_sunken_ossuary: 'The Sunken Ossuary',
-  reliquary_bell_niche: 'The Bell Niche',
-  reliquary_saintless_hall: 'The Saintless Hall',
-  reliquary_finale: 'The Bell-Buried Chamber',
-};
-
-/** Compose the area label shown on the minimap / world-map zone title. */
+/** Compose the area label shown on the minimap / world-map zone title. The
+ * module name is passed in already localized (the caller resolves the
+ * `delveUi.moduleName.*` key via t()), so this helper stays string-table-free. */
 export function delveAreaLabel(
   delveName: string,
-  moduleId: string | undefined,
+  moduleName: string,
 ): string {
-  const modName = moduleId ? (DELVE_MODULE_DISPLAY_NAMES[moduleId] ?? moduleId) : '';
-  return modName ? `${delveName} — ${modName}` : delveName;
+  return moduleName ? `${delveName}: ${moduleName}` : delveName;
 }
 
 // ---------------------------------------------------------------------------
@@ -129,13 +119,13 @@ export function delveSchematicStatic(
     strokeWidth: 1.5,
   });
 
-  // Pillars — small dark dots
+  // Pillars: small dark dots
   for (const p of layout.pillars) {
     const { cx, cy } = toCanvas(p.x, p.z, layout, canvasSize, pad);
     prims.push({ kind: 'circle', cx, cy, r: Math.max(2, canvasSize * 0.024), fill: '#3a2f22', stroke: '#5a4e3c', strokeWidth: 1 });
   }
 
-  // Tombs — small rects along the walls
+  // Tombs: small rects along the walls
   for (const t of layout.tombs) {
     const { cx, cy } = toCanvas(t.x, t.z, layout, canvasSize, pad);
     const tw = Math.max(3, canvasSize * 0.035);
@@ -151,7 +141,7 @@ export function delveSchematicStatic(
     prims.push({ kind: 'rect', x: cx - sw / 2, y: cy - sh / 2, w: sw, h: sh, fill: '#2e2820', stroke: '#4a4030', strokeWidth: 0.5 });
   }
 
-  // Dais — larger circle near the back; radius expressed as fraction of canvas size
+  // Dais: larger circle near the back; radius expressed as fraction of canvas size
   // (not world units) to keep it from overflowing into the text area.
   const dais = layout.dais;
   const { cx: dcx, cy: dcy } = toCanvas(dais.x, dais.z, layout, canvasSize, pad);
@@ -159,7 +149,7 @@ export function delveSchematicStatic(
   prims.push({ kind: 'circle', cx: dcx, cy: dcy, r: dr, fill: '#2a2016', stroke: '#7a6840', strokeWidth: 1 });
 
   // Exit marker at zMax (north passage, top of canvas since zMin is north entrance)
-  // The tombstone passage is at the top — zMin end is the ENTRANCE (south), zMax is boss end (north).
+  // The tombstone passage is at the top, zMin end is the ENTRANCE (south), zMax is boss end (north).
   // Actually: zMin = entrance side (-19), zMax = boss end (61). The exit to next module is
   // at zMax (the "sealed passage north"). We draw a small arch glyph there.
   const { cx: exCx, cy: exCy } = toCanvas(0, layout.zMax - 2, layout, canvasSize, pad);

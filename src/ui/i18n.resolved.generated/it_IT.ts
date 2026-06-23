@@ -1659,6 +1659,7 @@ export const it_IT: EnTranslations = {
       "passageSealed": "Il passaggio è sigillato.",
       "moveCloserPassage": "Avvicinati al passaggio.",
       "moveCloserChest": "Avvicinati allo scrigno.",
+      "nothingToTake": "Non è rimasto nulla da prendere.",
       "wayOutNotOpen": "La via d'uscita non è ancora aperta.",
       "moveCloserStairs": "Avvicinati alle scale."
     },
@@ -1750,6 +1751,12 @@ export const it_IT: EnTranslations = {
       "reliquary_bell_niche": "Decine di campanelli pendono nel silenzio, ciascuno legato con un drappo funebre.",
       "reliquary_saintless_hall": "Statue con i volti scalpellati via con accurato odio.",
       "reliquary_finale": "La campana sepolta rintocca una volta sotto i tuoi stivali."
+    },
+    "moduleName": {
+      "reliquary_sunken_ossuary": "L'Ossario Sommerso",
+      "reliquary_bell_niche": "La Nicchia della Campana",
+      "reliquary_saintless_hall": "La Sala senza Santi",
+      "reliquary_finale": "La Stanza della Campana Sepolta"
     },
     "companion": {
       "barkLine": "{name}: {line}",

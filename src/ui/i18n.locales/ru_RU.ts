@@ -1,4 +1,4 @@
-﻿// Flat dotted-key translation overlay for "ru_RU".
+// Flat dotted-key translation overlay for "ru_RU".
 //
 // One key per leaf of the authoritative nested `en` (src/ui/i18n.catalog), keys
 // in `en`'s leaf order. This is the translator-edited source: edit a value to
@@ -3034,6 +3034,10 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   "delveUi.module.reliquary_finale": "Погребённый колокол единожды звонит у тебя под ногами.",
   "delveUi.module.reliquary_saintless_hall": "Статуи, чьи лица сточены с тщательной ненавистью.",
   "delveUi.module.reliquary_sunken_ossuary": "Вода сочится сквозь погребальные полки, унося старый пепел серебристо-чёрными струями.",
+  "delveUi.moduleName.reliquary_sunken_ossuary": "Затопленная Костница",
+  "delveUi.moduleName.reliquary_bell_niche": "Колокольная Ниша",
+  "delveUi.moduleName.reliquary_saintless_hall": "Зал без Святых",
+  "delveUi.moduleName.reliquary_finale": "Зал Погребённого Колокола",
   "delveUi.npc.halven.greeting": "Реликварий внизу снова сдвинулся. После полуночи мы слышим пение сквозь пол, а Послушница Тесса клянётся, что погребальные книги сами меняют свои чернила. Если в тебе довольно смелости, {playerName}, возьми свечу и спустись вниз. Не доверяй каждому голосу, что услышишь там. Иные из них знали твоё имя ещё до твоего рождения.",
   "delveUi.objective.kill_boss": "Убейте: {boss}",
   "delveUi.objective.clear_room": "Зачистите комнату",
@@ -3073,6 +3077,7 @@ export const ru_RU: Partial<Record<TranslationKey, string>> = {
   "sim.delve.mechanismOpen": "Рядом со щелчком открывается механизм. На севере открывается проход: найдите впереди выходной портал.",
   "sim.delve.moduleEnter": "{name}: {objective}",
   "sim.delve.moveCloserChest": "Подойдите ближе к сундуку.",
+  "sim.delve.nothingToTake": "Забирать больше нечего.",
   "sim.delve.moveCloserPassage": "Подойдите ближе к проходу.",
   "sim.delve.moveCloserStairs": "Подойдите ближе к лестнице.",
   "sim.delve.notInDelve": "Вы не находитесь в вылазке.",

@@ -1,4 +1,4 @@
-// Unit tests for src/ui/lockpick_panel.ts — pure view helpers, no DOM.
+// Unit tests for src/ui/lockpick_panel.ts: pure view helpers, no DOM.
 import { describe, expect, it } from 'vitest';
 import {
   anteOptions,
@@ -27,7 +27,7 @@ function viewFromLock(seed: number, col = 0): LockpickView {
   };
 }
 
-describe('lockpickBoardModel — tumbler tracks', () => {
+describe('lockpickBoardModel: tumbler tracks', () => {
   it('produces one column per lock column with fog past the visible window', () => {
     const view = viewFromLock(123, 0);
     const m = lockpickBoardModel(view);

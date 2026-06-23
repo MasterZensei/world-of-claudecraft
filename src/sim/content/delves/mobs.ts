@@ -17,7 +17,7 @@ export const DELVE_MOBS: Record<string, MobTemplate> = {
     family: 'undead',
     hpBase: 38, hpPerLevel: 13, dmgBase: 5, dmgPerLevel: 1.5, attackSpeed: 2.3,
     armorPerLevel: 8, moveSpeed: 6, aggroRadius: 11,
-    // Periodic AoE chime; when killed it empowers nearby Ringers — mind kill order
+    // Periodic AoE chime; when killed it empowers nearby Ringers, mind kill order
     aoePulse: { min: 5, max: 9, radius: 6, every: 4, name: 'Funeral Chime' },
     packFrenzy: { radius: 10, hasteMult: 1.3, duration: 6 },
     loot: [{ copper: 8, chance: 1 }],
@@ -28,13 +28,13 @@ export const DELVE_MOBS: Record<string, MobTemplate> = {
     family: 'humanoid',
     hpBase: 42, hpPerLevel: 14, dmgBase: 5, dmgPerLevel: 1.4, attackSpeed: 2.5,
     armorPerLevel: 7, moveSpeed: 7, aggroRadius: 10,
-    // Healing received cut 35% per hit — kills Tessa's effectiveness if ignored
+    // Healing received cut 35% per hit, kills Tessa's effectiveness if ignored
     mortalStrike: { chance: 0.4, healReduction: 0.35, duration: 8, name: 'Grave Hex' },
     loot: [{ copper: 10, chance: 1 }],
     scale: 1.0, color: 0x4a3828,
   },
   // Weak undead add summoned by the `restless_graves` Heroic affix a few seconds
-  // after a piece of trash dies. Deliberately frail — it's bonus pressure, not a
+  // after a piece of trash dies. Deliberately frail, it's bonus pressure, not a
   // planned pull. (Do not reuse the lvl-18 dungeon `raised_bonewalker`.)
   reliquary_bonewalker: {
     id: 'reliquary_bonewalker', name: 'Raised Bonewalker', minLevel: 7, maxLevel: 8,
@@ -51,7 +51,7 @@ export const DELVE_MOBS: Record<string, MobTemplate> = {
     ccImmune: true,
     hpBase: 72, hpPerLevel: 24, dmgBase: 10, dmgPerLevel: 2.5, attackSpeed: 2.9,
     armorPerLevel: 18, moveSpeed: 5, aggroRadius: 9,
-    // Slow, can't be CC'd, cleaves anyone standing adjacent — tank it solo
+    // Slow, can't be CC'd, cleaves anyone standing adjacent, tank it solo
     cleave: { radius: 3.5, mult: 0.6, name: 'Stone Sweep' },
     loot: [{ copper: 60, chance: 1 }],
     scale: 1.25, color: 0xc8beb0,

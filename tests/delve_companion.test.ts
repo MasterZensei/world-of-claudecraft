@@ -56,7 +56,7 @@ describe('delve companions', () => {
     const pushed = (sim as any).clampDelveDoors(run, grave.pos.x, grave.pos.z, 0.5);
     expect(Math.hypot(pushed.x - grave.pos.x, pushed.z - grave.pos.z)).toBeGreaterThanOrEqual(1.4);
 
-    // A pressure plate is NOT solid — you must be able to stand on it to trigger it.
+    // A pressure plate is NOT solid, you must be able to stand on it to trigger it.
     const plate = [...sim.entities.values()].find((e) => e.templateId === 'delve_pressure_plate')!;
     expect(plate).toBeDefined();
     const onPlate = (sim as any).clampDelveDoors(run, plate.pos.x, plate.pos.z, 0.5);

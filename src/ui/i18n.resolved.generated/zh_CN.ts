@@ -1659,6 +1659,7 @@ export const zh_CN: EnTranslations = {
       "passageSealed": "通道被封住了。",
       "moveCloserPassage": "靠近通道一些。",
       "moveCloserChest": "靠近宝箱一些。",
+      "nothingToTake": "这里已经没有可拿的东西了。",
       "wayOutNotOpen": "出路尚未开启。",
       "moveCloserStairs": "靠近楼梯一些。"
     },
@@ -1750,6 +1751,12 @@ export const zh_CN: EnTranslations = {
       "reliquary_bell_niche": "数十口手钟静默地悬着，每一口都系着丧葬布。",
       "reliquary_saintless_hall": "一座座雕像的脸面被人以审慎的仇恨凿去。",
       "reliquary_finale": "埋藏的钟在你脚下鸣响了一声。"
+    },
+    "moduleName": {
+      "reliquary_sunken_ossuary": "沉没的藏骨堂",
+      "reliquary_bell_niche": "鸣钟壁龛",
+      "reliquary_saintless_hall": "无圣之厅",
+      "reliquary_finale": "埋钟之厅"
     },
     "companion": {
       "barkLine": "{name}：{line}",

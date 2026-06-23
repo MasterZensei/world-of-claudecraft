@@ -18,7 +18,7 @@ const availableEntry = shop.find((e) => e.gate === 'available')!;
 const clearsEntry = shop.find((e) => e.gate === 'clears:3')!;
 const heroicEntry = shop.find((e) => e.gate === 'heroicClear')!;
 
-describe('delve shop — gate logic', () => {
+describe('delve shop, gate logic', () => {
   it('available is always open', () => {
     const sim = makeSim();
     expect(sim.delveShopGateMet(metaOf(sim), 'collapsed_reliquary', 'available')).toBe(true);
@@ -48,7 +48,7 @@ describe('delve shop — gate logic', () => {
   });
 });
 
-describe('delve shop — buying', () => {
+describe('delve shop, buying', () => {
   it('grants the item and debits Marks on a valid purchase', () => {
     const sim = makeSim();
     metaOf(sim).delveMarks = 100;
@@ -58,7 +58,7 @@ describe('delve shop — buying', () => {
     expect(sim.delveMarks).toBe(100 - availableEntry.marks);
   });
 
-  it('rejects when Marks are insufficient — no item, no debit', () => {
+  it('rejects when Marks are insufficient, no item, no debit', () => {
     const sim = makeSim();
     metaOf(sim).delveMarks = availableEntry.marks - 1;
     const before = countOf(sim, availableEntry.itemId);
@@ -95,7 +95,7 @@ describe('delve shop — buying', () => {
     expect(sim.delveMarks).toBe(100 - heroicEntry.marks);
   });
 
-  it('rejects an item that is not in the shop / wrong delve — no debit', () => {
+  it('rejects an item that is not in the shop / wrong delve, no debit', () => {
     const sim = makeSim();
     metaOf(sim).delveMarks = 100;
     sim.delveBuyShopItem('collapsed_reliquary', 'worn_sword');
@@ -108,7 +108,7 @@ describe('delve shop — buying', () => {
 // The shop tab (hud.ts) renders from this IWorld view; the same resolver backs the
 // online ClientWorld off its mirrored delveClears, so the lock badge it shows
 // matches the gate the server-authoritative buy enforces.
-describe('delve shop — delveShopOffers view', () => {
+describe('delve shop, delveShopOffers view', () => {
   it('mirrors the stock and resolves lock state + gate breakdown from clears', () => {
     const sim = makeSim();
     const offers = sim.delveShopOffers('collapsed_reliquary');
