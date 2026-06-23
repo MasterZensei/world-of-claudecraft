@@ -76,7 +76,13 @@ export function loadGltf(url: string): Promise<GLTF> {
         recordAssetLoad('gltf', resolved, startedAt, true);
         reject(new Error(`asset load failed: ${url} (missing file or bad GLB)`));
       });
-    }));
+    })).catch((err: unknown) => {
+      // Evict the rejected promise so the next call re-fetches rather than
+      // permanently caching a failure (black void bug: rejected promise poisons
+      // ensureDungeonAssets for the whole session).
+      gltfCache.delete(resolved);
+      throw err;
+    });
     gltfCache.set(resolved, p);
   }
   return p;

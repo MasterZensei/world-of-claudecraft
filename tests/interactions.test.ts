@@ -212,6 +212,7 @@ describe('handlePickedEntity', () => {
     const hud = {
       openLoot: () => {},
       openQuestDialog: () => {},
+      openDelveBoard: () => {},
       showError: () => {},
       closeContextMenu: () => {},
     };
@@ -242,6 +243,7 @@ describe('handlePickedEntity', () => {
     const hud = {
       openLoot: () => {},
       openQuestDialog: () => {},
+      openDelveBoard: () => {},
       showError: () => {},
       closeContextMenu: () => {},
     };
