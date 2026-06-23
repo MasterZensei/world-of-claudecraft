@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ALL_CLASSES, isQuestTurnInNpc, type Entity, type SimEvent } from '../sim/types';
+import { ALL_CLASSES, isQuestTurnInNpc, INTERACT_RANGE, type Entity, type SimEvent } from '../sim/types';
 import { OVERHEAD_EMOTES, type IWorld } from '../world_api';
 import { groundHeight, WATER_LEVEL, zoneBiomeAt } from '../sim/world';
 import { drapeRingLocalY } from './selection_ring';
@@ -582,6 +582,12 @@ function dungeonDisplayName(dungeonId: string): string {
 }
 
 function objectDisplayName(entity: Entity): string {
+  if (entity.templateId === 'delve_locked_chest') {
+    return t('worldContent.delveLockedChestInteract');
+  }
+  if (entity.templateId === 'delve_reward_chest') {
+    return t('worldContent.delveRewardChestInteract');
+  }
   if ((entity.templateId === 'dungeon_door' || entity.templateId === 'dungeon_exit') && entity.dungeonId) {
     const dungeonName = dungeonDisplayName(entity.dungeonId);
     return entity.templateId === 'dungeon_exit'
@@ -3773,9 +3779,11 @@ export class Renderer {
       const isSelf = id === p.id;
       const hasOverheadEmote = !!(e.kind === 'player' && e.overheadEmoteId && !e.dead);
       const isDoor = e.templateId === 'dungeon_door' || e.templateId === 'dungeon_exit';
+      const isDelveChest = e.templateId === 'delve_locked_chest' || e.templateId === 'delve_reward_chest';
+      const delveChestNear = isDelveChest && d2 <= (INTERACT_RANGE + 1) * (INTERACT_RANGE + 1);
       const hidden = (isSelf && !hasOverheadEmote) || d2 > NAMEPLATE_RANGE_SQ
         || (e.dead && !e.lootable && e.kind === 'mob')
-        || (e.kind === 'object' && !isDoor)
+        || (e.kind === 'object' && !isDoor && !delveChestNear)
         // the sealed royal door inside the crypt carries no floating label —
         // it reads as part of the back wall, not a portal billboard
         || (isDoor && e.dungeonId === 'nythraxis_boss_arena')

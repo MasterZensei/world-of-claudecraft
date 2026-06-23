@@ -48,8 +48,8 @@ function glowMat(color: number, opacity = 0.28): THREE.Material {
 function buildLockedDoor(): { group: THREE.Group; height: number } {
   const group = new THREE.Group();
 
-  // Dimensions to match the collider: total width=28, height=8 (DUNGEON_WALL_HEIGHT).
-  const totalW = 28;
+  // Dimensions to match the collider: spans the full walkable aisle (|x|<24).
+  const totalW = 48;
   const totalH = 8;
 
   const darkIron = ironMat(0x2a2a2e, 0x3a1810, 0.08);
@@ -354,7 +354,7 @@ function buildModuleExit(): { group: THREE.Group; height: number } {
 // The GLB is normalized to a target height so it sits right whatever its native
 // scale, and re-seated on the floor. The locked variant overlays a ward seal.
 // ---------------------------------------------------------------------------
-const CHEST_TARGET_H = 4.2; // a grand reliquary chest (3x the base 1.4 height)
+const CHEST_TARGET_H = 2.8; // grand reliquary chest (2x the base 1.4 height)
 
 function buildGlbChest(locked: boolean): { group: THREE.Group; height: number } | null {
   const mesh = buildDungeonPropMesh('chest_gold');
@@ -368,7 +368,7 @@ function buildGlbChest(locked: boolean): { group: THREE.Group; height: number } 
   // Re-seat the base on the floor (KayKit origin is not always at the base).
   const seated = new THREE.Box3().setFromObject(mesh);
   mesh.position.y -= seated.min.y;
-  group.rotation.y = Math.PI; // face directly south (toward the entrance), no jitter
+  group.rotation.y = 0; // face south (toward the entrance)
   if (locked) {
     const half = new THREE.Vector3();
     new THREE.Box3().setFromObject(mesh).getSize(half);
@@ -411,8 +411,7 @@ function buildLockedChest(entityId: number): { group: THREE.Group; height: numbe
 function buildProceduralRewardChest(entityId: number): { group: THREE.Group; height: number } {
   const group = new THREE.Group();
 
-  // Slight rotation variation.
-  group.rotation.y = ((entityId * 11) % 7) * 0.2 - 0.6;
+  group.rotation.y = 0; // face south (toward the entrance)
 
   const woodMat = stoneMat(0x4a3018);
   const ironBandMat = ironMat(0x2a2420, 0x200808, 0.06);

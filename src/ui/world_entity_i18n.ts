@@ -231,6 +231,8 @@ type WorldEntityTranslations = {
     dungeonExitName: string;
     dungeonPartyWarning: string;
     dungeonInstanceBusy: string;
+    delveLockedChestInteract: string;
+    delveRewardChestInteract: string;
   };
   entities: {
     mobs: MobTranslations;
@@ -323,6 +325,8 @@ function makeEnglishWorldEntities(): WorldEntityTranslations {
       dungeonExitName: '{name} Exit',
       dungeonPartyWarning: '{name} is meant for a full party of {count}. Tread carefully.',
       dungeonInstanceBusy: 'All instances of {name} are busy. Try again soon.',
+      delveLockedChestInteract: 'Press F to pick the lock',
+      delveRewardChestInteract: 'Press F to claim spoils',
     },
     entities: { mobs, npcs, quests, zones, dungeons, delves },
   };

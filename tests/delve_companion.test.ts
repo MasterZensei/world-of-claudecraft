@@ -154,6 +154,33 @@ describe('delve companions', () => {
     expect(meta.delveMarks).toBe(2);
   });
 
+  it('companion damages hostile mobs in combat', () => {
+    const sim = makeSim();
+    sim.setPlayerLevel(10);
+    teleport(sim, 0, 0);
+    sim.enterDelve('collapsed_reliquary', 'normal');
+    const run = sim.delveRunForPlayer(sim.playerId)!;
+    run.modules = ['reliquary_sunken_ossuary'];
+    run.moduleIndex = 0;
+    (sim as any).spawnDelveModule(run);
+    const companion = sim.entities.get(run.companion!.entityId)!;
+    const mob = [...sim.entities.values()].find((e) => e.kind === 'mob' && e.hostile && e.templateId !== 'acolyte_tessa')!;
+    expect(mob).toBeDefined();
+    const hpBefore = mob.hp;
+    sim.player.targetId = mob.id;
+    sim.player.autoAttack = true;
+    sim.player.inCombat = true;
+    mob.aggroTargetId = sim.playerId;
+    companion.pos = { ...mob.pos };
+    companion.prevPos = { ...companion.pos };
+    companion.swingTimer = 0;
+    for (let i = 0; i < 20 * 3; i++) {
+      sim.tick();
+      if (mob.hp < hpBefore) break;
+    }
+    expect(mob.hp).toBeLessThan(hpBefore);
+  });
+
   it('companion heals owner on interval', () => {
     const sim = makeSim();
     sim.setPlayerLevel(10);

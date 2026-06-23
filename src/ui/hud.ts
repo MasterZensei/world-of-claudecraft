@@ -4402,6 +4402,7 @@ export class Hud {
     el.querySelectorAll('[data-action]').forEach((btn) => {
       btn.addEventListener('click', () => {
         if ((btn as HTMLButtonElement).disabled) return;
+        this.clearLockpickTimer();
         this.sim.lockpickAction((btn as HTMLElement).dataset.action as PickAction);
       });
     });
@@ -4463,6 +4464,7 @@ export class Hud {
       const action = PICK_ACTIONS[idx];
       if (!this.lockpickView.allowed.includes(action)) return;
       e.preventDefault(); e.stopImmediatePropagation();
+      this.clearLockpickTimer();
       this.sim.lockpickAction(action);
     };
     this.lockpickKeyHandler = handler;

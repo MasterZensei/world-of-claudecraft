@@ -55,13 +55,12 @@ export const COLLAPSED_RELIQUARY_MODULES: Record<string, DelveModuleDef> = {
     length: 110,
     spawnSets: [OSSUARY_SPAWNS],
     interactableSlots: [
-      // Pressure plate 1: between pillar rows z=14 and z=40, clear of tombs at z=18.
+      // Both pressure plates sit on the entrance side of the portcullis (south of
+      // z=47) so the player must step them before the gate, not bypass around it.
       { x: 0, z: 32, variants: ['pressure_plate'] },
-      // Iron portcullis gate: between pillar rows z=40 and z=66, clear of tombs.
-      // Both plates must be stepped on to open it.
+      { x: 0, z: 40, variants: ['pressure_plate'] },
+      // Iron portcullis gate: spans the full aisle between pillar rows z=40 and z=66.
       { x: 0, z: 47, variants: ['locked_door'] },
-      // Pressure plate 2: between pillar rows z=40 and z=66, south of the gate.
-      { x: 0, z: 58, variants: ['pressure_plate'] },
     ],
   },
   reliquary_bell_niche: {

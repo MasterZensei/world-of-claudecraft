@@ -15560,7 +15560,9 @@ export class Sim {
       if (!obj) continue;
       if (state.kind === 'locked_door') {
         if (state.open) continue;
-        const hw = 14, hd = 1.2; // spans full walkable aisle (|x|<14), thin in z
+        // Span the full walkable aisle (delve side walls at |x|=25, hw=1) so the
+        // portcullis cannot be bypassed by skirting the centre mesh.
+        const hw = 24, hd = 1.2;
         const dx = x - obj.pos.x, dz = z - obj.pos.z;
         const ox = Math.abs(dx) - hw - r;
         const oz = Math.abs(dz) - hd - r;
@@ -15953,8 +15955,8 @@ export class Sim {
       delete run.objectState[id];
     }
     const chest = this.createDelveObject(run, 'locked_chest', chestPos);
-    chest.facing = Math.PI;
-    chest.prevFacing = Math.PI;
+    chest.facing = 0;
+    chest.prevFacing = 0;
     run.rewardChestId = chest.id;
     run.objectState[chest.id].attemptAvailable = true;
     if (!run.partyKey) return;
@@ -16469,26 +16471,35 @@ export class Sim {
     let combatTarget: Entity | null = null;
     if (owner.targetId !== null) {
       const t = this.entities.get(owner.targetId);
-      if (t && !t.dead && t.kind === 'mob' && t.hostile) combatTarget = t;
+      if (t && !t.dead && this.isHostileTo(companion, t)) combatTarget = t;
     }
-    if (!combatTarget && owner.inCombat) {
+    if (!combatTarget) {
+      let best: Entity | null = null;
+      let bestD = 40;
       for (const m of this.entities.values()) {
-        if (m.kind === 'mob' && !m.dead && m.hostile && m.aggroTargetId === owner.id) {
-          combatTarget = m;
-          break;
-        }
+        if (m.kind !== 'mob' || m.dead || !this.isHostileTo(companion, m)) continue;
+        const engagingOwner = m.aggroTargetId === owner.id;
+        const ownerOffense =
+          owner.targetId === m.id &&
+          (owner.autoAttack || owner.inCombat || m.threat.has(owner.id));
+        if (!engagingOwner && !ownerOffense) continue;
+        const d = dist2d(companion.pos, m.pos);
+        if (d < bestD) { best = m; bestD = d; }
       }
+      combatTarget = best;
     }
     if (combatTarget) {
       companion.inCombat = true;
       const reach = MELEE_RANGE * 0.9;
       const cd = dist2d(companion.pos, combatTarget.pos);
       if (cd > reach) {
+        companion.swingTimer = Math.max(0, (companion.swingTimer ?? 0) - DT);
         if (!this.isRooted(companion)) {
           this.moveToward(companion, combatTarget.pos, companion.moveSpeed * this.moveSpeedMult(companion));
         }
       } else {
         companion.facing = angleTo(companion.pos, combatTarget.pos);
+        companion.swingTimer = (companion.swingTimer ?? 0) - DT;
         if (companion.swingTimer <= 0) {
           this.mobSwing(companion, combatTarget);
           companion.swingTimer = companion.weapon.speed * this.swingIntervalMult(companion);
@@ -16496,7 +16507,7 @@ export class Sim {
       }
     } else {
       companion.inCombat = false;
-      companion.swingTimer = Math.max(0, companion.swingTimer);
+      companion.swingTimer = Math.max(0, (companion.swingTimer ?? 0) - DT);
     }
 
     companion.wanderTimer = (companion.wanderTimer ?? 0) - DT;
