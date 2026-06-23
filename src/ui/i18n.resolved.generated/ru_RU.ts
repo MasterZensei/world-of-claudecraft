@@ -176,7 +176,7 @@ export const ru_RU: EnTranslations = {
     },
     "theme": {
       "preset": "Тема интерфейса",
-      "customColors": "Свои цвета",
+      "customColors": "Настраиваемые цвета",
       "reset": "Сброс",
       "presets": {
         "classic": "Классическое золото",
@@ -231,12 +231,27 @@ export const ru_RU: EnTranslations = {
       "hapticsOff": "Вибрация выкл.",
       "toggleHaptics": "Вкл/выкл вибрацию"
     },
+    "tutorial": {
+      "moveBodyTouch": "Используйте джойстик передвижения, чтобы двигаться, и проведите по экрану, чтобы осмотреться. Сделайте несколько шагов, чтобы начать.",
+      "talkBodyTouch": "Подойдите к маршалу Редбруку и нажмите кнопку «Использовать», чтобы заговорить, затем примите его задание.",
+      "returnBodyTouch": "Задание выполнено. Вернитесь к маршалу Редбруку и нажмите кнопку «Использовать», чтобы сдать его.",
+      "doneBodyTouch": "Основы освоены, {name}. Долина в вашем распоряжении: исследуйте её. Нажмите «Еще», затем «Журнал заданий», чтобы просмотреть свои задания в любой момент. Удачной охоты!"
+    },
     "widgets": {
       "clockTitle": "Местное время — нажмите для переключения 12/24-часового формата",
       "worldCoordinates": "Координаты мира",
       "coordinates": "Координаты",
       "heading": "Направление",
       "minimapZoom": "Масштаб миникарты"
+    },
+    "raidLockout": {
+      "title": "Блокировки рейдов",
+      "allReady": "Все рейды доступны",
+      "daysHours": "{d}д {h}ч",
+      "hoursMinutes": "{h}ч {m}м",
+      "minutes": "{m}м",
+      "lessThanMinute": "<1м",
+      "lockedToast": "Вы привязаны к {raid}. Разблокировка через {time}."
     },
     "compass": {
       "N": "С",
@@ -552,10 +567,10 @@ export const ru_RU: EnTranslations = {
       "noMatch": "Нет предметов, соответствующих фильтрам."
     },
     "raidConvert": {
-      "toPartyDone": "Your raid has converted back to a party.",
-      "notRaid": "Your group is not a raid.",
-      "leaderOnly": "Only the raid leader may convert to a party.",
-      "tooLarge": "A raid with more than five members cannot convert back to a party."
+      "toPartyDone": "Ваш рейд снова преобразован в группу.",
+      "notRaid": "Ваша группа не является рейдом.",
+      "leaderOnly": "Только лидер рейда может преобразовать рейд в группу.",
+      "tooLarge": "Рейд, в котором более пяти участников, нельзя преобразовать обратно в группу."
     }
   },
   "guide": {
@@ -958,7 +973,6 @@ export const ru_RU: EnTranslations = {
       "notedLabel": "Стоит отметить",
       "flavor": {
         "old_greyjaw": "Покрытый шрамами старый волк, которого не удержал ни один капкан. На него списывают трёх гончих и руку конюшонка. Он охотится в глубоких лесах в одиночку и звереет тем сильнее, чем дольше тянется схватка.",
-        "brightwood_stag": "Гордый олень из рощи, что пригибает свою венценосную корону рогов и прёт вперёд, становясь тем опаснее, чем дольше его теснят.",
         "grubjaw": "Болотный тролль, столь жадный, что прочие тролли не станут рыть рядом с ним. Поговаривают, будто он сожрал двух последних вьючных мулов одного торговца, прямо со сбруей.",
         "shardlord_kazzix": "Грозовой элементаль, обретший плечи. Он бродит по дальним утёсам над Бурехребтом, и его сердечный осколок стоит того, чтобы бросить вызов молниям.",
         "mirejaw_frenzy": "Болотный мурлок, что посреди боя взвинчивает себя до бешеной ярости, самый громкий из шумной, оберегающей свою территорию стаи.",
@@ -2125,7 +2139,9 @@ export const ru_RU: EnTranslations = {
     "genre": "MMORPG",
     "playMode": "Многопользовательская игра",
     "applicationCategory": "Игра",
-    "operatingSystem": "Веб-браузер"
+    "operatingSystem": "Веб-браузер",
+    "officialLabel": "Официальный сайт World of ClaudeCraft",
+    "officialBody": "worldofclaudecraft.com - официальная бесплатная браузерная MMO для мира Claudemoon. Играйте онлайн с постоянным персонажем, исследуйте мир в одиночку офлайн, читайте wiki и переходите по проверенным ссылкам сообщества с этого сайта."
   },
   "a11y": {
     "goHome": "Перейти на главную",
@@ -2533,7 +2549,7 @@ export const ru_RU: EnTranslations = {
         "report": "Пожаловаться на игрока",
         "removeParty": "Удалить из группы",
         "convertToRaid": "Преобразовать в рейд",
-        "convertToParty": "Convert to party",
+        "convertToParty": "Преобразовать в группу",
         "cancel": "Отмена"
       }
     },
@@ -2655,7 +2671,7 @@ export const ru_RU: EnTranslations = {
       "assistSelf": "Вы не можете помогать самому себе.",
       "assistNoTarget": "У {name} нет цели.",
       "assistWhom": "Кому помочь? Выберите игрока или используйте /assist <name>.",
-      "assisting": "Помогаете {name}.",
+      "assisting": "Вы помогаете {name}.",
       "notInParty": "Вы не в группе.",
       "unknownCommand": "Неизвестная команда: {command}. Попробуйте /s /y /w /p /g.",
       "chatCooldown": "Чат на восстановлении еще {seconds} сек.",
@@ -5008,39 +5024,6 @@ export const ru_RU: EnTranslations = {
       "nythraxis_scourge_of_thornpeak": {
         "name": "Нитраксис, Бич Торнпика"
       },
-      "brightwood_hare": {
-        "name": "Заяц Брайтвуда"
-      },
-      "glade_fox": {
-        "name": "Лисица поляны"
-      },
-      "spotted_fawn": {
-        "name": "Пятнистый оленёнок"
-      },
-      "meadow_crane": {
-        "name": "Луговой журавль"
-      },
-      "thornpelt_badger": {
-        "name": "Терношкурый барсук"
-      },
-      "dawnmane_doe": {
-        "name": "Зарегривая лань"
-      },
-      "bramble_lynx": {
-        "name": "Терновая рысь"
-      },
-      "brightwood_stag": {
-        "name": "Олень Брайтвуда"
-      },
-      "grovetusk_boar": {
-        "name": "Рощеклыкий кабан"
-      },
-      "sunhide_bear": {
-        "name": "Солнцешкурый медведь"
-      },
-      "brightwood_monarch": {
-        "name": "Монарх Брайтвуда"
-      },
       "reliquary_ledger_wraith": {
         "name": "Книжный призрак"
       },
@@ -5061,9 +5044,6 @@ export const ru_RU: EnTranslations = {
       },
       "acolyte_tessa": {
         "name": "Послушница Тесса"
-      },
-      "elder_bristleback": {
-        "name": "Старый Щетиноспин"
       },
       "ironvein_foreman": {
         "name": "Прораб Железной жилы"
@@ -5088,12 +5068,6 @@ export const ru_RU: EnTranslations = {
       },
       "nhalia_mourner": {
         "name": "Плакальщица Налии"
-      },
-      "sableweb_hatchling": {
-        "name": "Детеныш Сейблвеб"
-      },
-      "sableweb_matriarch": {
-        "name": "Матриарх Сейблвеб"
       },
       "sister_nhalia": {
         "name": "Сестра Налия"

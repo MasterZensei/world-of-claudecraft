@@ -231,12 +231,27 @@ export const zh_TW: EnTranslations = {
       "hapticsOff": "觸覺回饋已關閉",
       "toggleHaptics": "切換觸覺回饋"
     },
+    "tutorial": {
+      "moveBodyTouch": "使用搖桿移動，拖曳螢幕環顧四周。先走幾步開始吧。",
+      "talkBodyTouch": "靠近雷德布魯克元帥並點按「使用」按鈕與他交談，然後接受他的任務。",
+      "returnBodyTouch": "任務已完成。返回雷德布魯克元帥處並點按「使用」按鈕繳交任務。",
+      "doneBodyTouch": "你已掌握基礎，{name}。東溪谷任你探索。點按「更多」再選「任務日誌」即可隨時查看任務。祝你狩獵順利。"
+    },
     "widgets": {
       "clockTitle": "本地時間 - 點擊切換 12／24 小時制",
       "worldCoordinates": "世界座標",
       "coordinates": "座標",
       "heading": "方位",
       "minimapZoom": "小地圖縮放"
+    },
+    "raidLockout": {
+      "title": "團隊副本鎖定",
+      "allReady": "所有團隊副本就緒",
+      "daysHours": "{d}天{h}小時",
+      "hoursMinutes": "{h}小時{m}分",
+      "minutes": "{m}分",
+      "lessThanMinute": "<1分",
+      "lockedToast": "你已鎖定到{raid}。{time}後解鎖。"
     },
     "compass": {
       "N": "北",
@@ -552,10 +567,10 @@ export const zh_TW: EnTranslations = {
       "noMatch": "沒有符合篩選條件的物品。"
     },
     "raidConvert": {
-      "toPartyDone": "Your raid has converted back to a party.",
-      "notRaid": "Your group is not a raid.",
-      "leaderOnly": "Only the raid leader may convert to a party.",
-      "tooLarge": "A raid with more than five members cannot convert back to a party."
+      "toPartyDone": "你的團隊已轉換回隊伍。",
+      "notRaid": "你的隊伍並非團隊。",
+      "leaderOnly": "只有團隊領袖可以轉換為隊伍。",
+      "tooLarge": "超過五名成員的團隊無法轉換回隊伍。"
     }
   },
   "guide": {
@@ -958,7 +973,6 @@ export const zh_TW: EnTranslations = {
       "notedLabel": "值得一提",
       "flavor": {
         "old_greyjaw": "一頭傷痕累累的老狼，沒有任何陷阱困得住牠，被指控害死了三條獵犬，還咬斷一名馬廄小弟的手臂。牠獨自獵食於深林之中，戰鬥拖得愈久就愈兇殘。",
-        "brightwood_stag": "一頭高傲的林地雄鹿，會低下牠那頂鹿角王冠橫衝直撞，而且被逼得愈久就愈難對付。",
         "grubjaw": "一頭貪婪到連其他巨魔都不願在牠身旁挖掘的沼澤巨魔，據說曾把一名商人最後兩頭馱騾連同挽具一併吞下肚。",
         "shardlord_kazzix": "一具長出了肩膀的風暴元素，行走在風暴岩之上的遠處峭壁間，身上的心核碎片值得人冒著雷電去搶。",
         "mirejaw_frenzy": "一隻沼澤魚人，會在戰鬥中把自己鞭策成一陣亂揮亂打的狂亂，是一群喧鬧又護地的同類中嗓門最大的那個。",
@@ -2125,7 +2139,9 @@ export const zh_TW: EnTranslations = {
     "genre": "MMORPG",
     "playMode": "多人遊戲",
     "applicationCategory": "遊戲",
-    "operatingSystem": "網頁瀏覽器"
+    "operatingSystem": "網頁瀏覽器",
+    "officialLabel": "World of ClaudeCraft 官方網站",
+    "officialBody": "worldofclaudecraft.com 是 Claudemoon 伺服器的官方免費瀏覽器 MMO。你可以用持久角色線上遊玩，也可以離線單人探索、閱讀 wiki，並從本站前往已驗證的社群連結。"
   },
   "a11y": {
     "goHome": "前往首頁",
@@ -2533,7 +2549,7 @@ export const zh_TW: EnTranslations = {
         "report": "檢舉玩家",
         "removeParty": "移出隊伍",
         "convertToRaid": "轉換為團隊",
-        "convertToParty": "Convert to party",
+        "convertToParty": "轉換為隊伍",
         "cancel": "取消"
       }
     },
@@ -5008,39 +5024,6 @@ export const zh_TW: EnTranslations = {
       "nythraxis_scourge_of_thornpeak": {
         "name": "尼思拉克西斯，荊峰之災"
       },
-      "brightwood_hare": {
-        "name": "明木野兔"
-      },
-      "glade_fox": {
-        "name": "林間狐狸"
-      },
-      "spotted_fawn": {
-        "name": "斑點幼鹿"
-      },
-      "meadow_crane": {
-        "name": "草甸鶴"
-      },
-      "thornpelt_badger": {
-        "name": "棘毛獾"
-      },
-      "dawnmane_doe": {
-        "name": "曦鬃母鹿"
-      },
-      "bramble_lynx": {
-        "name": "棘叢猞猁"
-      },
-      "brightwood_stag": {
-        "name": "明木雄鹿"
-      },
-      "grovetusk_boar": {
-        "name": "林牙野豬"
-      },
-      "sunhide_bear": {
-        "name": "陽皮熊"
-      },
-      "brightwood_monarch": {
-        "name": "明木君主"
-      },
       "reliquary_ledger_wraith": {
         "name": "名冊幽靈"
       },
@@ -5061,9 +5044,6 @@ export const zh_TW: EnTranslations = {
       },
       "acolyte_tessa": {
         "name": "侍僧泰莎"
-      },
-      "elder_bristleback": {
-        "name": "年長硬鬃"
       },
       "ironvein_foreman": {
         "name": "鐵脈工頭"
@@ -5088,12 +5068,6 @@ export const zh_TW: EnTranslations = {
       },
       "nhalia_mourner": {
         "name": "娜莉亞哀悼者"
-      },
-      "sableweb_hatchling": {
-        "name": "黑網幼蛛"
-      },
-      "sableweb_matriarch": {
-        "name": "黑網主母"
       },
       "sister_nhalia": {
         "name": "娜莉亞修女"

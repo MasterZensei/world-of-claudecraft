@@ -261,6 +261,8 @@ import { chatPlayerContextActions } from './player_context_menu';
 import { hydratePortraits, portraitChipHtml } from './portrait_chip';
 import { maskProfanity } from './profanity';
 import { type QuestTrackerView, questTrackerView, type TrackedQuest } from './quest_tracker';
+import { lockoutParts, lockoutShape } from './raid_lockout';
+import { type RaidLockoutI18n, raidLockoutPanelHtml } from './raid_lockout_view';
 import { restView } from './rest_indicator';
 import { localizeServerText, localizeZone } from './server_i18n';
 import { localizeSimAuraName, localizeSimText } from './sim_i18n';
@@ -795,6 +797,8 @@ export class Hud {
   private minimapCtx: CanvasRenderingContext2D;
   private minimapBg: HTMLCanvasElement;
   private clockEl: HTMLElement | null = null;
+  private raidLockoutEl: HTMLElement | null = null;
+  private raidLockoutLocked = false;
   private clock24 = false; // 24-hour vs 12-hour AM/PM display
   private lastClockText = ''; // avoid redundant DOM writes each frame
   private lastCoordsText = ''; // cache so we only touch the DOM when coords change
@@ -1122,6 +1126,16 @@ export class Hud {
     // UI-only concern, so `new Date()` here is fine (the sim-only time ban
     // doesn't apply — cf. meters.ts using performance.now()).
     this.clockEl = $('#minimap-clock');
+    // raid-lockout badge on the minimap rim: a lock icon whose hover/tap panel
+    // lists the player's raid lockouts (the unlock countdown). Always visible;
+    // it lights up (.locked) while any raid is on cooldown. attachTooltip already
+    // handles desktop hover, mobile tap, and keyboard focus uniformly.
+    this.raidLockoutEl = document.getElementById('raid-lockout');
+    if (this.raidLockoutEl) {
+      this.raidLockoutEl.innerHTML = svgIcon('lock');
+      this.raidLockoutEl.hidden = false;
+      this.attachTooltip(this.raidLockoutEl, () => this.raidLockoutPanelView());
+    }
     this.clock24 = (() => {
       try {
         return localStorage.getItem('clock24h') === '1';
@@ -3466,6 +3480,7 @@ export class Hud {
     this.tutorial.update(sim, this.renderer, this.keybinds);
     this.reconcileLootRolls();
     this.updateLootRollTimers(now);
+    if (slowHud) this.updateRaidLockoutBadge();
     this.syncActiveHotbarForm();
     this.syncSlotMap(); // picks up newly learned abilities mid-session
 
@@ -3954,6 +3969,45 @@ export class Hud {
       label.style.display = 'block';
     } else {
       label.style.display = 'none';
+    }
+  }
+
+  // Light the minimap raid-lockout badge while any raid is on cooldown (state
+  // only flips on lock/unlock, so this runs on the slow HUD tick).
+  private updateRaidLockoutBadge(): void {
+    if (!this.raidLockoutEl) return;
+    const locked = this.sim.raidLockouts().length > 0;
+    if (locked === this.raidLockoutLocked) return;
+    this.raidLockoutLocked = locked;
+    this.raidLockoutEl.classList.toggle('locked', locked);
+  }
+
+  // Tooltip/panel HTML for the raid-lockout badge: localized title + a row per
+  // still-locked raid (name + unlock countdown), or an "all ready" line.
+  private raidLockoutPanelView(): string {
+    const i18n: RaidLockoutI18n = {
+      title: t('hudChrome.raidLockout.title'),
+      allReady: t('hudChrome.raidLockout.allReady'),
+      raidName: (id) => dungeonDisplayName(id),
+      duration: (ms) => this.formatLockoutDuration(ms),
+    };
+    return raidLockoutPanelHtml(this.sim.raidLockouts(), i18n);
+  }
+
+  // Localized "Xd Yh" / "Xh Ym" / "Xm" / "<1m" for a remaining-ms span; the
+  // digits run through formatNumber and the units reorder via the t() template.
+  private formatLockoutDuration(ms: number): string {
+    const { days, hours, minutes } = lockoutParts(ms);
+    const n = (v: number) => formatNumber(v, { maximumFractionDigits: 0, useGrouping: false });
+    switch (lockoutShape(ms)) {
+      case 'daysHours':
+        return t('hudChrome.raidLockout.daysHours', { d: n(days), h: n(hours) });
+      case 'hoursMinutes':
+        return t('hudChrome.raidLockout.hoursMinutes', { h: n(hours), m: n(minutes) });
+      case 'minutes':
+        return t('hudChrome.raidLockout.minutes', { m: n(minutes) });
+      default:
+        return t('hudChrome.raidLockout.lessThanMinute');
     }
   }
 
@@ -6473,6 +6527,18 @@ export class Hud {
   }
 
   private localizeErrorText(text: string): string {
+    // Raid entry while locked: enrich the toast with the live unlock countdown
+    // from the mirrored lockout state. Falls through to the base sim_i18n message
+    // (still recognized there) if the lockout already cleared client-side.
+    if (text === 'You are locked to Nythraxis Raid Arena.') {
+      const lock = this.sim.raidLockouts().find((l) => l.id === 'nythraxis_boss_arena');
+      if (lock) {
+        return t('hudChrome.raidLockout.lockedToast', {
+          raid: dungeonDisplayName('nythraxis_boss_arena'),
+          time: this.formatLockoutDuration(lock.msRemaining),
+        });
+      }
+    }
     const exact: Record<string, TranslationKey> = {
       'You are stunned!': 'hud.errors.stunned',
       'You are silenced!': 'hud.errors.silenced',
@@ -11648,7 +11714,7 @@ export class Hud {
     // (<= one party's worth) back into a normal party. Larger raids must shed members first.
     const canUnconvert = leader && party.members.length <= 5;
     const footer = canUnconvert
-      ? `<div class="soc-empty soc-empty-action"><button type="button" class="soc-x" data-act="convert-party">${esc(t('hud.chat.context.convertToParty'))}</button></div>`
+      ? `<div class="soc-empty-action"><button type="button" class="soc-x" data-act="convert-party">${esc(t('hud.chat.context.convertToParty'))}</button></div>`
       : '';
     return `<div class="raid-groups">${groupHtml(1)}${groupHtml(2)}</div>${footer}`;
   }

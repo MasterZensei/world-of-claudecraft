@@ -231,12 +231,27 @@ export const zh_CN: EnTranslations = {
       "hapticsOff": "震动反馈：关",
       "toggleHaptics": "切换震动反馈"
     },
+    "tutorial": {
+      "moveBodyTouch": "使用摇杆移动，拖动屏幕环顾四周。先走几步开始吧。",
+      "talkBodyTouch": "靠近雷德布鲁克元帅并点击“使用”按钮与他交谈，然后接受他的任务。",
+      "returnBodyTouch": "任务已完成。返回雷德布鲁克元帅处并点击“使用”按钮交付任务。",
+      "doneBodyTouch": "你已掌握基础，{name}。东溪谷任你探索。点击“更多”，再点击“任务日志”，随时查看你的任务日志。祝你狩猎顺利。"
+    },
     "widgets": {
       "clockTitle": "本地时间 - 点击切换 12/24 小时制",
       "worldCoordinates": "世界坐标",
       "coordinates": "坐标",
       "heading": "朝向",
       "minimapZoom": "小地图缩放"
+    },
+    "raidLockout": {
+      "title": "团队副本锁定",
+      "allReady": "所有团队副本就绪",
+      "daysHours": "{d}天{h}小时",
+      "hoursMinutes": "{h}小时{m}分",
+      "minutes": "{m}分",
+      "lessThanMinute": "<1分",
+      "lockedToast": "你已锁定到{raid}。{time}后解锁。"
     },
     "compass": {
       "N": "北",
@@ -552,10 +567,10 @@ export const zh_CN: EnTranslations = {
       "noMatch": "没有符合筛选条件的物品。"
     },
     "raidConvert": {
-      "toPartyDone": "Your raid has converted back to a party.",
-      "notRaid": "Your group is not a raid.",
-      "leaderOnly": "Only the raid leader may convert to a party.",
-      "tooLarge": "A raid with more than five members cannot convert back to a party."
+      "toPartyDone": "你的团队已转换回队伍。",
+      "notRaid": "你的队伍不是团队。",
+      "leaderOnly": "只有团队领袖可以转换为队伍。",
+      "tooLarge": "成员超过五人的团队无法转换回队伍。"
     }
   },
   "guide": {
@@ -958,7 +973,6 @@ export const zh_CN: EnTranslations = {
       "notedLabel": "值得一提",
       "flavor": {
         "old_greyjaw": "一头浑身伤疤的老狼，从未被任何陷阱困住，三条猎犬和一名马童的手臂都算在它头上。它独自在密林深处狩猎，战斗拖得越久就越发狂暴。",
-        "brightwood_stag": "一头骄傲的林地雄鹿，会低下顶着鹿角的头颅猛冲向前，被逼得越久就越发难缠。",
         "grubjaw": "一头贪婪到连其他巨魔都不愿与之为伍的沼泽巨魔，据说曾把一名商人最后两头驮货的骡子连同挽具一同吞下。",
         "shardlord_kazzix": "一个化作魁梧身形的风暴元素，徘徊在风暴岩之上遥远的峭壁间，身上的心石值得你冒着雷电去夺取。",
         "mirejaw_frenzy": "一只沼泽鱼人，会在战斗中将自己鞭策进狂乱的扑腾，是一支喧闹而极具地盘意识的鱼群中嗓门最大的那个。",
@@ -2125,7 +2139,9 @@ export const zh_CN: EnTranslations = {
     "genre": "MMORPG",
     "playMode": "多人游戏",
     "applicationCategory": "游戏",
-    "operatingSystem": "网页浏览器"
+    "operatingSystem": "网页浏览器",
+    "officialLabel": "World of ClaudeCraft 官方网站",
+    "officialBody": "worldofclaudecraft.com 是 Claudemoon 服务器的官方免费浏览器 MMO。你可以用持久角色在线游玩，也可以离线单人探索，阅读 wiki，并从本站访问已验证的社区链接。"
   },
   "a11y": {
     "goHome": "前往主页",
@@ -2533,7 +2549,7 @@ export const zh_CN: EnTranslations = {
         "report": "举报玩家",
         "removeParty": "移出队伍",
         "convertToRaid": "转换为团队",
-        "convertToParty": "Convert to party",
+        "convertToParty": "转换为队伍",
         "cancel": "取消"
       }
     },
@@ -5008,39 +5024,6 @@ export const zh_CN: EnTranslations = {
       "nythraxis_scourge_of_thornpeak": {
         "name": "尼思拉克西斯，荆峰之灾"
       },
-      "brightwood_hare": {
-        "name": "明木野兔"
-      },
-      "glade_fox": {
-        "name": "林地狐狸"
-      },
-      "spotted_fawn": {
-        "name": "斑点幼鹿"
-      },
-      "meadow_crane": {
-        "name": "草甸仙鹤"
-      },
-      "thornpelt_badger": {
-        "name": "棘毛獾"
-      },
-      "dawnmane_doe": {
-        "name": "晨鬃母鹿"
-      },
-      "bramble_lynx": {
-        "name": "棘丛猞猁"
-      },
-      "brightwood_stag": {
-        "name": "明木雄鹿"
-      },
-      "grovetusk_boar": {
-        "name": "林牙野猪"
-      },
-      "sunhide_bear": {
-        "name": "阳皮熊"
-      },
-      "brightwood_monarch": {
-        "name": "明木君主"
-      },
       "reliquary_ledger_wraith": {
         "name": "名册幽魂"
       },
@@ -5061,9 +5044,6 @@ export const zh_CN: EnTranslations = {
       },
       "acolyte_tessa": {
         "name": "侍僧泰莎"
-      },
-      "elder_bristleback": {
-        "name": "年长硬鬃"
       },
       "ironvein_foreman": {
         "name": "铁脉工头"
@@ -5088,12 +5068,6 @@ export const zh_CN: EnTranslations = {
       },
       "nhalia_mourner": {
         "name": "娜莉娅哀悼者"
-      },
-      "sableweb_hatchling": {
-        "name": "黑网幼蛛"
-      },
-      "sableweb_matriarch": {
-        "name": "黑网主母"
       },
       "sister_nhalia": {
         "name": "娜莉娅修女"

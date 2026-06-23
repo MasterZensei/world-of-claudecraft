@@ -231,12 +231,27 @@ export const de_DE: EnTranslations = {
       "hapticsOff": "Haptik aus",
       "toggleHaptics": "Haptik umschalten"
     },
+    "tutorial": {
+      "moveBodyTouch": "Nutze den Bewegungsstick zum Bewegen und zieh über den Bildschirm, um dich umzusehen. Mach ein paar Schritte, um zu beginnen.",
+      "talkBodyTouch": "Stell dich nah an Marschall Redbrook und tippe auf die Schaltfläche Benutzen, um mit ihm zu sprechen, und nimm dann seine Aufgabe an.",
+      "returnBodyTouch": "Deine Aufgabe ist erledigt. Kehre zu Marschall Redbrook zurück und tippe auf die Schaltfläche Benutzen, um sie abzugeben.",
+      "doneBodyTouch": "Du beherrschst die Grundlagen, {name}. Das Eastbrook-Tal liegt bereit, von dir erkundet zu werden. Tippe auf Mehr und dann auf Questlog, um jederzeit dein Questlog einzusehen. Gute Jagd."
+    },
     "widgets": {
       "clockTitle": "Ortszeit - klicken, um zwischen 12-/24-Stunden zu wechseln",
       "worldCoordinates": "Weltkoordinaten",
       "coordinates": "Koordinaten",
       "heading": "Blickrichtung",
       "minimapZoom": "Minikarten-Zoom"
+    },
+    "raidLockout": {
+      "title": "Schlachtzug-Sperren",
+      "allReady": "Alle Schlachtzüge bereit",
+      "daysHours": "{d}T {h}Std",
+      "hoursMinutes": "{h}Std {m}Min",
+      "minutes": "{m}Min",
+      "lessThanMinute": "<1Min",
+      "lockedToast": "Du bist für {raid} gesperrt. Freischaltung in {time}."
     },
     "compass": {
       "N": "N",
@@ -552,10 +567,10 @@ export const de_DE: EnTranslations = {
       "noMatch": "Keine Gegenstände entsprechen Euren Filtern."
     },
     "raidConvert": {
-      "toPartyDone": "Your raid has converted back to a party.",
-      "notRaid": "Your group is not a raid.",
-      "leaderOnly": "Only the raid leader may convert to a party.",
-      "tooLarge": "A raid with more than five members cannot convert back to a party."
+      "toPartyDone": "Euer Schlachtzug wurde wieder in eine Gruppe umgewandelt.",
+      "notRaid": "Eure Gruppe ist kein Schlachtzug.",
+      "leaderOnly": "Nur der Schlachtzugsleiter darf in eine Gruppe umwandeln.",
+      "tooLarge": "Ein Schlachtzug mit mehr als fünf Mitgliedern kann nicht wieder in eine Gruppe umgewandelt werden."
     }
   },
   "guide": {
@@ -958,7 +973,6 @@ export const de_DE: EnTranslations = {
       "notedLabel": "Bemerkenswert",
       "flavor": {
         "old_greyjaw": "Ein vernarbter alter Wolf, den keine Falle gehalten hat, dem drei Jagdhunde und der Arm eines Stalljungen zur Last gelegt werden. Er jagt allein in den tiefen Wäldern und wird umso wilder, je länger ein Kampf andauert.",
-        "brightwood_stag": "Ein stolzer Hain-Hirsch, der seine Krone aus Geweih senkt und vorwärts stürmt, und der schwerer zu bezwingen wird, je länger man ihn bedrängt.",
         "grubjaw": "Ein Moortroll, so gierig, dass die anderen Trolle nicht neben ihm graben wollen, von dem man sagt, er habe einem Händler die letzten zwei Packmaultiere gefressen, samt Geschirr und allem.",
         "shardlord_kazzix": "Ein Sturmelementar, dem man Schultern gegeben hat und der über die fernen Felszacken hoch über Stormcrag wandelt, mit einem Herzsplitter, für den es sich lohnt, dem Blitz zu trotzen.",
         "mirejaw_frenzy": "Ein Moor-Murloc, der sich mitten im Kampf in eine um sich schlagende Raserei steigert, das lauteste Wesen in einem lauten, territorialen Rudel.",
@@ -2125,7 +2139,9 @@ export const de_DE: EnTranslations = {
     "genre": "MMORPG",
     "playMode": "Mehrspieler",
     "applicationCategory": "Spiel",
-    "operatingSystem": "Webbrowser"
+    "operatingSystem": "Webbrowser",
+    "officialLabel": "Offizielle Website von World of ClaudeCraft",
+    "officialBody": "worldofclaudecraft.com ist das offizielle kostenlose Browser-MMO für das Reich Claudemoon. Spiele online mit einem dauerhaften Charakter, erkunde solo offline, lies das Wiki und folge den verifizierten Community-Links auf dieser Website."
   },
   "a11y": {
     "goHome": "Zur Startseite",
@@ -2533,7 +2549,7 @@ export const de_DE: EnTranslations = {
         "report": "Spieler melden",
         "removeParty": "Aus Gruppe entfernen",
         "convertToRaid": "In Schlachtzug umwandeln",
-        "convertToParty": "Convert to party",
+        "convertToParty": "In Gruppe umwandeln",
         "cancel": "Abbrechen"
       }
     },
@@ -5008,39 +5024,6 @@ export const de_DE: EnTranslations = {
       "nythraxis_scourge_of_thornpeak": {
         "name": "Nythraxis, Geißel von Thornpeak"
       },
-      "brightwood_hare": {
-        "name": "Hellholz-Hase"
-      },
-      "glade_fox": {
-        "name": "Lichtungsfuchs"
-      },
-      "spotted_fawn": {
-        "name": "Geflecktes Hirschkalb"
-      },
-      "meadow_crane": {
-        "name": "Wiesenkranich"
-      },
-      "thornpelt_badger": {
-        "name": "Dornpelz-Dachs"
-      },
-      "dawnmane_doe": {
-        "name": "Morgenmähnen-Hirschkuh"
-      },
-      "bramble_lynx": {
-        "name": "Dornenluchs"
-      },
-      "brightwood_stag": {
-        "name": "Hellholz-Hirsch"
-      },
-      "grovetusk_boar": {
-        "name": "Hainhauer-Keiler"
-      },
-      "sunhide_bear": {
-        "name": "Sonnenfell-Bär"
-      },
-      "brightwood_monarch": {
-        "name": "Der Hellholz-Monarch"
-      },
       "reliquary_ledger_wraith": {
         "name": "Verzeichnisgespenst"
       },
@@ -5061,9 +5044,6 @@ export const de_DE: EnTranslations = {
       },
       "acolyte_tessa": {
         "name": "Akolythin Tessa"
-      },
-      "elder_bristleback": {
-        "name": "Alter Bristleback"
       },
       "ironvein_foreman": {
         "name": "Eisenader-Vorarbeiter"
@@ -5088,12 +5068,6 @@ export const de_DE: EnTranslations = {
       },
       "nhalia_mourner": {
         "name": "Nhalia-Trauernde"
-      },
-      "sableweb_hatchling": {
-        "name": "Sableweb-Jungtier"
-      },
-      "sableweb_matriarch": {
-        "name": "Sableweb-Matriarchin"
       },
       "sister_nhalia": {
         "name": "Schwester Nhalia"

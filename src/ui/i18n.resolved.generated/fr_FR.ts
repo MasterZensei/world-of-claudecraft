@@ -231,12 +231,27 @@ export const fr_FR: EnTranslations = {
       "hapticsOff": "Vibrations désactivées",
       "toggleHaptics": "Activer/désactiver les vibrations"
     },
+    "tutorial": {
+      "moveBodyTouch": "Utilise le joystick de déplacement pour te déplacer et fais glisser l'écran pour regarder autour de toi. Fais quelques pas pour commencer.",
+      "talkBodyTouch": "Tiens-toi près du maréchal Redbrook et touche le bouton Utiliser pour lui parler, puis accepte sa mission.",
+      "returnBodyTouch": "Ta mission est accomplie. Retourne voir le maréchal Redbrook et touche le bouton Utiliser pour la rendre.",
+      "doneBodyTouch": "Tu maîtrises les bases, {name}. Le Val est à toi : touche Plus, puis Journal de quêtes, pour consulter ton journal de quêtes à tout moment. Bonne chasse !"
+    },
     "widgets": {
       "clockTitle": "Heure locale - cliquez pour basculer 12/24 heures",
       "worldCoordinates": "Coordonnées du monde",
       "coordinates": "Coordonnées",
       "heading": "Cap",
       "minimapZoom": "Zoom de la minicarte"
+    },
+    "raidLockout": {
+      "title": "Verrous de raid",
+      "allReady": "Tous les raids prêts",
+      "daysHours": "{d}j {h}h",
+      "hoursMinutes": "{h}h {m}min",
+      "minutes": "{m}min",
+      "lessThanMinute": "<1min",
+      "lockedToast": "Vous êtes verrouillé sur {raid}. Déverrouillage dans {time}."
     },
     "compass": {
       "N": "N",
@@ -552,10 +567,10 @@ export const fr_FR: EnTranslations = {
       "noMatch": "Aucun objet ne correspond à vos filtres."
     },
     "raidConvert": {
-      "toPartyDone": "Your raid has converted back to a party.",
-      "notRaid": "Your group is not a raid.",
-      "leaderOnly": "Only the raid leader may convert to a party.",
-      "tooLarge": "A raid with more than five members cannot convert back to a party."
+      "toPartyDone": "Votre raid a été reconverti en groupe.",
+      "notRaid": "Votre groupe n'est pas un raid.",
+      "leaderOnly": "Seul le chef de raid peut convertir en groupe.",
+      "tooLarge": "Un raid de plus de cinq membres ne peut pas être reconverti en groupe."
     }
   },
   "guide": {
@@ -958,7 +973,6 @@ export const fr_FR: EnTranslations = {
       "notedLabel": "À noter",
       "flavor": {
         "old_greyjaw": "Un vieux loup balafré qu'aucun piège n'a jamais tenu, tenu pour responsable de trois chiens et du bras d'un garçon d'écurie. Il chasse seul au plus profond des bois et devient sauvage à mesure que le combat s'éternise.",
-        "brightwood_stag": "Un fier cerf des bosquets qui baisse sa couronne de bois et charge tête baissée, devenant d'autant plus coriace qu'on le presse longtemps.",
         "grubjaw": "Un troll des fagnes si avide que les autres trolls refusent de creuser à ses côtés ; on dit qu'il a dévoré les deux dernières mules de bât d'un marchand, harnais compris.",
         "shardlord_kazzix": "Un élémentaire de tempête doté d'épaules, qui arpente les crêtes lointaines au-dessus de Stormcrag, porteur d'un éclat de cœur qui vaut bien d'affronter la foudre.",
         "mirejaw_frenzy": "Un murloc des marais qui se monte en frénésie convulsive en plein combat, le plus bruyant d'une meute bruyante et territoriale.",
@@ -2125,7 +2139,9 @@ export const fr_FR: EnTranslations = {
     "genre": "MMORPG",
     "playMode": "Multijoueur",
     "applicationCategory": "Jeu",
-    "operatingSystem": "Navigateur web"
+    "operatingSystem": "Navigateur web",
+    "officialLabel": "Site officiel de World of ClaudeCraft",
+    "officialBody": "worldofclaudecraft.com est le MMO gratuit officiel sur navigateur du royaume Claudemoon. Jouez en ligne avec un personnage persistant, explorez en solo hors ligne, lisez le wiki et suivez les liens communautaires vérifiés depuis ce site."
   },
   "a11y": {
     "goHome": "Aller à l'accueil",
@@ -2533,7 +2549,7 @@ export const fr_FR: EnTranslations = {
         "report": "Signaler le joueur",
         "removeParty": "Retirer du groupe",
         "convertToRaid": "Convertir en raid",
-        "convertToParty": "Convert to party",
+        "convertToParty": "Convertir en groupe",
         "cancel": "Annuler"
       }
     },
@@ -5008,39 +5024,6 @@ export const fr_FR: EnTranslations = {
       "nythraxis_scourge_of_thornpeak": {
         "name": "Nythraxis, Fléau de Thornpeak"
       },
-      "brightwood_hare": {
-        "name": "Lièvre de Brightwood"
-      },
-      "glade_fox": {
-        "name": "Renard des clairières"
-      },
-      "spotted_fawn": {
-        "name": "Faon tacheté"
-      },
-      "meadow_crane": {
-        "name": "Grue des prés"
-      },
-      "thornpelt_badger": {
-        "name": "Blaireau Pelage-d'épines"
-      },
-      "dawnmane_doe": {
-        "name": "Biche Crinaube"
-      },
-      "bramble_lynx": {
-        "name": "Lynx des ronces"
-      },
-      "brightwood_stag": {
-        "name": "Cerf de Brightwood"
-      },
-      "grovetusk_boar": {
-        "name": "Sanglier Défense-des-bois"
-      },
-      "sunhide_bear": {
-        "name": "Ours Peau-de-soleil"
-      },
-      "brightwood_monarch": {
-        "name": "Le Monarque de Brightwood"
-      },
       "reliquary_ledger_wraith": {
         "name": "Spectre du registre"
       },
@@ -5061,9 +5044,6 @@ export const fr_FR: EnTranslations = {
       },
       "acolyte_tessa": {
         "name": "Acolyte Tessa"
-      },
-      "elder_bristleback": {
-        "name": "Ancien Bristleback"
       },
       "ironvein_foreman": {
         "name": "Contremaître Veinefer"
@@ -5088,12 +5068,6 @@ export const fr_FR: EnTranslations = {
       },
       "nhalia_mourner": {
         "name": "Pleureuse de Nhalia"
-      },
-      "sableweb_hatchling": {
-        "name": "Jeune Sableweb"
-      },
-      "sableweb_matriarch": {
-        "name": "Matriarche Sableweb"
       },
       "sister_nhalia": {
         "name": "Sœur Nhalia"

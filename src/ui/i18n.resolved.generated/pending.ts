@@ -10,11 +10,6 @@
 
 export const pending: Record<string, readonly string[]> = {
   "es": [
-    "hud.chat.context.convertToParty",
-    "hudChrome.raidConvert.leaderOnly",
-    "hudChrome.raidConvert.notRaid",
-    "hudChrome.raidConvert.toPartyDone",
-    "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
     "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
@@ -22,11 +17,6 @@ export const pending: Record<string, readonly string[]> = {
     "worldContent.delveSurfaceExitInteract"
   ],
   "es_ES": [
-    "hud.chat.context.convertToParty",
-    "hudChrome.raidConvert.leaderOnly",
-    "hudChrome.raidConvert.notRaid",
-    "hudChrome.raidConvert.toPartyDone",
-    "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
     "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
@@ -34,11 +24,6 @@ export const pending: Record<string, readonly string[]> = {
     "worldContent.delveSurfaceExitInteract"
   ],
   "fr_FR": [
-    "hud.chat.context.convertToParty",
-    "hudChrome.raidConvert.leaderOnly",
-    "hudChrome.raidConvert.notRaid",
-    "hudChrome.raidConvert.toPartyDone",
-    "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
     "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
@@ -46,11 +31,6 @@ export const pending: Record<string, readonly string[]> = {
     "worldContent.delveSurfaceExitInteract"
   ],
   "fr_CA": [
-    "hud.chat.context.convertToParty",
-    "hudChrome.raidConvert.leaderOnly",
-    "hudChrome.raidConvert.notRaid",
-    "hudChrome.raidConvert.toPartyDone",
-    "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
     "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
@@ -59,11 +39,6 @@ export const pending: Record<string, readonly string[]> = {
   ],
   "en_CA": [],
   "it_IT": [
-    "hud.chat.context.convertToParty",
-    "hudChrome.raidConvert.leaderOnly",
-    "hudChrome.raidConvert.notRaid",
-    "hudChrome.raidConvert.toPartyDone",
-    "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
     "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
@@ -71,11 +46,6 @@ export const pending: Record<string, readonly string[]> = {
     "worldContent.delveSurfaceExitInteract"
   ],
   "de_DE": [
-    "hud.chat.context.convertToParty",
-    "hudChrome.raidConvert.leaderOnly",
-    "hudChrome.raidConvert.notRaid",
-    "hudChrome.raidConvert.toPartyDone",
-    "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
     "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
@@ -83,11 +53,6 @@ export const pending: Record<string, readonly string[]> = {
     "worldContent.delveSurfaceExitInteract"
   ],
   "zh_CN": [
-    "hud.chat.context.convertToParty",
-    "hudChrome.raidConvert.leaderOnly",
-    "hudChrome.raidConvert.notRaid",
-    "hudChrome.raidConvert.toPartyDone",
-    "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
     "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
@@ -95,11 +60,6 @@ export const pending: Record<string, readonly string[]> = {
     "worldContent.delveSurfaceExitInteract"
   ],
   "zh_TW": [
-    "hud.chat.context.convertToParty",
-    "hudChrome.raidConvert.leaderOnly",
-    "hudChrome.raidConvert.notRaid",
-    "hudChrome.raidConvert.toPartyDone",
-    "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
     "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
@@ -107,11 +67,6 @@ export const pending: Record<string, readonly string[]> = {
     "worldContent.delveSurfaceExitInteract"
   ],
   "ko_KR": [
-    "hud.chat.context.convertToParty",
-    "hudChrome.raidConvert.leaderOnly",
-    "hudChrome.raidConvert.notRaid",
-    "hudChrome.raidConvert.toPartyDone",
-    "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
     "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
@@ -119,11 +74,6 @@ export const pending: Record<string, readonly string[]> = {
     "worldContent.delveSurfaceExitInteract"
   ],
   "ja_JP": [
-    "hud.chat.context.convertToParty",
-    "hudChrome.raidConvert.leaderOnly",
-    "hudChrome.raidConvert.notRaid",
-    "hudChrome.raidConvert.toPartyDone",
-    "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
     "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
@@ -131,11 +81,6 @@ export const pending: Record<string, readonly string[]> = {
     "worldContent.delveSurfaceExitInteract"
   ],
   "pt_BR": [
-    "hud.chat.context.convertToParty",
-    "hudChrome.raidConvert.leaderOnly",
-    "hudChrome.raidConvert.notRaid",
-    "hudChrome.raidConvert.toPartyDone",
-    "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
     "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",
@@ -143,11 +88,6 @@ export const pending: Record<string, readonly string[]> = {
     "worldContent.delveSurfaceExitInteract"
   ],
   "ru_RU": [
-    "hud.chat.context.convertToParty",
-    "hudChrome.raidConvert.leaderOnly",
-    "hudChrome.raidConvert.notRaid",
-    "hudChrome.raidConvert.toPartyDone",
-    "hudChrome.raidConvert.tooLarge",
     "lockpickUi.depthKeys",
     "lockpickUi.perMove",
     "worldContent.delveLockedChestInteract",

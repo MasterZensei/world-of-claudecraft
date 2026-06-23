@@ -231,12 +231,27 @@ export const ja_JP: EnTranslations = {
       "hapticsOff": "振動オフ",
       "toggleHaptics": "振動を切り替え"
     },
+    "tutorial": {
+      "moveBodyTouch": "移動スティックで移動し、画面をドラッグして周囲を見回します。数歩進んで始めましょう。",
+      "talkBodyTouch": "レッドブルック元帥に近づき、「使用」ボタンをタップして話しかけ、依頼を受けましょう。",
+      "returnBodyTouch": "依頼は完了しました。レッドブルック元帥のもとへ戻り、「使用」ボタンをタップして納品しましょう。",
+      "doneBodyTouch": "基本は覚えましたね、{name}。イーストブルック渓谷はあなたのもの、自由に探索しましょう。いつでも「その他」から「クエストログ」をタップしてクエストログを確認できます。よい狩りを！"
+    },
     "widgets": {
       "clockTitle": "現地時刻 - クリックで12/24時間表記を切り替え",
       "worldCoordinates": "ワールド座標",
       "coordinates": "座標",
       "heading": "方角",
       "minimapZoom": "ミニマップのズーム"
+    },
+    "raidLockout": {
+      "title": "レイドロックアウト",
+      "allReady": "すべてのレイドが利用可能",
+      "daysHours": "{d}日{h}時間",
+      "hoursMinutes": "{h}時間{m}分",
+      "minutes": "{m}分",
+      "lessThanMinute": "1分未満",
+      "lockedToast": "{raid}にロックされています。解除まで{time}。"
     },
     "compass": {
       "N": "北",
@@ -552,10 +567,10 @@ export const ja_JP: EnTranslations = {
       "noMatch": "条件に一致するアイテムはありません。"
     },
     "raidConvert": {
-      "toPartyDone": "Your raid has converted back to a party.",
-      "notRaid": "Your group is not a raid.",
-      "leaderOnly": "Only the raid leader may convert to a party.",
-      "tooLarge": "A raid with more than five members cannot convert back to a party."
+      "toPartyDone": "レイドがパーティに戻りました。",
+      "notRaid": "パーティはレイドではありません。",
+      "leaderOnly": "パーティに変換できるのはレイドリーダーだけです。",
+      "tooLarge": "メンバーが5人を超えるレイドはパーティに戻せません。"
     }
   },
   "guide": {
@@ -958,7 +973,6 @@ export const ja_JP: EnTranslations = {
       "notedLabel": "特筆すべき点",
       "flavor": {
         "old_greyjaw": "どんな罠にも捕らえられたことのない、傷だらけの老いた狼。猟犬三頭と厩番の少年の腕を奪った咎を負わされています。深い森を独りで狩り、戦いが長引くほどに獰猛になります。",
-        "brightwood_stag": "誇り高い林間の牡鹿。角の冠を下げて突進し、追い詰められるほどに手強くなります。",
         "grubjaw": "あまりに強欲で、他のトロルが隣で掘ろうとしないほどの沼地のトロル。交易商の最後の駄馬二頭を、馬具ごと食ったと言われています。",
         "shardlord_kazzix": "肩を得た嵐のエレメンタル。ストームクラグの上方にそびえる遥かな岩場を歩き、稲妻を冒してでも手に入れたいハートシャードを抱えています。",
         "mirejaw_frenzy": "戦いの最中に自らを暴れ狂う狂乱へと駆り立てる沼地のマーロック。騒がしく縄張り意識の強い群れの中で、最もやかましい一匹です。",
@@ -2125,7 +2139,9 @@ export const ja_JP: EnTranslations = {
     "genre": "MMORPG",
     "playMode": "マルチプレイヤー",
     "applicationCategory": "ゲーム",
-    "operatingSystem": "Webブラウザ"
+    "operatingSystem": "Webブラウザ",
+    "officialLabel": "World of ClaudeCraft 公式サイト",
+    "officialBody": "worldofclaudecraft.com は Claudemoon レルムの公式無料ブラウザMMOです。永続キャラクターでオンラインプレイし、オフラインでソロ探索し、wikiを読み、このサイトから確認済みのコミュニティリンクをたどれます。"
   },
   "a11y": {
     "goHome": "ホームへ移動",
@@ -2195,10 +2211,10 @@ export const ja_JP: EnTranslations = {
     "medium": "中",
     "low": "低",
     "popTipLow": "低人口：現在オンラインのプレイヤーは15人未満。余裕があり、新規スタートに最適です。",
-    "popTipMedium": "中人口：現在オンラインのプレイヤーは15〜39人。健全で活発なサーバーです。",
+    "popTipMedium": "中人口：現在オンラインのプレイヤーは15〜39人。健全で活発なレルムです。",
     "popTipHigh": "高人口：現在オンラインのプレイヤーは40〜79人。混雑しており、多くのプレイヤーがいます。",
     "popTipFull": "満員：現在オンラインのプレイヤーは80人以上。非常に混雑しており、ログイン待ちが発生する場合があります。",
-    "popTipOffline": "オフライン：このサーバーは現在接続できず、参加できません。",
+    "popTipOffline": "オフライン：このレルムは現在接続できず、参加できません。",
     "characterCountOne": "{count}キャラクター",
     "characterCountOther": "{count}キャラクター",
     "selectedRealm": "レルム: {name}",
@@ -2533,7 +2549,7 @@ export const ja_JP: EnTranslations = {
         "report": "プレイヤーを通報",
         "removeParty": "パーティから外す",
         "convertToRaid": "レイドに変換",
-        "convertToParty": "Convert to party",
+        "convertToParty": "パーティに変換",
         "cancel": "キャンセル"
       }
     },
@@ -5008,39 +5024,6 @@ export const ja_JP: EnTranslations = {
       "nythraxis_scourge_of_thornpeak": {
         "name": "ナイスラクシス、ソーンピークの災厄"
       },
-      "brightwood_hare": {
-        "name": "ブライトウッドの野ウサギ"
-      },
-      "glade_fox": {
-        "name": "林間のキツネ"
-      },
-      "spotted_fawn": {
-        "name": "斑模様の子鹿"
-      },
-      "meadow_crane": {
-        "name": "草原のツル"
-      },
-      "thornpelt_badger": {
-        "name": "茨毛のアナグマ"
-      },
-      "dawnmane_doe": {
-        "name": "暁のたてがみの雌鹿"
-      },
-      "bramble_lynx": {
-        "name": "茨のオオヤマネコ"
-      },
-      "brightwood_stag": {
-        "name": "ブライトウッドの牡鹿"
-      },
-      "grovetusk_boar": {
-        "name": "木立牙の猪"
-      },
-      "sunhide_bear": {
-        "name": "陽光皮の熊"
-      },
-      "brightwood_monarch": {
-        "name": "ブライトウッドの君主"
-      },
       "reliquary_ledger_wraith": {
         "name": "台帳の亡霊"
       },
@@ -5061,9 +5044,6 @@ export const ja_JP: EnTranslations = {
       },
       "acolyte_tessa": {
         "name": "侍祭テッサ"
-      },
-      "elder_bristleback": {
-        "name": "老ブリストルバック"
       },
       "ironvein_foreman": {
         "name": "鉄脈の現場監督"
@@ -5088,12 +5068,6 @@ export const ja_JP: EnTranslations = {
       },
       "nhalia_mourner": {
         "name": "ナリアの嘆き手"
-      },
-      "sableweb_hatchling": {
-        "name": "セーブルウェブの幼体"
-      },
-      "sableweb_matriarch": {
-        "name": "セーブルウェブの女家長"
       },
       "sister_nhalia": {
         "name": "シスター・ナリア"

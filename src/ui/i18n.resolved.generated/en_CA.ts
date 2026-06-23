@@ -231,12 +231,27 @@ export const en_CA: EnTranslations = {
       "hapticsOff": "Haptics Off",
       "toggleHaptics": "Toggle haptics"
     },
+    "tutorial": {
+      "moveBodyTouch": "Use the movement stick to move and drag the screen to look around. Take a few steps to begin.",
+      "talkBodyTouch": "Stand close to Marshal Redbrook and tap the Use button to speak, then accept his task.",
+      "returnBodyTouch": "Your task is done. Return to Marshal Redbrook and tap the Use button to turn it in.",
+      "doneBodyTouch": "You have the basics, {name}. The Vale is yours to explore. Tap More, then Quests, to review your quest log anytime. Good hunting."
+    },
     "widgets": {
       "clockTitle": "Local time - click to toggle 12/24-hour",
       "worldCoordinates": "World coordinates",
       "coordinates": "Coordinates",
       "heading": "Heading",
       "minimapZoom": "Minimap zoom"
+    },
+    "raidLockout": {
+      "title": "Raid Lockouts",
+      "allReady": "All raids ready",
+      "daysHours": "{d}d {h}h",
+      "hoursMinutes": "{h}h {m}m",
+      "minutes": "{m}m",
+      "lessThanMinute": "<1m",
+      "lockedToast": "You are locked to {raid}. Unlocks in {time}."
     },
     "compass": {
       "N": "N",
@@ -958,7 +973,6 @@ export const en_CA: EnTranslations = {
       "notedLabel": "Of note",
       "flavor": {
         "old_greyjaw": "A scarred old wolf no trap has held, blamed for three hounds and a stable boy's arm. He hunts the deep woods alone, and turns savage the longer a fight wears on.",
-        "brightwood_stag": "A proud grove deer that lowers its crown of antlers and bulls forward, growing harder to face the longer it is pressed.",
         "grubjaw": "A fen troll so greedy the other trolls will not dig beside him, said to have eaten a trader's last two pack-mules, harness and all.",
         "shardlord_kazzix": "A storm elemental given shoulders, walking the far crags above Stormcrag with a heartshard worth braving the lightning for.",
         "mirejaw_frenzy": "A marsh murloc that whips itself into a thrashing frenzy mid-fight, the loudest thing in a loud, territorial pack.",
@@ -2125,7 +2139,9 @@ export const en_CA: EnTranslations = {
     "genre": "MMORPG",
     "playMode": "Multiplayer",
     "applicationCategory": "Game",
-    "operatingSystem": "Web browser"
+    "operatingSystem": "Web browser",
+    "officialLabel": "Official World of ClaudeCraft website",
+    "officialBody": "worldofclaudecraft.com is the official free browser MMO for the Claudemoon realm. Play online with a persistent character, explore solo offline, read the wiki, and follow verified community links from this site."
   },
   "a11y": {
     "goHome": "Go to homepage",
@@ -3716,7 +3732,7 @@ export const en_CA: EnTranslations = {
       },
       "travel_form": {
         "name": "Travel Form",
-        "description": "Instantly shift into a swift travel form, increasing movement speed by 40%. You cannot use other abilities while shifted, but can shift in or out of combat — ideal for escaping."
+        "description": "Instantly shift into a swift travel form, increasing movement speed by 40%. You cannot use other abilities while shifted, but can shift in or out of combat, ideal for escaping."
       },
       "enrage": {
         "name": "Enrage",
@@ -5008,39 +5024,6 @@ export const en_CA: EnTranslations = {
       "nythraxis_scourge_of_thornpeak": {
         "name": "Nythraxis, Scourge of Thornpeak"
       },
-      "brightwood_hare": {
-        "name": "Brightwood Hare"
-      },
-      "glade_fox": {
-        "name": "Glade Fox"
-      },
-      "spotted_fawn": {
-        "name": "Spotted Fawn"
-      },
-      "meadow_crane": {
-        "name": "Meadow Crane"
-      },
-      "thornpelt_badger": {
-        "name": "Thornpelt Badger"
-      },
-      "dawnmane_doe": {
-        "name": "Dawnmane Doe"
-      },
-      "bramble_lynx": {
-        "name": "Bramble Lynx"
-      },
-      "brightwood_stag": {
-        "name": "Brightwood Stag"
-      },
-      "grovetusk_boar": {
-        "name": "Grovetusk Boar"
-      },
-      "sunhide_bear": {
-        "name": "Sunhide Bear"
-      },
-      "brightwood_monarch": {
-        "name": "The Brightwood Monarch"
-      },
       "reliquary_ledger_wraith": {
         "name": "Ledger Wraith"
       },
@@ -5061,9 +5044,6 @@ export const en_CA: EnTranslations = {
       },
       "acolyte_tessa": {
         "name": "Acolyte Tessa"
-      },
-      "elder_bristleback": {
-        "name": "Elder Bristleback"
       },
       "ironvein_foreman": {
         "name": "Ironvein Foreman"
@@ -5088,12 +5068,6 @@ export const en_CA: EnTranslations = {
       },
       "nhalia_mourner": {
         "name": "Nhalia Mourner"
-      },
-      "sableweb_hatchling": {
-        "name": "Sableweb Hatchling"
-      },
-      "sableweb_matriarch": {
-        "name": "Sableweb Matriarch"
       },
       "sister_nhalia": {
         "name": "Sister Nhalia"

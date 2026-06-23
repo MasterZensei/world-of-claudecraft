@@ -60,7 +60,6 @@ import {
   DUNGEON_LIST,
   DUNGEON_X_THRESHOLD,
   DUNGEONS,
-  DungeonDef,
   dungeonAt,
   delveAt,
   delveModuleZOffset,
@@ -251,11 +250,11 @@ const NYTHRAXIS_RELIC_SUMMONS: Record<string, string> = {
   priests_sigil: 'corrupted_priest_malric',
   royal_seal: 'deathstalker_voss',
 };
-const NYTHRAXIS_CRYPT_QUESTS = new Set(['q_nythraxis_sealed_crypt', 'q_nythraxis_bound_guardian']);
+const _NYTHRAXIS_CRYPT_QUESTS = new Set(['q_nythraxis_sealed_crypt', 'q_nythraxis_bound_guardian']);
 const NYTHRAXIS_BOSS_ID = 'nythraxis_scourge_of_thornpeak';
 const NYTHRAXIS_ADD_ID = 'nythraxis_skeleton_warrior';
 const NYTHRAXIS_ALDRIC_ID = 'brother_aldric_raid';
-const NYTHRAXIS_FINAL_QUEST_ID = 'q_nythraxis_scourges_end';
+const _NYTHRAXIS_FINAL_QUEST_ID = 'q_nythraxis_scourges_end';
 const NYTHRAXIS_WARDSTONE_ITEM_ID = 'bastion_ward_stone';
 // How far a wardstone may sit from the boss spawn and still belong to this
 // encounter. The three arena wards form a wide forward triangle (~54yd out), so
@@ -1819,6 +1818,15 @@ export class Sim {
   get questsDone(): Set<string> {
     return this.primary.questsDone;
   }
+  raidLockouts(): import('../world_api').RaidLockout[] {
+    const now = this.lockoutNowMs();
+    const out: import('../world_api').RaidLockout[] = [];
+    for (const [id, until] of this.primary.raidLockouts) {
+      const msRemaining = until - now;
+      if (msRemaining > 0) out.push({ id, msRemaining });
+    }
+    return out;
+  }
   get counters(): RewardCounters {
     return this.primary.counters;
   }
@@ -2430,6 +2438,12 @@ export class Sim {
     return this.partyOf(mob.tappedById)?.lootStrategies ?? null;
   }
   private partyLootCandidatesForMob(mob: Entity): PlayerMeta[] {
+    if (mob.lootRecipientIds && mob.lootRecipientIds.length > 0) {
+      return mob.lootRecipientIds.flatMap((pid) => {
+        const candidate = this.players.get(pid);
+        return candidate ? [candidate] : [];
+      });
+    }
     if (mob.tappedById === null) return [];
     const party = this.partyOf(mob.tappedById);
     if (!party || party.members.length <= 1) return [];
@@ -2437,11 +2451,9 @@ export class Sim {
     for (const pid of party.members) {
       const candidate = this.players.get(pid);
       const e = this.entities.get(pid);
-      // A member downed during the fight (corpse still in range) keeps loot
-      // rights, exactly like the kill-credit gate in handleDeath. Do not filter
-      // on `e.dead` here: that locked fallen members out of currency splits and
-      // need/greed rolls. Releasing to the graveyard moves the corpse out of
-      // range, which is what actually forfeits the rights.
+      // Before a corpse has a death-time snapshot, fall back to current range.
+      // Do not filter on `e.dead`: a downed member whose corpse is still in
+      // range keeps loot rights.
       if (candidate && e && dist2d(e.pos, mob.pos) <= PARTY_XP_RANGE) candidates.push(candidate);
     }
     return candidates;
@@ -2880,7 +2892,7 @@ export class Sim {
   // Regen, timers, auras
   // -------------------------------------------------------------------------
 
-  private updateRegen(p: Entity, meta: PlayerMeta): void {
+  private updateRegen(p: Entity, _meta: PlayerMeta): void {
     if (this.tickCount % 40 !== 0) return; // every 2 seconds (the classic tick)
     if (p.resourceType === 'mana') {
       if (p.fiveSecondRule >= 5) {
@@ -4232,7 +4244,7 @@ export class Sim {
           break;
         }
         case 'taunt': {
-          if (!target || target.kind !== 'mob' || target.dead) break;
+          if (target?.kind !== 'mob' || target.dead) break;
           this.applyTaunt(p, target);
           break;
         }
@@ -4407,14 +4419,6 @@ export class Sim {
     if (stage >= PVP_CC_DR_MULTIPLIERS.length) return null;
     target.ccDr.set(category, { stage: stage + 1, resetAt: this.time + reset });
     return duration * PVP_CC_DR_MULTIPLIERS[stage];
-  }
-
-  private mobsInRadius(pos: Vec3, radius: number): Entity[] {
-    const out: Entity[] = [];
-    this.grid.forEachInRadius(pos.x, pos.z, radius, (e) => {
-      if (e.kind === 'mob' && !e.dead && e.hostile) out.push(e);
-    });
-    return out;
   }
 
   private hostilesInRadius(source: Entity, pos: Vec3, radius: number): Entity[] {
@@ -4639,6 +4643,20 @@ export class Sim {
       }
     }
 
+    const pet = this.createDemonPet(owner, templateId);
+    if (!pet) return;
+    this.emit({
+      type: 'log',
+      text: `${pet.name} answers your summons.`,
+      color: '#b894ff',
+      pid: owner.id,
+    });
+    this.emit({ type: 'aura', targetId: pet.id, name: 'Summoned', gained: true });
+  }
+
+  private createDemonPet(owner: Entity, mobId: string, emit = false): Entity | null {
+    const template = MOBS[mobId];
+    if (!template) return null;
     const pet = createMob(
       this.nextId++,
       template,
@@ -4661,13 +4679,14 @@ export class Sim {
     pet.wanderTarget = null;
     clearThreat(pet);
     this.addEntity(pet);
-    this.emit({
-      type: 'log',
-      text: `${pet.name} answers your summons.`,
-      color: '#b894ff',
-      pid: owner.id,
-    });
-    this.emit({ type: 'aura', targetId: pet.id, name: 'Summoned', gained: true });
+    if (emit)
+      this.emit({
+        type: 'log',
+        text: `${pet.name} answers your summons.`,
+        color: '#b894ff',
+        pid: owner.id,
+      });
+    return pet;
   }
 
   private despawnPersistentPet(pet: Entity): void {
@@ -4808,13 +4827,7 @@ export class Sim {
         : r.e.targetId !== null
           ? (this.entities.get(r.e.targetId) ?? null)
           : null;
-    if (
-      !target ||
-      target.kind !== 'mob' ||
-      target.dead ||
-      !target.hostile ||
-      target.ownerId !== null
-    ) {
+    if (target?.kind !== 'mob' || target.dead || !target.hostile || target.ownerId !== null) {
       this.error(r.e.id, 'Your pet needs a hostile target.');
       return;
     }
@@ -4839,7 +4852,7 @@ export class Sim {
       return;
     }
     const item = ITEMS[itemId];
-    if (!item || item.kind !== 'food' || !item.foodHp) {
+    if (item?.kind !== 'food' || !item.foodHp) {
       this.error(r.e.id, 'Your pet can only eat food.');
       return;
     }
@@ -4963,86 +4976,6 @@ export class Sim {
       pet.autoAttack = false;
     }
     this.emit({ type: 'log', text: `${pet.name} is now ${mode}.`, color: '#ffd100', pid: r.e.id });
-  }
-
-  /** Release a tamed beast back to the wild: it drops its owner, sheds pet
-   *  auras, turns hostile/neutral again and evades home (or stays dead). */
-  private releasePetToWild(pet: Entity): void {
-    this.clearNonPlayerStatAuras(pet);
-    pet.auras = [];
-    pet.ownerId = null;
-    pet.petTauntTimer = 0;
-    pet.hostile = true;
-    pet.aggroTargetId = null;
-    pet.inCombat = false;
-    pet.aiState = pet.dead ? 'dead' : 'evade';
-    clearThreat(pet);
-    for (const m of this.entities.values()) {
-      if (m.kind !== 'mob' || m.id === pet.id) continue;
-      m.threat.delete(pet.id);
-      if (m.aggroTargetId === pet.id && !m.dead && m.aiState !== 'dead') this.retargetMob(m);
-    }
-  }
-
-  // -------------------------------------------------------------------------
-  // Warlock demon pets — summoned (never tamed) demons that fight like hunter
-  // pets but unravel (despawn) on dismiss/death/logout instead of going feral.
-  // -------------------------------------------------------------------------
-
-  /** Summon a demon pet (imp/voidwalker) just behind the warlock, replacing any
-   *  existing pet. Created fresh at the owner's level — never a world mob. */
-  private summonDemon(owner: Entity, mobId: string): void {
-    const template = MOBS[mobId];
-    if (!template) return;
-    const existing = this.petOf(owner.id, true);
-    if (existing) {
-      this.despawnPet(existing);
-      if (existing.templateId === mobId && !existing.dead) {
-        this.emit({
-          type: 'log',
-          text: `${existing.name} fades back into the void.`,
-          color: '#b894ff',
-          pid: owner.id,
-        });
-        return;
-      }
-    }
-    if (this.createDemonPet(owner, mobId, true)) return;
-  }
-
-  private createDemonPet(owner: Entity, mobId: string, emit = false): Entity | null {
-    const template = MOBS[mobId];
-    if (!template) return null;
-    // appear just behind the caster so the demon doesn't spawn inside the target
-    const ang = owner.facing + Math.PI;
-    const pos = this.groundPos(owner.pos.x + Math.sin(ang) * 2, owner.pos.z + Math.cos(ang) * 2);
-    const pet = createMob(this.nextId++, template, owner.level, pos);
-    pet.spawnPos = { ...pos };
-    pet.ownerId = owner.id;
-    pet.petTauntTimer = 0;
-    pet.hostile = false;
-    pet.aiState = 'idle';
-    pet.aggroTargetId = null;
-    pet.inCombat = false;
-    pet.tappedById = null;
-    pet.loot = null;
-    pet.lootable = false;
-    this.addEntity(pet);
-    if (emit)
-      this.emit({
-        type: 'log',
-        text: `You summon ${template.name}.`,
-        color: '#a78bfa',
-        pid: owner.id,
-      });
-    return pet;
-  }
-
-  /** Tear-down for any pet: summoned demons vanish from the world; tamed beasts
-   *  return to the wild and walk home. */
-  private removePet(pet: Entity): void {
-    if (MOBS[pet.templateId]?.family === 'demon') this.despawnPet(pet);
-    else this.releasePetToWild(pet);
   }
 
   /** Remove a summoned demon from the world entirely, scrubbing any references
@@ -5441,8 +5374,7 @@ export class Sim {
     const match = target.kind === 'player' ? this.arenaMatches.get(target.id) : undefined;
     // Fiesta lifesteal augment: heal the attacker for a slice of damage dealt.
     if (
-      match &&
-      match.fiesta &&
+      match?.fiesta &&
       match.state === 'active' &&
       sourcePlayer &&
       amount > 0 &&
@@ -5456,8 +5388,7 @@ export class Sim {
       }
     }
     if (
-      match &&
-      match.fiesta &&
+      match?.fiesta &&
       match.state === 'active' &&
       sourcePlayer &&
       this.isArenaCrossTeam(match, sourcePlayer.id, target.id)
@@ -5631,12 +5562,7 @@ export class Sim {
       // friendly DoT tail, self-damage) is benched, not killed — never let the
       // party-mode hp hit a permanent death + graveyard flow.
       const fmatch = target.kind === 'player' ? this.arenaMatches.get(target.id) : undefined;
-      if (
-        fmatch &&
-        fmatch.fiesta &&
-        fmatch.state === 'active' &&
-        !this.arenaIsDown(fmatch, target.id)
-      ) {
+      if (fmatch?.fiesta && fmatch.state === 'active' && !this.arenaIsDown(fmatch, target.id)) {
         this.fiestaDown(fmatch, target, null);
       } else {
         this.handleDeath(target, source);
@@ -5703,7 +5629,7 @@ export class Sim {
     kind: 'hit' | 'miss' | 'dodge',
     school: string,
   ): void {
-    if (!source || source.kind !== 'player' || source.id === target.id) return;
+    if (source?.kind !== 'player' || source.id === target.id) return;
     if (
       target.kind !== 'mob' ||
       target.hp <= 0 ||
@@ -5833,7 +5759,7 @@ export class Sim {
         // members nearby (classic group rules + group bonus). A member downed
         // during the fight still counts while their corpse is in range: classic
         // groups credit fallen members (and their loot rights), they are not
-        // erased for dying. Releasing to the graveyard moves them out of range.
+        // erased for dying or for releasing to the graveyard after the kill.
         const party = this.partyOf(creditEntity.id);
         const eligible: PlayerMeta[] = [];
         if (party) {
@@ -5844,6 +5770,7 @@ export class Sim {
           }
         }
         if (eligible.length === 0) eligible.push(meta);
+        e.lootRecipientIds = eligible.map((member) => member.entityId);
         const bonus = GROUP_XP_BONUS[Math.min(eligible.length, GROUP_XP_BONUS.length) - 1];
 
         meta.counters.kills++;
@@ -6011,7 +5938,7 @@ export class Sim {
   private needsQuestDrop(entry: LootEntry, meta: PlayerMeta): boolean {
     if (!entry.questId || !entry.itemId) return false;
     const qp = meta.questLog.get(entry.questId);
-    if (!qp || qp.state !== 'active') return false;
+    if (qp?.state !== 'active') return false;
     const quest = QUESTS[entry.questId];
     const objIdx = quest.objectives.findIndex(
       (o) => o.type === 'collect' && o.itemId === entry.itemId,
@@ -6168,8 +6095,7 @@ export class Sim {
     const r = this.resolve(pid);
     if (!r) return;
     const roll = this.pendingLootRolls.get(rollId);
-    if (!roll || !roll.candidates.includes(r.meta.entityId) || roll.choices.has(r.meta.entityId))
-      return;
+    if (!roll?.candidates.includes(r.meta.entityId) || roll.choices.has(r.meta.entityId)) return;
     roll.choices.set(r.meta.entityId, {
       choice,
       roll: choice === 'need' || choice === 'greed' ? this.rng.int(1, 100) : null,
@@ -6212,7 +6138,7 @@ export class Sim {
 
   private returnLootRollItemToCorpse(roll: PendingLootRoll): void {
     const mob = this.entities.get(roll.mobId);
-    if (!mob || !mob.dead) return;
+    if (!mob?.dead) return;
     if (!mob.loot) mob.loot = { copper: 0, items: [] };
     const existing = mob.loot.items.find(
       (slot) => slot.openToAll && slot.itemId === roll.itemId && !slot.personalFor,
@@ -6302,7 +6228,7 @@ export class Sim {
 
   private nythraxisAddFallbackTarget(add: Entity): Entity | null {
     const boss = this.findNythraxisBossForAdd(add);
-    if (!boss || !boss.inCombat || boss.aiState === 'idle' || boss.aiState === 'evade') return null;
+    if (!boss?.inCombat || boss.aiState === 'idle' || boss.aiState === 'evade') return null;
     const target = boss.aggroTargetId !== null ? this.entities.get(boss.aggroTargetId) : null;
     return target && !target.dead && target.kind === 'player' ? target : null;
   }
@@ -6506,18 +6432,6 @@ export class Sim {
         }
       });
     }
-  }
-
-  private nearestLivingPlayer(pos: Vec3, maxDist: number): { e: Entity; d: number } | null {
-    let best: Entity | null = null;
-    let bestD2 = maxDist * maxDist;
-    this.playerGrid.forEachInRadius(pos.x, pos.z, maxDist, (e, d2) => {
-      if (!e.dead && d2 < bestD2) {
-        bestD2 = d2;
-        best = e;
-      }
-    });
-    return best ? { e: best, d: Math.sqrt(bestD2) } : null;
   }
 
   // Classic "trivial con": a wild mob far below the player's level stops
@@ -8067,7 +7981,7 @@ export class Sim {
   // their own entries on enemy hate tables.
   private updatePet(pet: Entity): void {
     const owner = pet.ownerId !== null ? this.entities.get(pet.ownerId) : null;
-    if (!owner || owner.kind !== 'player' || !this.players.has(owner.id)) {
+    if (owner?.kind !== 'player' || !this.players.has(owner.id)) {
       this.despawnPersistentPet(pet);
       return;
     }
@@ -8368,6 +8282,7 @@ export class Sim {
     mob.dead = false;
     mob.lootable = false;
     mob.loot = null;
+    mob.lootRecipientIds = undefined;
     mob.tappedById = null;
     mob.ownerId = null;
     mob.hostile = true;
@@ -9766,7 +9681,7 @@ export class Sim {
     if (!r) return;
     const { meta, e: p } = r;
     const def = ITEMS[itemId];
-    if (!def || !def.slot || (def.kind !== 'weapon' && def.kind !== 'armor')) return;
+    if (!def?.slot || (def.kind !== 'weapon' && def.kind !== 'armor')) return;
     if (this.countItem(itemId, meta.entityId) <= 0) return;
     if (!canEquipItem(meta.cls, def)) {
       this.error(meta.entityId, 'You cannot equip that.');
@@ -9898,7 +9813,7 @@ export class Sim {
     this.addItem(caught, 1, meta.entityId);
   }
 
-  useItem(itemId: string, pid?: number): ItemUseResult | void {
+  useItem(itemId: string, pid?: number): ItemUseResult | undefined {
     const r = this.resolve(pid);
     if (!r) return;
     const { meta, e: p } = r;
@@ -10007,7 +9922,7 @@ export class Sim {
     const { meta, e: p } = r;
     const npc = this.entities.get(npcId);
     const def = ITEMS[itemId];
-    if (!npc || npc.kind !== 'npc' || npc.vendorItems.length === 0) {
+    if (npc?.kind !== 'npc' || npc.vendorItems.length === 0) {
       this.error(meta.entityId, 'That merchant is not available.');
       return;
     }
@@ -10158,7 +10073,7 @@ export class Sim {
     if (!r) return;
     const { meta, e: p } = r;
     const mob = this.entities.get(mobId);
-    if (!mob || !mob.lootable || !mob.loot) return;
+    if (!mob?.lootable || !mob.loot) return;
     const tapperParty = mob.tappedById !== null ? this.partyOf(mob.tappedById) : null;
     const hasSharedLootRights =
       mob.tappedById === null ||
@@ -10202,7 +10117,7 @@ export class Sim {
     if (!r) return;
     const { meta, e: p } = r;
     const obj = this.entities.get(objId);
-    if (!obj || obj.kind !== 'object' || !obj.lootable || !obj.objectItemId) return;
+    if (obj?.kind !== 'object' || !obj.lootable || !obj.objectItemId) return;
     if (dist2d(p.pos, obj.pos) > INTERACT_RANGE) {
       this.error(meta.entityId, 'Too far away.');
       return;
@@ -10243,7 +10158,7 @@ export class Sim {
     const mobId = NYTHRAXIS_RELIC_SUMMONS[obj.objectItemId];
     if (!mobId) return false;
     const qp = meta.questLog.get('q_nythraxis_sealed_crypt');
-    if (!qp || qp.state !== 'active') {
+    if (qp?.state !== 'active') {
       const def = ITEMS[obj.objectItemId];
       this.error(meta.entityId, def?.pickupDeny ?? 'The relic is bound by the sealed crypt.');
       return true;
@@ -10303,7 +10218,7 @@ export class Sim {
         );
         for (const member of shared) {
           const memberQp = member.questLog.get(qp.questId);
-          if (!memberQp || memberQp.state !== 'active') continue;
+          if (memberQp?.state !== 'active') continue;
           if (memberQp.counts[objectiveIndex] >= objective.count) continue;
           memberQp.counts[objectiveIndex]++;
           member.counters.questProgress++;
@@ -11529,7 +11444,7 @@ export class Sim {
       const clean = cm[2].trim();
       if (!clean) return null;
       const mine = this.channelSubs.get(r.meta.entityId);
-      if (!mine || !mine.has(channel)) {
+      if (!mine?.has(channel)) {
         this.error(
           r.meta.entityId,
           `You are not in the ${channel} channel. Type /join ${channel} first.`,
@@ -11934,7 +11849,7 @@ export class Sim {
     const r = this.resolve(pid);
     if (!r) return;
     const party = this.partyOf(r.meta.entityId);
-    if (!party || !party.raid) {
+    if (!party?.raid) {
       this.error(r.meta.entityId, 'You are not in a raid group.');
       return;
     }
@@ -12041,14 +11956,7 @@ export class Sim {
     if (!Number.isInteger(markerId) || markerId < 0 || markerId > 7) return;
     // markable: a live, wild, hostile mob (not players, NPCs, corpses, or pets)
     const target = this.entities.get(entityId);
-    if (
-      !target ||
-      target.kind !== 'mob' ||
-      target.dead ||
-      !target.hostile ||
-      target.ownerId !== null
-    )
-      return;
+    if (target?.kind !== 'mob' || target.dead || !target.hostile || target.ownerId !== null) return;
     let marks = this.partyMarkers.get(party.id);
     if (!marks) {
       marks = new Map();
@@ -13575,7 +13483,7 @@ export class Sim {
     });
   }
 
-  private fiestaGrabPowerup(match: ArenaMatch, e: Entity, p: FiestaPowerup): void {
+  private fiestaGrabPowerup(_match: ArenaMatch, e: Entity, p: FiestaPowerup): void {
     const def = POWERUPS_BY_ID[p.defId];
     if (!def) return;
     // Re-apply (refreshing) each buff aura for the power-up's duration. These are
@@ -13694,7 +13602,7 @@ export class Sim {
     // Snap up any offered augment immediately (random, deterministic via rng).
     if (match?.fiesta) {
       const offer = match.fiesta.offers.get(pid);
-      if (offer && offer.choices.length) this.arenaAugmentPick(this.rng.pick(offer.choices), pid);
+      if (offer?.choices.length) this.arenaAugmentPick(this.rng.pick(offer.choices), pid);
     }
     meta.moveInput = emptyMoveInput();
     if (e.dead || !match?.fiesta || match.state !== 'active') return;
@@ -13764,7 +13672,7 @@ export class Sim {
     const roster = (pids: number[]): import('../world_api').FiestaScoreboardPlayer[] =>
       pids.map((p) => {
         const m = this.players.get(p);
-        const e = this.entities.get(p);
+        const _e = this.entities.get(p);
         return {
           pid: p,
           name: m?.name ?? '?',
@@ -14523,7 +14431,7 @@ export class Sim {
     }
     for (const doorId of this.dungeonDoorIds) {
       const door = this.entities.get(doorId);
-      if (door && door.dungeonId && dist2d(p.pos, door.pos) < DOOR_TRIGGER_RADIUS) {
+      if (door?.dungeonId && dist2d(p.pos, door.pos) < DOOR_TRIGGER_RADIUS) {
         this.enterDungeon(door.dungeonId, p.id);
         return;
       }
@@ -14590,15 +14498,6 @@ export class Sim {
     p.autoAttack = false;
     inst.emptyFor = 0;
     this.emit({ type: 'log', text: dungeon.enterText, color: '#b9f', pid: r.meta.entityId });
-  }
-
-  private canEnterNythraxisCrypt(meta: PlayerMeta): boolean {
-    for (const questId of NYTHRAXIS_CRYPT_QUESTS) {
-      const qp = meta.questLog.get(questId);
-      if (qp && (qp.state === 'active' || qp.state === 'ready')) return true;
-      if (meta.questsDone.has(questId)) return true;
-    }
-    return false;
   }
 
   private canEnterNythraxisRaid(meta: PlayerMeta): boolean {
@@ -15218,7 +15117,7 @@ export class Sim {
       set.add(channel);
       this.notice(pid, `Joined the ${channel} channel. Type /${channel} <message> to talk.`);
     } else {
-      if (!set || !set.has(channel)) {
+      if (!set?.has(channel)) {
         this.error(pid, `You are not in the ${channel} channel.`);
         return;
       }

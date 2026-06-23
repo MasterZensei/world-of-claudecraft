@@ -40,7 +40,7 @@ import {
 import { IpBlockList } from './ip_block';
 import { loadActiveBlockedIps } from './ip_block_db';
 import { REALM } from './realm';
-import type { Presence, PresenceStatus, SocialActor, SocialEvent, SocialTransport } from './social';
+import type { Presence, PresenceStatus, SocialActor, SocialTransport } from './social';
 import { SocialService } from './social';
 import { PgSocialDb } from './social_db';
 import { holderInfoForPubkey } from './woc_balance';
@@ -934,7 +934,7 @@ export class GameServer {
     return this.leave(session, leaveReason);
   }
 
-  async leave(session: ClientSession, reason: string): Promise<void> {
+  async leave(session: ClientSession, _reason: string): Promise<void> {
     if (session.left || !this.clients.has(session.pid)) return;
     session.left = true;
     this.clients.delete(session.pid);
@@ -2117,6 +2117,14 @@ export class GameServer {
     maybe('cosmetics', session.accountCosmetics);
     maybe('qlog', [...meta.questLog.values()]);
     maybe('qdone', [...meta.questsDone]);
+    // Raid lockouts as {dungeonId: expiryEpochMs}, future-only. Absolute expiry
+    // (not a countdown) so the serialized form is stable between resets and the
+    // delta guard ships it only on grant / reset / expiry; the client derives the
+    // remaining time from its own clock.
+    maybe(
+      'lockouts',
+      Object.fromEntries([...meta.raidLockouts].filter(([, until]) => until > Date.now())),
+    );
     maybe('milestones', [...meta.unlockedMilestones]);
     maybe('cds', Object.fromEntries([...p.cooldowns.entries()].map(([k, v]) => [k, round2(v)])));
     maybe('stats', p.stats);
@@ -2147,7 +2155,7 @@ export class GameServer {
       loadouts: meta.loadouts,
       activeLoadout: meta.activeLoadout,
     });
-    return extra === '' ? json : `${json.slice(0, -1)}${extra}}`;
+    return extra === '' ? json : `${json.slice(0, -1) + extra}}`;
   }
 
   private partyWire(pid: number): unknown {

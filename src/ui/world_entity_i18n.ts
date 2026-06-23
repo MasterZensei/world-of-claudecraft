@@ -73,18 +73,6 @@ const MOB_IDS = [
   'bound_guardian',
   'nythraxis_skeleton_warrior',
   'nythraxis_scourge_of_thornpeak',
-  // Brightwood Glade wildlife pack
-  'brightwood_hare',
-  'glade_fox',
-  'spotted_fawn',
-  'meadow_crane',
-  'thornpelt_badger',
-  'dawnmane_doe',
-  'bramble_lynx',
-  'brightwood_stag',
-  'grovetusk_boar',
-  'sunhide_bear',
-  'brightwood_monarch',
   // Collapsed Reliquary delve mobs
   'reliquary_ledger_wraith', 'reliquary_funeral_ringer', 'reliquary_gravecall_acolyte',
   'reliquary_bonewalker', 'reliquary_saintless_effigy', 'deacon_varric',
