@@ -1780,6 +1780,7 @@ export const ko_KR: EnTranslations = {
     "triesOf": "시도 {tries}/{total}",
     "triesOfAria": "남은 시도 {total}회 중 {tries}회",
     "ward": "방호 장치 {col} / {total}",
+    "depthKeys": "Hotkeys set pick depth (Q/W/E/A/Z), not the ward number.",
     "withdraw": "물러나기 (Esc)",
     "action": {
       "hardSet": "강하게 고정",
@@ -6256,6 +6257,9 @@ export const ko_KR: EnTranslations = {
     "corpseName": "{name} (시체)",
     "dungeonExitName": "{name} 출구",
     "dungeonPartyWarning": "{name}은 {count}명의 완전한 파티를 위해 마련된 곳입니다. 조심해서 나아가십시오.",
-    "dungeonInstanceBusy": "{name}의 모든 인스턴스가 사용 중입니다. 잠시 후 다시 시도하십시오."
+    "dungeonInstanceBusy": "{name}의 모든 인스턴스가 사용 중입니다. 잠시 후 다시 시도하십시오.",
+    "delveLockedChestInteract": "Press F to pick the lock",
+    "delveRewardChestInteract": "Press F to claim spoils",
+    "delveSurfaceExitInteract": "Press F to climb"
   }
 };

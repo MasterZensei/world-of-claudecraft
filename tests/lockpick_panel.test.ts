@@ -23,7 +23,7 @@ function viewFromLock(seed: number, col = 0): LockpickView {
   return {
     sessionId: 's1', objectId: 7, w: TIER.cols, h: TIER.rows,
     col, row: spec.startRow, page: 1, pageCount: 3, tries: 1, triesTotal: 1, lootTier: 'premium',
-    allowed: TIER.allowedActions, visible,
+    allowed: TIER.allowedActions, visible, stepTimeoutMs: 20000,
   };
 }
 
@@ -70,10 +70,10 @@ describe('lockpickBoardModel: tumbler tracks', () => {
 });
 
 describe('lockpickActionButtons', () => {
-  it('returns all five actions in shallow→deep order with hotkeys 1..5', () => {
+  it('returns all five actions in shallow→deep order with depth hotkeys Q/W/E/A/Z', () => {
     const btns = lockpickActionButtons(['hardSet', 'set', 'steady', 'ease', 'drop']);
     expect(btns.map((b) => b.action)).toEqual(['hardSet', 'set', 'steady', 'ease', 'drop']);
-    expect(btns.map((b) => b.key)).toEqual(['1', '2', '3', '4', '5']);
+    expect(btns.map((b) => b.key)).toEqual(['Q', 'W', 'E', 'A', 'Z']);
     expect(btns.every((b) => b.enabled)).toBe(true);
   });
 
@@ -95,6 +95,13 @@ describe('anteOptions', () => {
     expect(opts[2]).toMatchObject({ tier: 'low', pages: 1 });
     expect(opts[0].margin).toContain('gauntlet');
     expect(opts[2].margin).toContain('Single');
+  });
+
+  it('carries each ante its own per-move clock (hard 3s / medium 6s / easy 9s)', () => {
+    // The clock is an ante/difficulty dial, not a delve-band dial: every ante
+    // shows its own ANTE_TO_STEP_TIMEOUT_MS budget.
+    const opts = anteOptions();
+    expect(opts.map((o) => o.timerSeconds)).toEqual([3, 6, 9]);
   });
 
   it('forces Premium-only for a Bountiful Coffer (§7.6)', () => {

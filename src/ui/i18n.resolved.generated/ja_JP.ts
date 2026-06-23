@@ -1780,6 +1780,7 @@ export const ja_JP: EnTranslations = {
     "triesOf": "挑戦 {tries}/{total}",
     "triesOfAria": "残り挑戦 {tries}/{total}",
     "ward": "ウォード {col}/{total}",
+    "depthKeys": "Hotkeys set pick depth (Q/W/E/A/Z), not the ward number.",
     "withdraw": "手を引く (Esc)",
     "action": {
       "hardSet": "強く押し込む",
@@ -6256,6 +6257,9 @@ export const ja_JP: EnTranslations = {
     "corpseName": "{name}（死体）",
     "dungeonExitName": "{name}の出口",
     "dungeonPartyWarning": "{name}は{count}人のフルパーティ向けです。慎重に進んでください。",
-    "dungeonInstanceBusy": "{name}のインスタンスはすべて使用中です。少し待ってから再試行してください。"
+    "dungeonInstanceBusy": "{name}のインスタンスはすべて使用中です。少し待ってから再試行してください。",
+    "delveLockedChestInteract": "Press F to pick the lock",
+    "delveRewardChestInteract": "Press F to claim spoils",
+    "delveSurfaceExitInteract": "Press F to climb"
   }
 };

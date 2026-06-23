@@ -1780,6 +1780,7 @@ export const de_DE: EnTranslations = {
     "triesOf": "Versuche {tries}/{total}",
     "triesOfAria": "{tries} von {total} Versuchen übrig",
     "ward": "Sperre {col} / {total}",
+    "depthKeys": "Hotkeys set pick depth (Q/W/E/A/Z), not the ward number.",
     "withdraw": "Zurückziehen (Esc)",
     "action": {
       "hardSet": "Fest setzen",
@@ -6256,6 +6257,9 @@ export const de_DE: EnTranslations = {
     "corpseName": "{name} (Leichnam)",
     "dungeonExitName": "Ausgang von {name}",
     "dungeonPartyWarning": "{name} ist für eine vollständige Gruppe von {count} gedacht. Geh vorsichtig vor.",
-    "dungeonInstanceBusy": "Alle Instanzen von {name} sind belegt. Versuch es bald erneut."
+    "dungeonInstanceBusy": "Alle Instanzen von {name} sind belegt. Versuch es bald erneut.",
+    "delveLockedChestInteract": "Press F to pick the lock",
+    "delveRewardChestInteract": "Press F to claim spoils",
+    "delveSurfaceExitInteract": "Press F to climb"
   }
 };

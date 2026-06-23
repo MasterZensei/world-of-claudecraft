@@ -64,6 +64,18 @@ export const ANTE_TO_TRIES: Record<Ante, number> = {
   3: 3, // modest, easy: three tries
 };
 
+/** Per-MOVE time budget (ms) each difficulty grants, the lockpick clock's ONLY
+ * axis: the clock is an ante/difficulty dial, not a delve-band dial. Hard
+ * (premium/ante 1) is the tightest at 3s, medium 6s, easy (modest/ante 3) the
+ * most forgiving at 9s. Server-authoritative, enforced on the sim tick
+ * (Sim.armLockpickStep) and re-armed on every move; the client only renders the
+ * remaining time. Tune the numbers HERE. */
+export const ANTE_TO_STEP_TIMEOUT_MS: Record<Ante, number> = {
+  1: 3000, // premium, hard
+  2: 6000, // medium
+  3: 9000, // modest, easy
+};
+
 /** Puzzle difficulty dials. Scales with the delve's level band; lives are the
  * player's ante, never a difficulty dial. */
 export interface LockTierSpec {
@@ -75,7 +87,6 @@ export interface LockTierSpec {
   allowedActions: Exclude<PickAction, 'abort'>[];
   trapCount?: number; // ward-traps that look open but JAM instantly on contact (default 0)
   noiseThreshold?: number; // omit to disable the noise meter
-  stepTimeoutMs?: number; // omit for no clock (default)
 }
 
 /** Server-only full lock layout. Never serialized whole when fogged, only
@@ -108,6 +119,12 @@ export interface LockSession {
   row: number;
   triesLeft: number; // attempts remaining (this one included); chest jams at 0
   triesTotal: number; // = ANTE_TO_TRIES[ante]
+  // Sim-tick deadline for the CURRENT step (server-authoritative clock). The sim
+  // burns a try when tickCount reaches it; re-armed on every move. The per-move
+  // budget is the ante's ANTE_TO_STEP_TIMEOUT_MS (hard 3s / medium 6s / easy 9s).
+  // The client never reports a timeout; the HUD only renders the remaining time.
+  // See Sim.armLockpickStep / tickLockpickTimeout.
+  stepDeadlineTick: number;
   state: LockSessionState;
 }
 
@@ -342,21 +359,28 @@ export function stepLock(
  * never serializes anything beyond what this returns. A window >= tier.cols
  * reveals the whole board (full-visibility easy locks).
  *
- * Ward-traps are deliberately reported as `kind: 'open'`, never `'trap'`: they
- * "look open but jam on contact" (the heart of the puzzle, the player must read
- * and thread the true path). stepLock() enforces the jam server-side, so the fog
- * never telegraphs a trap to the client. The 'trap' CellKind exists only as a
- * step RESULT (the toast shown after the pick touches one).
+ * Ward-traps are revealed as `kind: 'trap'` so the player can SEE and thread
+ * around them. An open-looking notch that jams on contact is pure RNG death when
+ * it is invisible: the pick has no way to read the safe path, so a "correct"
+ * looking press can jam a 1-try lock through no fault of the player. Painting
+ * traps as a distinct hazard notch makes the lock solvable by sight, with the
+ * forgiveness band and gates as the real challenge. stepLock() still enforces the
+ * jam server-side; revealing trap POSITIONS grants no exploit (loot stays
+ * server-authoritative), it only lets the player play fairly. A trap-free
+ * solution always exists (the carved path is never trapped), so the revealed
+ * board is always winnable.
  */
 export function visibleCells(spec: LockSpec, col: number, window: number): VisibleCell[] {
   const last = spec.open.length - 1;
   const maxCol = window >= spec.tier.cols ? last : Math.min(last, col + window);
   const cells: VisibleCell[] = [];
   for (let c = 0; c <= maxCol; c++) {
+    const trapRows = spec.traps[c];
     for (const r of spec.open[c]) {
       const kind: CellKind = c === last ? 'seat'
         : spec.gates.includes(c) ? 'gate'
-          : 'open';
+          : trapRows && trapRows.includes(r) ? 'trap'
+            : 'open';
       cells.push({ col: c, row: r, kind });
     }
   }

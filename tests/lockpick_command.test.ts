@@ -299,21 +299,22 @@ describe('lockpick, tries (easy 3 / medium 2 / hard 1)', () => {
     expect(run.objectState[chestId].lootedTier).toBe('low');
   });
 
-  it('timeout consumes a try (retry while tries remain)', () => {
+  it('a sim-enforced step timeout consumes a try (retry while tries remain)', () => {
     const sim = makeSim();
     const run = enterFinale(sim);
     killBoss(sim, run);
     const chestId = standOnChest(sim, run);
     sim.lockpickEngage(chestId, 2); // 2 tries
     flush(sim);
-    sim.lockpickTimeout();
+    // Force the per-step deadline due; the sim tick (flush) enforces the timeout.
+    run.lockpick!.stepDeadlineTick = 0;
     const events = flush(sim);
     const step = events.find((e) => e.type === 'lockpickStep') as any;
     expect(step.result).toBe('retry');
     expect(step.tries).toBe(1);
     expect(run.lockpick).not.toBeNull();
     // A second timeout exhausts the last try → fail.
-    sim.lockpickTimeout();
+    run.lockpick!.stepDeadlineTick = 0;
     const ev2 = flush(sim);
     expect(ev2.find((e) => e.type === 'lockpickEnd' && (e as any).outcome === 'fail')).toBeDefined();
     expect(run.lockpick).toBeNull();

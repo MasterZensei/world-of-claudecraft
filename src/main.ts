@@ -1759,7 +1759,14 @@ async function startGame(world: IWorld, offlineSim: Sim | null, online: ClientWo
         tokenProvider: () => api.token,
         characterIdProvider: () => online?.characterId ?? null,
       });
-      (window as any).__game = { sim: world, world, renderer, input, hud, online, controller, perf, gamepad };
+      (window as any).__game = {
+        sim: world, world, renderer, input, hud, online, controller, perf, gamepad,
+        /** Opens the board and drains queued sim events. Do not call sim.lockpickEngage directly offline. */
+        lockpickEngage: (objectId: number, ante: number) => hud.submitLockpickEngage(objectId, ante as 1 | 2 | 3),
+        /** Syncs HUD col/row from sim before acting; always drains step events. Use instead of sim.lockpickAction. */
+        lockpickAction: (action: string) => hud.submitLockpickAction(action as import('./sim/lockpick').PickAction),
+        flushLockpickEvents: () => hud.flushLockpickEvents(),
+      };
     }, LOADING_FADE_MS);
   }));
   // Now in-game: fade the home-page theme out (it kept playing through loading).

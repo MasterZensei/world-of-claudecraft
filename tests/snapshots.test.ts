@@ -1284,6 +1284,7 @@ describe('lockpick view rebuilds from events on the online client', () => {
       type: 'lockpickSession', sessionId: sid, objectId: 77, w: 11, h: 6,
       col, row: 2, page: 1, pageCount: 1, tries: 1, triesTotal: 1,
       lootTier: 'premium', allowed: ['hardSet', 'set', 'steady', 'ease', 'drop'], visible,
+      stepTimeoutMs: 20000,
     };
   }
   function feed(client: ClientWorld, ev: any) {

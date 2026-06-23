@@ -1780,6 +1780,7 @@ export const pt_BR: EnTranslations = {
     "triesOf": "Tentativas {tries}/{total}",
     "triesOfAria": "{tries} de {total} tentativas restantes",
     "ward": "Guarda {col} / {total}",
+    "depthKeys": "Hotkeys set pick depth (Q/W/E/A/Z), not the ward number.",
     "withdraw": "Recuar (Esc)",
     "action": {
       "hardSet": "Fixar Forte",
@@ -6256,6 +6257,9 @@ export const pt_BR: EnTranslations = {
     "corpseName": "{name} (cadáver)",
     "dungeonExitName": "Saída de {name}",
     "dungeonPartyWarning": "{name} foi feito para um grupo completo de {count}. Avance com cuidado.",
-    "dungeonInstanceBusy": "Todas as instâncias de {name} estão ocupadas. Tente novamente em breve."
+    "dungeonInstanceBusy": "Todas as instâncias de {name} estão ocupadas. Tente novamente em breve.",
+    "delveLockedChestInteract": "Press F to pick the lock",
+    "delveRewardChestInteract": "Press F to claim spoils",
+    "delveSurfaceExitInteract": "Press F to climb"
   }
 };

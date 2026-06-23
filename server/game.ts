@@ -1918,11 +1918,6 @@ export class GameServer {
         sim.lockpickAbort(pid, sid);
         break;
       }
-      case 'lockpick_timeout': {
-        const sid = typeof msg.sid === 'string' ? msg.sid : undefined;
-        sim.lockpickTimeout(pid, sid);
-        break;
-      }
       case 'collect_delve_chest_loot': {
         if (typeof msg.objectId !== 'number') break;
         sim.collectDelveChestLoot(msg.objectId, pid);

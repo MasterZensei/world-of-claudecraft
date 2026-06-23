@@ -459,6 +459,7 @@ export const en = {
     triesOf: "Tries {tries}/{total}",
     triesOfAria: "{tries} of {total} tries left",
     ward: "Ward {col} / {total}",
+    depthKeys: "Hotkeys set pick depth (Q/W/E/A/Z), not the ward number.",
     withdraw: "Withdraw (Esc)",
     action: {
       hardSet: "Hard Set",

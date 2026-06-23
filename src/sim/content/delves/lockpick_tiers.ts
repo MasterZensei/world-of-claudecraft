@@ -27,6 +27,8 @@ export const LOCKPICK_TIER_PRESETS: Record<string, LockTierSpec> = {
     visibilityWindow: 4, // fogged: only the next few wards are lit
     trapCount: 3, // ward-traps that jam on contact
     allowedActions: ['hardSet', 'set', 'steady', 'ease', 'drop'],
+    // Per-MOVE clock lives on the ante (ANTE_TO_STEP_TIMEOUT_MS in lockpick.ts),
+    // not the delve band: the difficulty the player antes sets their time budget.
   },
   heroic: {
     cols: 16,

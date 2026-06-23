@@ -18,7 +18,7 @@ import type { LockpickView } from '../world_api';
 import type {
   Ante, LootTier, PickAction, StepResult,
 } from '../sim/lockpick';
-import { ACTION_DELTA, ANTE_TO_PAGES, ANTE_TO_TIER, ANTE_TO_TRIES, PICK_ACTIONS } from '../sim/lockpick';
+import { ACTION_DELTA, ANTE_TO_PAGES, ANTE_TO_STEP_TIMEOUT_MS, ANTE_TO_TIER, ANTE_TO_TRIES, PICK_ACTIONS } from '../sim/lockpick';
 
 /** Kind of a lit notch on a tumbler track. */
 export type NotchKind = 'open' | 'gate' | 'seat' | 'trap';
@@ -57,12 +57,9 @@ export const TIER_LABEL: Record<LootTier, string> = {
   low: 'Modest',
 };
 
-/** Seconds per lock page: easy=15s, medium=10s, hard=5s. */
-export const TIER_TIMER_SECONDS: Record<LootTier, number> = {
-  low: 15,
-  medium: 10,
-  premium: 5,
-};
+/** Depth hotkeys in shallow→deep order. Letter keys avoid colliding with the
+ * 1-based ward counter (Ward 4 / 16) shown above the board. */
+export const PICK_ACTION_HOTKEYS = ['q', 'w', 'e', 'a', 'z'] as const;
 
 /** Display label + delta glyph + hotkey for each depth action (shallow→deep). */
 export interface ActionButton {
@@ -97,7 +94,7 @@ export function lockpickActionButtons(allowed: readonly Exclude<PickAction, 'abo
     action,
     label: ACTION_LABEL[action],
     glyph: deltaGlyph(ACTION_DELTA[action]),
-    key: String(i + 1),
+    key: PICK_ACTION_HOTKEYS[i].toUpperCase(),
     enabled: allow.has(action),
   }));
 }
@@ -155,8 +152,10 @@ export interface AnteOption {
   tries: number;
   /** Stakes summary line. */
   margin: string;
-  /** Time allowed per lock page in seconds. */
-  timerSeconds: number;
+  /** Per-move time budget in seconds (authoritative, from the ante's
+   * ANTE_TO_STEP_TIMEOUT_MS). The clock is an ante/difficulty dial: hard 3s /
+   * medium 6s / easy 9s per move. */
+  timerSeconds: number | null;
 }
 
 /** The three ante choices shown in the engage selector. Ante == loot tier ==
@@ -165,7 +164,10 @@ export interface AnteOption {
  * out.
  *
  * A Bountiful Coffer (§7.6) is purple and forces the Hard/Premium path: only the
- * Premium ante is offered, the lower difficulties are not an option. */
+ * Premium ante is offered, the lower difficulties are not an option.
+ *
+ * The per-move clock is an ante dial, so each ante carries its OWN time budget
+ * (hard 3s / medium 6s / easy 9s) from ANTE_TO_STEP_TIMEOUT_MS. */
 export function anteOptions(coffer = false): AnteOption[] {
   const antes: Ante[] = coffer ? [1] : [1, 2, 3];
   return antes.map((ante) => {
@@ -175,7 +177,8 @@ export function anteOptions(coffer = false): AnteOption[] {
     const gauntlet = pages > 1 ? `${pages}-lock gauntlet` : 'Single lock';
     const triesText = tries > 1 ? `${tries} tries` : '1 try';
     const margin = `${gauntlet}, ${triesText}`;
-    return { ante, tier, tierLabel: TIER_LABEL[tier], pages, tries, margin, timerSeconds: TIER_TIMER_SECONDS[tier] };
+    const timerSeconds = ANTE_TO_STEP_TIMEOUT_MS[ante] / 1000;
+    return { ante, tier, tierLabel: TIER_LABEL[tier], pages, tries, margin, timerSeconds };
   });
 }
 
@@ -199,4 +202,25 @@ export function endSummary(outcome: 'success' | 'fail' | 'abandoned', tier?: Loo
   if (outcome === 'success') return `Lock sprung, ${tier ? TIER_LABEL[tier] : 'a'} cache claimed.`;
   if (outcome === 'fail') return 'The lock is ruined. Clear the delve again for another attempt.';
   return 'You ease the picks back out. The lock waits.';
+}
+
+/** Identity of the current timed move. The per-page countdown is per-MOVE: it
+ * refills to the full per-lock time whenever this key changes, i.e. on every pin
+ * advance (col), every fresh try (tries), every new page, and every new lock
+ * session. Deriving the reset from the authoritative world.lockpickState this way
+ * (instead of from a step-event result) makes the refill follow the real board in
+ * both hosts, independent of event-flush timing: the clock cannot fail to reset
+ * after a correct move. A null state (the lock ended) carries no key and stops
+ * the clock. */
+export function lockpickTimerKey(view: LockpickView): string {
+  return `${view.sessionId}:${view.page}:${view.tries}:${view.col}`;
+}
+
+/** Compact signature of everything the board paint depends on. The window's
+ * per-frame repaint compares this against the last paint and only touches the
+ * DOM when it changes, so reading straight from the authoritative
+ * world.lockpickState every frame stays cheap. */
+export function lockpickRenderSig(view: LockpickView): string {
+  return `${view.sessionId}|${view.col}|${view.row}|${view.page}|${view.pageCount}`
+    + `|${view.tries}|${view.triesTotal}|${view.w}|${view.h}|${view.visible.length}`;
 }

@@ -588,6 +588,9 @@ function objectDisplayName(entity: Entity): string {
   if (entity.templateId === 'delve_reward_chest') {
     return t('worldContent.delveRewardChestInteract');
   }
+  if (entity.templateId === 'delve_surface_exit') {
+    return t('worldContent.delveSurfaceExitInteract');
+  }
   if ((entity.templateId === 'dungeon_door' || entity.templateId === 'dungeon_exit') && entity.dungeonId) {
     const dungeonName = dungeonDisplayName(entity.dungeonId);
     return entity.templateId === 'dungeon_exit'
@@ -3779,11 +3782,12 @@ export class Renderer {
       const isSelf = id === p.id;
       const hasOverheadEmote = !!(e.kind === 'player' && e.overheadEmoteId && !e.dead);
       const isDoor = e.templateId === 'dungeon_door' || e.templateId === 'dungeon_exit';
-      const isDelveChest = e.templateId === 'delve_locked_chest' || e.templateId === 'delve_reward_chest';
-      const delveChestNear = isDelveChest && d2 <= (INTERACT_RANGE + 1) * (INTERACT_RANGE + 1);
+      const isDelveInteract = e.templateId === 'delve_locked_chest' || e.templateId === 'delve_reward_chest'
+        || e.templateId === 'delve_surface_exit';
+      const delveInteractNear = isDelveInteract && d2 <= (INTERACT_RANGE + 1) * (INTERACT_RANGE + 1);
       const hidden = (isSelf && !hasOverheadEmote) || d2 > NAMEPLATE_RANGE_SQ
         || (e.dead && !e.lootable && e.kind === 'mob')
-        || (e.kind === 'object' && !isDoor && !delveChestNear)
+        || (e.kind === 'object' && !isDoor && !delveInteractNear)
         // the sealed royal door inside the crypt carries no floating label —
         // it reads as part of the back wall, not a portal billboard
         || (isDoor && e.dungeonId === 'nythraxis_boss_arena')

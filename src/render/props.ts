@@ -1089,11 +1089,20 @@ export function buildProps(seed: number, delveLabel?: (delveId: string) => strin
       ctx.fillRect(gx - gw / 2, gy2 - 1.8, gw, 3.6);
     }
 
-    // carved text, shadow pass then bright pass for depth illusion
-    ctx.font = 'bold 34px Georgia, "Times New Roman", serif';
+    // carved text, shadow pass then bright pass for depth illusion. Shrink the
+    // font until the (localized) name fits inside the slab border so a long title
+    // like "THE COLLAPSED RELIQUARY" is never clipped at the canvas edges.
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const label = (delveLabel ? delveLabel(dm.delveId) : dm.delveId).toUpperCase();
+    const maxTextW = CW - 44; // inside the 6px stroke + breathing room
+    let fontPx = 34;
+    ctx.font = `bold ${fontPx}px Georgia, "Times New Roman", serif`;
+    const measured = ctx.measureText(label).width;
+    if (measured > maxTextW) {
+      fontPx = Math.max(16, Math.floor(fontPx * (maxTextW / measured)));
+      ctx.font = `bold ${fontPx}px Georgia, "Times New Roman", serif`;
+    }
     ctx.fillStyle = '#120f0b';
     ctx.fillText(label, CW / 2 + 2, CH / 2 + 2);
     ctx.fillStyle = '#7d6e59';

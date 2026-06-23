@@ -1780,6 +1780,7 @@ export const zh_TW: EnTranslations = {
     "triesOf": "嘗試 {tries}/{total}",
     "triesOfAria": "剩餘 {tries}/{total} 次嘗試",
     "ward": "鎖簧 {col}/{total}",
+    "depthKeys": "Hotkeys set pick depth (Q/W/E/A/Z), not the ward number.",
     "withdraw": "收手 (Esc)",
     "action": {
       "hardSet": "重壓",
@@ -6256,6 +6257,9 @@ export const zh_TW: EnTranslations = {
     "corpseName": "{name}（屍體）",
     "dungeonExitName": "{name}出口",
     "dungeonPartyWarning": "{name}適合{count}人完整隊伍挑戰。請謹慎前進。",
-    "dungeonInstanceBusy": "{name}的所有副本都已被佔用。請稍後再試。"
+    "dungeonInstanceBusy": "{name}的所有副本都已被佔用。請稍後再試。",
+    "delveLockedChestInteract": "Press F to pick the lock",
+    "delveRewardChestInteract": "Press F to claim spoils",
+    "delveSurfaceExitInteract": "Press F to climb"
   }
 };

@@ -26,7 +26,10 @@ const check = (name, cond, extra = '') => {
 const browser = await puppeteer.launch({
   executablePath: BROWSER_PATH, headless: 'new', protocolTimeout: 60000,
   userDataDir: `C:/Users/Sud0S/AppData/Local/Temp/woc-lockpick-e2e-${Date.now()}`,
-  args: ['--window-size=1280,800', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--no-first-run', '--no-default-browser-check'],
+  args: ['--window-size=1280,800', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--no-first-run', '--no-default-browser-check',
+    // __game is published behind a setTimeout(LOADING_FADE_MS) after the loading
+    // fade; an occluded headless page freezes timers, so keep the page active.
+    '--disable-background-timer-throttling', '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding'],
   defaultViewport: { width: 1280, height: 800 },
 });
 const page = await browser.newPage();
@@ -38,19 +41,22 @@ page.on('pageerror', (e) => errors.push('PAGEERROR: ' + e.message));
 page.on('console', (m) => { if (m.type() === 'error' && !benign(m.text())) errors.push('CONSOLE: ' + m.text()); });
 
 await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-await sleep(1500);
+// The homepage's /api project-stats fetch 502s offline and can delay the boot UI
+// wiring on a loaded machine; settle before clicking so the handlers are attached
+// (clicking the moment the node exists in the DOM is a no-op and stalls the boot).
+await sleep(2500);
 await page.evaluate(() => {
   document.querySelector('.server-select-option[data-mode="offline"]')?.click();
   document.querySelector('#btn-play')?.click();
 });
-await sleep(800);
+await sleep(1200);
 await page.evaluate(() => {
   const name = document.querySelector('#char-name');
   if (name) name.value = 'Picker';
   document.querySelector('#offline-select .mini-class[data-class="warrior"]')?.click();
   document.querySelector('#btn-start-offline')?.click();
 });
-await page.waitForFunction(() => window.__game?.sim?.player?.pos, { timeout: 20000, polling: 200 });
+await page.waitForFunction(() => window.__game?.sim?.player?.pos, { timeout: 30000, polling: 200 });
 await sleep(1500);
 
 // ---- enter delve + spawn the reward chest (bypass the boss fight) ----
@@ -88,8 +94,9 @@ check('surface exit not yet open', setup.surfaceExitBefore == null);
 
 // ---- SUCCESS path: engage ante 1, solve the real lock flawlessly ----
 const engage = await page.evaluate((chestId) => {
-  const sim = window.__game.sim;
-  sim.lockpickEngage(chestId, 1); // ante 1 = premium, 1 try, 3 pages
+  const g = window.__game;
+  const sim = g.sim;
+  g.lockpickEngage(chestId, 1); // HUD path: premium, 1 try, 3 pages, immediate board sync
   const run = sim.delveRunForPlayer(sim.player.id);
   const s = run?.lockpick;
   if (!s) return { sessionStarted: false };
@@ -107,7 +114,12 @@ const engage = await page.evaluate((chestId) => {
       for (const r of reach) {
         for (const d of deltas) {
           const nr = r + d;
-          if (spec.open[c].includes(nr) && !par.has(nr)) { par.set(nr, r); next.add(nr); }
+          // Trap rows live inside spec.open (they look open but jam on contact),
+          // so a correct solver must thread the true path AROUND them, exactly as
+          // the sim's solveLockActions does. Skipping this is what made the E2E's
+          // own solver route into a ward-trap and burn the single premium try.
+          const trapped = spec.traps[c] && spec.traps[c].includes(nr);
+          if (spec.open[c].includes(nr) && !trapped && !par.has(nr)) { par.set(nr, r); next.add(nr); }
         }
       }
       parents[c] = par;
@@ -128,7 +140,10 @@ const engage = await page.evaluate((chestId) => {
     const spec = run.lockpick.pages[run.lockpick.pageIndex];
     const pageActions = solvePage(spec);
     allActions.push(...pageActions);
-    for (const a of pageActions) sim.lockpickAction(a);
+    for (const a of pageActions) {
+      sim.lockpickAction(a);
+      g.flushLockpickEvents();
+    }
   }
 
   const spec0 = s.pages[0];
@@ -204,7 +219,7 @@ const failPath = await page.evaluate(() => {
   const chest = sim.entities.get(chestId);
   if (chest) { const p = sim.player; p.pos.x = chest.pos.x; p.pos.z = chest.pos.z; p.prevPos.x = chest.pos.x; p.prevPos.z = chest.pos.z; }
   const distOk = chest ? Math.hypot(sim.player.pos.x - chest.pos.x, sim.player.pos.z - chest.pos.z) : -1;
-  sim.lockpickEngage(chestId, 1);
+  g.lockpickEngage(chestId, 1);
   if (!run.lockpick) {
     const st = run.objectState[chestId];
     return { setupErr: 'engage made no session', chestId, distOk,
@@ -225,6 +240,7 @@ const failPath = await page.evaluate(() => {
   // then check; but normally a wrong move exists. Submit it.
   if (!wrong) return { chestId, noWrongMove: true };
   sim.lockpickAction(wrong);
+  g.flushLockpickEvents();
   const st = run.objectState[chestId];
   return {
     chestId, noWrongMove: false, wrong,

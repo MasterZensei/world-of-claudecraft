@@ -1698,9 +1698,6 @@ export class ClientWorld implements IWorld {
   lockpickAbort(): void {
     this.cmd({ cmd: 'lockpick_abort', sid: this.lockpickState?.sessionId });
   }
-  lockpickTimeout(): void {
-    this.cmd({ cmd: 'lockpick_timeout', sid: this.lockpickState?.sessionId });
-  }
   collectDelveChestLoot(chestId: number): void {
     this.cmd({ cmd: 'collect_delve_chest_loot', objectId: chestId });
   }
@@ -1722,6 +1719,7 @@ export class ClientWorld implements IWorld {
         lootTier: ev.lootTier,
         allowed: ev.allowed,
         visible: ev.visible,
+        stepTimeoutMs: ev.stepTimeoutMs,
       };
     } else if (ev.type === 'lockpickStep') {
       const s = this.lockpickState;

@@ -100,6 +100,9 @@ export interface LockpickView {
   lootTier: LootTier;
   allowed: Exclude<PickAction, 'abort'>[];
   visible: VisibleCell[];
+  // Per-step budget (ms) for the server-authoritative clock, or null for no
+  // clock. The HUD renders a countdown from this; it never enforces it.
+  stepTimeoutMs: number | null;
 }
 
 export interface DelveCompanionInfo {
@@ -464,7 +467,6 @@ export interface IWorld {
   lockpickEngage(objectId: number, ante: Ante): void;
   lockpickAction(action: PickAction): void;
   lockpickAbort(): void;
-  lockpickTimeout(): void;
   collectDelveChestLoot(chestId: number): void;
   delveRun: DelveRunInfo | null;
   companionState: DelveCompanionInfo | null;

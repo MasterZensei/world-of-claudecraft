@@ -118,7 +118,6 @@ import {
   isOverheadEmoteId,
   type LeaderboardEntry,
   type LeaderboardPage,
-  type LockpickView,
   type MarketInfo,
   OVERHEAD_EMOTES,
   type OverheadEmoteId,
@@ -167,16 +166,10 @@ import {
   playerDelveLocal,
   type SchematicPrimitive,
 } from './delve_map';
-import type { Ante, PickAction, StepResult } from '../sim/lockpick';
+import type { Ante, PickAction } from '../sim/lockpick';
 import { PICK_ACTIONS } from '../sim/lockpick';
-import {
-  anteOptions,
-  lockpickActionButtons,
-  lockpickBoardModel,
-  pageDots,
-  stepFeedback,
-  TIER_TIMER_SECONDS,
-} from './lockpick_panel';
+import { PICK_ACTION_HOTKEYS } from './lockpick_panel';
+import { LockpickWindow } from './lockpick_window';
 import { dropdownKeyNav } from './dropdown_nav';
 import { emoteIconUrl } from './emote_icons';
 import { itemDisplayName, tEntity } from './entity_i18n';
@@ -867,12 +860,19 @@ export class Hud {
   // True when the pending offer is a Bountiful Coffer (purple) -- forces the
   // Hard/Premium ante in the selector (§7.6).
   private lockpickCoffer = false;
-  private lockpickView: LockpickView | null = null;
   private lockpickReturnFocus: HTMLElement | null = null;
   private lockpickKeyHandler: ((e: KeyboardEvent) => void) | null = null;
-  private lockpickTimerEnd: number | null = null;
-  private lockpickTimerInterval: number | null = null;
-  private lockpickTimerTimeout: number | null = null;
+  // The board paints from the authoritative world.lockpickState (never a cached
+  // copy), and owns the per-page countdown with a generation guard. hud.ts keeps
+  // only offer routing, focus restore, and keybinds.
+  private readonly lockpickWindow = new LockpickWindow({
+    getState: () => this.sim.lockpickState,
+    tierName: (tier) => this.lockpickTierName(tier),
+    onEngage: (objectId, ante) => this.submitLockpickEngage(objectId, ante),
+    onAction: (action) => this.submitLockpickAction(action),
+    onAbort: () => this.submitLockpickAbort(),
+    onClose: () => this.closeLockpick(),
+  });
   private openGossipNpcId: number | null = null;
   private openQuestDetailId: string | null = null;
   private selectedQuestLogId: string | null = null;
@@ -3462,6 +3462,7 @@ export class Hud {
     if (slowHud) this.lastHudSlowAt = now;
 
     this.meters.update();
+    this.lockpickWindow.repaintIfChanged();
     this.tutorial.update(sim, this.renderer, this.keybinds);
     this.reconcileLootRolls();
     this.updateLootRollTimers(now);
@@ -4281,10 +4282,10 @@ export class Hud {
     if (el.style.display !== 'block') this.lockpickReturnFocus = this.currentFocusableElement();
     this.lockpickOfferId = objectId;
     this.lockpickCoffer = bountiful;
-    this.lockpickView = null;
     el.style.display = 'block';
     this.bindLockpickKeys();
-    this.renderLockpickAnte();
+    this.lockpickWindow.renderAnte(objectId, bountiful);
+    this.focusFirstInteractive(el, '.lp-ante-btn');
   }
 
   // The lockpick loot tier names are shared with the combat-log lines, so reuse
@@ -4293,121 +4294,15 @@ export class Hud {
     return t(tier === 'premium' ? 'sim.lockpick.tierPremium' : tier === 'medium' ? 'sim.lockpick.tierMedium' : 'sim.lockpick.tierLow');
   }
 
-  private renderLockpickAnte(): void {
-    const el = $('#lockpick-panel');
-    const objectId = this.lockpickOfferId;
-    if (objectId === null) { this.closeLockpick(); return; }
-    const coffer = this.lockpickCoffer;
-    const numFmt = { maximumFractionDigits: 0 } as const;
-    const buttons = anteOptions(coffer).map((o) => `<button type="button" class="lp-ante-btn" data-ante="${o.ante}">`
-      + `<span class="lp-ante-tier">${esc(t('lockpickUi.cache', { tier: this.lockpickTierName(o.tier) }))}</span>`
-      + `<span class="lp-ante-badges">`
-      + `<span class="lp-ante-pages" aria-label="${esc(t('lockpickUi.pagesAria', { count: formatNumber(o.pages, numFmt) }))}">${esc(formatNumber(o.pages, numFmt))}</span>`
-      + `<span class="lp-ante-tries">${esc(o.tries > 1 ? t('lockpickUi.tries', { count: formatNumber(o.tries, numFmt) }) : t('lockpickUi.triesOne'))}</span>`
-      + `</span>`
-      + `<span class="lp-ante-timer">${esc(t('lockpickUi.perLock', { seconds: formatNumber(o.timerSeconds, numFmt) }))}</span>`
-      + `</button>`).join('');
-    const title = coffer ? t('lockpickUi.cofferTitle') : t('lockpickUi.pickTitle');
-    const blurb = coffer ? t('lockpickUi.cofferBlurb') : t('lockpickUi.pickBlurb');
-    el.innerHTML = `<div class="panel-title"><span>${esc(title)}</span>`
-      + `<button type="button" class="x-btn" data-close aria-label="${esc(t('lockpickUi.closeAria'))}">${svgIcon('close')}</button></div>`
-      + `<div class="lp-blurb${coffer ? ' lp-blurb-coffer' : ''}">${esc(blurb)}</div>`
-      + `<div class="lp-ante-row${coffer ? ' lp-ante-row-coffer' : ''}">${buttons}</div>`;
-    el.querySelectorAll('[data-ante]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const ante = Number((btn as HTMLElement).dataset.ante) as Ante;
-        this.sim.lockpickEngage(objectId, ante);
-      });
-    });
-    el.querySelector('[data-close]')?.addEventListener('click', () => this.closeLockpick());
-    this.focusFirstInteractive(el, '.lp-ante-btn');
-  }
-
-  private openLockpickBoard(view: LockpickView): void {
+  // A lockpickSession event means the authoritative board is live in
+  // world.lockpickState; show the panel and let the window paint from it.
+  private openLockpickBoard(): void {
     const el = $('#lockpick-panel');
     if (el.style.display !== 'block') this.lockpickReturnFocus = this.currentFocusableElement();
     this.lockpickOfferId = null;
-    this.lockpickView = view;
     el.style.display = 'block';
     this.bindLockpickKeys();
-    this.startLockpickTimer(TIER_TIMER_SECONDS[view.lootTier]);
-    this.renderLockpickBoard();
-  }
-
-  private updateLockpickBoard(
-    col: number, row: number, page: number, pageCount: number,
-    tries: number, triesTotal: number,
-    result: StepResult,
-    visible: LockpickView['visible'],
-  ): void {
-    if (!this.lockpickView) return;
-    this.lockpickView = { ...this.lockpickView, col, row, page, pageCount, tries, triesTotal, visible };
-    // The timer is per-MOVE: every move that keeps the lock in play (an advance,
-    // a fresh page, or a fresh try) resets the clock to the full per-lock time.
-    // Only the terminal results (success/fail) leave it stopped.
-    if (result === 'advanced' || result === 'pageCleared' || result === 'retry') {
-      this.startLockpickTimer(TIER_TIMER_SECONDS[this.lockpickView.lootTier]);
-    }
-    const fb = stepFeedback(result);
-    // stepFeedback returns English text only for the known step results; localize
-    // those via t() and leave the (empty) default unlocalized.
-    this.renderLockpickBoard(fb.text ? t(`lockpickUi.feedback.${result}` as TranslationKey) : '', fb.tone);
-  }
-
-  private renderLockpickBoard(feedback = '', tone: 'good' | 'bad' | 'win' = 'good'): void {
-    const el = $('#lockpick-panel');
-    const view = this.lockpickView;
-    if (!view) { this.closeLockpick(); return; }
-    const m = lockpickBoardModel(view);
-    const rowH = (r: number): string => `${(r / Math.max(1, m.h - 1)) * 100}%`;
-    // Tumbler tracks: one brass column per lock column. Only lit wards (open /
-    // gate / seat / trap) show as notches; the rest of the face is solid metal.
-    // Fogged columns are a covered plate. The pick marker rides the active track.
-    let tracks = '';
-    for (const c of m.columns) {
-      let notches = '';
-      for (const n of c.notches) {
-        notches += `<span class="lp-notch lp-notch-${n.kind}" style="top:${rowH(n.row)}"></span>`;
-      }
-      const marker = c.markerRow !== null
-        ? `<span class="lp-pick" style="top:${rowH(c.markerRow)}"></span>` : '';
-      tracks += `<div class="lp-track lp-track-${c.state}${c.isGate ? ' lp-track-gate' : ''}">`
-        + `<div class="lp-track-face">${notches}${marker}</div></div>`;
-    }
-    const dots = pageDots(view.page, view.pageCount)
-      .map((d) => `<span class="lp-page-dot lp-page-${d}"></span>`).join('');
-    const actions = lockpickActionButtons(view.allowed).map((b) => `<button type="button" class="lp-action-btn"`
-      + ` data-action="${esc(b.action)}"${b.enabled ? '' : ' disabled'}>`
-      + `<span class="lp-action-key">${esc(b.key)}</span>`
-      + `<span class="lp-action-glyph">${b.glyph}</span>`
-      + `<span class="lp-action-label">${esc(t(`lockpickUi.action.${b.action}` as TranslationKey))}</span></button>`).join('');
-    const n = { maximumFractionDigits: 0 } as const;
-    const page = formatNumber(view.page, n);
-    const total = formatNumber(view.pageCount, n);
-    const tries = formatNumber(view.tries, n);
-    const triesTotal = formatNumber(view.triesTotal, n);
-    const timerSecs = TIER_TIMER_SECONDS[view.lootTier];
-    el.innerHTML = `<div class="panel-title"><span>${esc(t('lockpickUi.boardTitle', { tier: this.lockpickTierName(view.lootTier) }))}</span>`
-      + `<button type="button" class="x-btn" data-close aria-label="${esc(t('lockpickUi.withdrawAria'))}">${svgIcon('close')}</button></div>`
-      + `<div class="lp-status"><span class="lp-pages" aria-label="${esc(t('lockpickUi.lockOfAria', { page, total }))}">${dots}`
-      + `<span class="lp-pages-label">${esc(t('lockpickUi.lockOf', { page, total }))}</span></span>`
-      + `<span class="lp-tries" aria-label="${esc(t('lockpickUi.triesOfAria', { tries, total: triesTotal }))}">${esc(t('lockpickUi.triesOf', { tries, total: triesTotal }))}</span>`
-      + `<span class="lp-col">${esc(t('lockpickUi.ward', { col: formatNumber(m.activeCol + 1, n), total: formatNumber(m.w, n) }))}</span></div>`
-      + `<div class="lp-timer" aria-label="${esc(t('lockpickUi.timerAria'))}"><div class="lp-timer-track"><div class="lp-timer-bar" id="lp-timer-bar" style="width:100%"></div></div>`
-      + `<span class="lp-timer-value" id="lp-timer-value">${esc(t('lockpickUi.seconds', { seconds: timerSecs.toFixed(1) }))}</span></div>`
-      + `<div class="lp-board" style="grid-template-columns:repeat(${m.w},1fr)">${tracks}</div>`
-      + `<div class="lp-feedback lp-tone-${tone}" role="status" aria-live="polite">${esc(feedback)}</div>`
-      + `<div class="lp-actions">${actions}</div>`
-      + `<button type="button" class="btn lp-withdraw" data-withdraw>${esc(t('lockpickUi.withdraw'))}</button>`;
-    el.querySelectorAll('[data-action]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        if ((btn as HTMLButtonElement).disabled) return;
-        this.clearLockpickTimer();
-        this.sim.lockpickAction((btn as HTMLElement).dataset.action as PickAction);
-      });
-    });
-    el.querySelector('[data-withdraw]')?.addEventListener('click', () => this.sim.lockpickAbort());
-    el.querySelector('[data-close]')?.addEventListener('click', () => this.sim.lockpickAbort());
+    this.lockpickWindow.openBoard();
   }
 
   private endLockpick(outcome: 'success' | 'fail' | 'abandoned', tier?: 'premium' | 'medium' | 'low'): void {
@@ -4453,57 +4348,65 @@ export class Hud {
     if (this.lockpickKeyHandler) return;
     const handler = (e: KeyboardEvent): void => {
       if ($('#lockpick-panel').style.display !== 'block') return;
+      // A live board exists iff the authoritative session is non-null; otherwise
+      // the panel is the ante selector and only Escape (close) applies.
+      const live = this.sim.lockpickState;
       if (e.key === 'Escape') {
         e.preventDefault(); e.stopImmediatePropagation();
-        if (this.lockpickView) this.sim.lockpickAbort(); else this.closeLockpick();
+        if (live) this.submitLockpickAbort(); else this.closeLockpick();
         return;
       }
-      if (!this.lockpickView) return;
-      const idx = '12345'.indexOf(e.key);
+      if (!live) return;
+      if (e.repeat) return;
+      const key = e.key.toLowerCase();
+      const idx = (PICK_ACTION_HOTKEYS as readonly string[]).indexOf(key);
       if (idx < 0) return;
       const action = PICK_ACTIONS[idx];
-      if (!this.lockpickView.allowed.includes(action)) return;
+      if (!live.allowed.includes(action)) return;
       e.preventDefault(); e.stopImmediatePropagation();
-      this.clearLockpickTimer();
-      this.sim.lockpickAction(action);
+      this.submitLockpickAction(action);
     };
     this.lockpickKeyHandler = handler;
     window.addEventListener('keydown', handler, true); // capture: beats game input
   }
 
-  private clearLockpickTimer(): void {
-    if (this.lockpickTimerInterval !== null) { clearInterval(this.lockpickTimerInterval); this.lockpickTimerInterval = null; }
-    if (this.lockpickTimerTimeout !== null) { clearTimeout(this.lockpickTimerTimeout); this.lockpickTimerTimeout = null; }
-    this.lockpickTimerEnd = null;
+  /** Offline sim queues lockpick events until the 20 Hz tick; flush them now so
+   * the step feedback toast, timer, and audio react immediately. The board
+   * POSITION never depends on this (it always paints from world.lockpickState);
+   * online has no drainEvents and reacts to the normal event stream instead. */
+  flushLockpickEvents(): void {
+    const drain = (this.sim as { drainEvents?: () => SimEvent[] }).drainEvents;
+    if (!drain) return;
+    const events = drain.call(this.sim);
+    if (events.length > 0) this.handleEvents(events);
   }
 
-  private startLockpickTimer(seconds: number): void {
-    this.clearLockpickTimer();
-    const end = performance.now() + seconds * 1000;
-    this.lockpickTimerEnd = end;
-    this.lockpickTimerInterval = window.setInterval(() => {
-      const remaining = Math.max(0, (end - performance.now()) / 1000);
-      const bar = document.getElementById('lp-timer-bar') as HTMLElement | null;
-      const val = document.getElementById('lp-timer-value');
-      if (bar) bar.style.width = `${(remaining / seconds) * 100}%`;
-      if (val) val.textContent = t('lockpickUi.seconds', { seconds: remaining.toFixed(1) });
-      const wrap = document.querySelector('.lp-timer') as HTMLElement | null;
-      if (wrap) wrap.classList.toggle('lp-timer-urgent', remaining < 3);
-    }, 100);
-    this.lockpickTimerTimeout = window.setTimeout(() => {
-      this.clearLockpickTimer();
-      // Running out of time burns a try (the server resets the board if any
-      // remain, or jams the chest if that was the last try).
-      if (this.lockpickView) this.sim.lockpickTimeout();
-    }, seconds * 1000);
+  /** Engage through the HUD path (always flushes queued sim events). Dev consoles
+   * should call this instead of sim.lockpickEngage directly. */
+  submitLockpickEngage(objectId: number, ante: Ante): void {
+    this.sim.lockpickEngage(objectId, ante);
+    this.flushLockpickEvents();
+  }
+
+  submitLockpickAction(action: PickAction): void {
+    this.sim.lockpickAction(action);
+    this.flushLockpickEvents();
+    // Safety net for any path that didn't emit a step event (e.g. a rejected
+    // action): realign the board to the authoritative state.
+    this.lockpickWindow.repaintIfChanged();
+  }
+
+  submitLockpickAbort(): void {
+    this.lockpickWindow.stopTimer();
+    this.sim.lockpickAbort();
+    this.flushLockpickEvents();
   }
 
   private closeLockpick(restoreFocus = true): void {
     $('#lockpick-panel').style.display = 'none';
     this.lockpickOfferId = null;
     this.lockpickCoffer = false;
-    this.lockpickView = null;
-    this.clearLockpickTimer();
+    this.lockpickWindow.close();
     this.hideTooltip();
     if (this.lockpickKeyHandler) {
       window.removeEventListener('keydown', this.lockpickKeyHandler, true);
@@ -6392,13 +6295,8 @@ export class Hud {
           break;
         }
         case 'lockpickOffer': this.openLockpickAnte(ev.objectId, ev.bountiful); break;
-        case 'lockpickSession': this.openLockpickBoard({
-          sessionId: ev.sessionId, objectId: ev.objectId, w: ev.w, h: ev.h,
-          col: ev.col, row: ev.row, page: ev.page, pageCount: ev.pageCount,
-          tries: ev.tries, triesTotal: ev.triesTotal, lootTier: ev.lootTier,
-          allowed: ev.allowed, visible: ev.visible,
-        }); break;
-        case 'lockpickStep': this.updateLockpickBoard(ev.col, ev.row, ev.page, ev.pageCount, ev.tries, ev.triesTotal, ev.result, ev.visible); break;
+        case 'lockpickSession': this.openLockpickBoard(); break;
+        case 'lockpickStep': this.lockpickWindow.onStep(ev.result); break;
         case 'lockpickEnd': this.endLockpick(ev.outcome, ev.lootTier); break;
         case 'lockpickBonus': {
           const tier = ev.tier === 'premium' ? t('sim.lockpick.tierPremium')

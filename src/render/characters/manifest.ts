@@ -763,15 +763,13 @@ export const VISUALS: Record<string, VisualDef> = {
     tint: 'entity',
     tintStrength: 0.35,
   },
-  // Brother Halven, the Reliquary Keeper: a dark, hooded figure tending the crypt
-  // door, deliberately grimmer than the chapel's brown-robed npc_mage brothers,
-  // so the delve's threshold reads as ominous from a distance. Hooded rogue rig
-  // ships the hood/mask/cape by default (no show filter); 'entity' tint takes
-  // BROTHER_HALVEN.color (a near-black charcoal) for the "dirty/dark" mood.
+  // Brother Halven, the Reliquary Keeper: a devout male guardian tending the crypt
+  // door. Uses the KayKit paladin, one of the newer full-pack adventurer models
+  // (unused elsewhere), for a sturdier, holier silhouette than the old hooded
+  // rogue. Ships its accessories (helm/cape/shield) by default (no show filter).
   npc_reliquary_keeper: {
-    url: `${PLAYERS}/rogue_hooded.glb`, height: HUMANOID_H,
+    url: `${PLAYERS}/paladin.glb`, height: HUMANOID_H,
     clips: kaykit(['1H_Melee_Attack_Chop']),
-    tint: 'entity', tintStrength: 0.6,
   },
 };
 

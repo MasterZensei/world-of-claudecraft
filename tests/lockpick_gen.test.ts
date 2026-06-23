@@ -141,35 +141,39 @@ describe('visibleCells, fog boundary (anti-cheat)', () => {
     }
   });
 
-  it('tags gate and seat cells correctly', () => {
+  it('tags gate, seat, and trap cells correctly', () => {
     const spec = generateLock(42, TIERS.mid);
     const cells = visibleCells(spec, 0, TIERS.mid.cols);
     const last = spec.open.length - 1;
     for (const cell of cells) {
       if (cell.col === last) expect(cell.kind).toBe('seat');
       else if (spec.gates.includes(cell.col)) expect(cell.kind).toBe('gate');
+      else if (spec.traps[cell.col]?.includes(cell.row)) expect(cell.kind).toBe('trap');
       else expect(cell.kind).toBe('open');
     }
   });
 
-  it('hides ward-traps from the fog: visibleCells never tags a trap, yet stepLock still jams', () => {
-    // The shipped reliquary tiers carry traps (normal 3 / heroic 5). Ward-traps
-    // "look open but jam on contact", they must NOT be telegraphed across the
-    // anti-cheat boundary, but the server must still jam when the pick touches one.
+  it('reveals ward-traps in the fog so the player can see and avoid them, yet stepLock still jams', () => {
+    // The shipped reliquary tiers carry traps (normal 3 / heroic 5). A trap that
+    // is invisible (painted as a plain open notch) is pure RNG death: a "correct"
+    // looking press jams a 1-try lock. So traps are now revealed as kind 'trap'
+    // and the player can thread around them; the server still jams on contact.
     const trapTier: LockTierSpec = {
       cols: 12, rows: 6, width: 1, gateCount: 2, visibilityWindow: 99, trapCount: 4, allowedActions: ALL_ACTIONS,
     };
     let trapsGenerated = 0;
+    let trapsRevealed = 0;
     let jams = 0;
     for (const seed of SEEDS.slice(0, 80)) {
       const spec = generateLock(seed, trapTier);
       const cells = visibleCells(spec, 0, trapTier.visibilityWindow); // full reveal
-      for (const cell of cells) expect(cell.kind).not.toBe('trap'); // never serialized as a trap
       for (let c = 1; c < spec.open.length - 1; c++) {
         for (const r of spec.traps[c] ?? []) {
           trapsGenerated++;
-          // The trap row is present, disguised as a plain open notch.
-          expect(cells.some((x) => x.col === c && x.row === r && x.kind === 'open')).toBe(true);
+          // The trap is now painted as a distinct hazard notch, never a plain 'open'.
+          const cell = cells.find((x) => x.col === c && x.row === r);
+          expect(cell?.kind).toBe('trap');
+          trapsRevealed++;
           // Server-side, stepping onto it from a reachable previous row still jams.
           for (const pr of spec.open[c - 1]) {
             for (const a of ALL_ACTIONS) {
@@ -180,7 +184,8 @@ describe('visibleCells, fog boundary (anti-cheat)', () => {
         }
       }
     }
-    expect(trapsGenerated).toBeGreaterThan(0); // the tier really does generate traps
-    expect(jams).toBeGreaterThan(0);           // and they still jam server-side
+    expect(trapsGenerated).toBeGreaterThan(0);     // the tier really does generate traps
+    expect(trapsRevealed).toBe(trapsGenerated);    // and every one is now visible to the player
+    expect(jams).toBeGreaterThan(0);               // and they still jam server-side
   });
 });

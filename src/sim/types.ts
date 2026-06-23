@@ -1092,7 +1092,7 @@ export type SimEvent = { pid?: number } & (
   // are always limited to the fog window (anti-cheat: the full lock is never
   // serialized).
   | { type: 'lockpickOffer'; objectId: number; bountiful: boolean }
-  | { type: 'lockpickSession'; sessionId: string; objectId: number; w: number; h: number; col: number; row: number; page: number; pageCount: number; tries: number; triesTotal: number; lootTier: LootTier; allowed: Exclude<PickAction, 'abort'>[]; visible: VisibleCell[] }
+  | { type: 'lockpickSession'; sessionId: string; objectId: number; w: number; h: number; col: number; row: number; page: number; pageCount: number; tries: number; triesTotal: number; lootTier: LootTier; allowed: Exclude<PickAction, 'abort'>[]; visible: VisibleCell[]; stepTimeoutMs: number | null }
   | { type: 'lockpickStep'; sessionId: string; col: number; row: number; page: number; pageCount: number; tries: number; triesTotal: number; result: StepResult; visible: VisibleCell[] }
   | { type: 'lockpickEnd'; sessionId: string; outcome: 'success' | 'fail' | 'abandoned'; lootTier?: LootTier }
   | { type: 'lockpickBonus'; tier: LootTier; marks: number; copper: number }

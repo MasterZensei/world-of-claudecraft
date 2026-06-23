@@ -1780,6 +1780,7 @@ export const it_IT: EnTranslations = {
     "triesOf": "Tentativi {tries}/{total}",
     "triesOfAria": "{tries} di {total} tentativi rimasti",
     "ward": "Guardia {col} / {total}",
+    "depthKeys": "Hotkeys set pick depth (Q/W/E/A/Z), not the ward number.",
     "withdraw": "Ritirati (Esc)",
     "action": {
       "hardSet": "Spinta Decisa",
@@ -6256,6 +6257,9 @@ export const it_IT: EnTranslations = {
     "corpseName": "{name} (cadavere)",
     "dungeonExitName": "Uscita da {name}",
     "dungeonPartyWarning": "{name} è pensato per un gruppo completo di {count}. Procedi con cautela.",
-    "dungeonInstanceBusy": "Tutte le istanze di {name} sono occupate. Riprova tra poco."
+    "dungeonInstanceBusy": "Tutte le istanze di {name} sono occupate. Riprova tra poco.",
+    "delveLockedChestInteract": "Press F to pick the lock",
+    "delveRewardChestInteract": "Press F to claim spoils",
+    "delveSurfaceExitInteract": "Press F to climb"
   }
 };

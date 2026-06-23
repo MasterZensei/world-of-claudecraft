@@ -117,7 +117,7 @@ import { questFallbackGrants } from './quest_fallback';
 import { sanitizeRemovedZone1Content } from './removed_zone1_content';
 import { Rng } from './rng';
 import {
-  ANTE_TO_TIER, ANTE_TO_PAGES, ANTE_TO_TRIES, generateLockPages, stepLock, visibleCells,
+  ANTE_TO_TIER, ANTE_TO_PAGES, ANTE_TO_TRIES, ANTE_TO_STEP_TIMEOUT_MS, generateLockPages, stepLock, visibleCells,
   type Ante, type LockSession, type PickAction,
 } from './lockpick';
 import { lockpickPresetFor, LOCKPICK_TIER_REWARD, delveChestItemsForTier } from './content/delves/lockpick_tiers';
@@ -1884,6 +1884,13 @@ export class Sim {
 
   emit(ev: SimEvent): void {
     this.events.push(ev);
+  }
+
+  /** Drain queued events without advancing simulation (offline HUD sync). */
+  drainEvents(): SimEvent[] {
+    const out = this.events;
+    this.events = [];
+    return out;
   }
 
   private refreshKnownAbilities(meta: PlayerMeta, announce: boolean): void {
@@ -15881,6 +15888,10 @@ export class Sim {
 
   private updateDelveRuns(): void {
     for (const run of this.delveRuns) {
+      // The lockpick per-step clock is enforced for EVERY run (a solo offline run
+      // has partyKey === null and is skipped by tickDelveRun below, but its lock
+      // must still time out identically to an online/headless one).
+      this.tickLockpickTimeout(run);
       if (run.partyKey !== null) this.tickDelveRun(run);
     }
     if (this.tickCount % 20 !== 0) return;
@@ -16617,6 +16628,8 @@ export class Sim {
       // Open the ante selector on the client; no session yet. A Bountiful Coffer
       // (purple) tells the client to force the Hard/Premium ante (§7.6).
       const isCoffer = run.bountiful && objectId === run.rewardChestId;
+      // No per-move budget on the offer: the clock is an ante dial, so the client
+      // shows each ante's own time from ANTE_TO_STEP_TIMEOUT_MS in the selector.
       this.emit({ type: 'lockpickOffer', objectId, bountiful: isCoffer, pid: r.meta.entityId });
       return;
     }
@@ -16721,9 +16734,11 @@ export class Sim {
       row: spec.startRow,
       triesLeft: triesTotal,
       triesTotal,
+      stepDeadlineTick: 0, // set by armLockpickStep below
       state: 'IN_PROGRESS',
     };
     run.lockpick = session;
+    this.armLockpickStep(session);
     this.emit({
       type: 'lockpickSession',
       sessionId: session.sessionId,
@@ -16739,8 +16754,49 @@ export class Sim {
       lootTier: session.lootTier,
       allowed: spec.tier.allowedActions,
       visible: visibleCells(spec, session.col, spec.tier.visibilityWindow),
+      stepTimeoutMs: ANTE_TO_STEP_TIMEOUT_MS[ante],
       pid: r.meta.entityId,
     });
+  }
+
+  /** (Re)start the per-step clock for the active page. The deadline is in sim
+   * ticks (deterministic), so the timeout is reproducible from the input timing
+   * alone and identical offline, on the server, and headless. The budget is the
+   * ante's ANTE_TO_STEP_TIMEOUT_MS (hard 3s / medium 6s / easy 9s per move). */
+  private armLockpickStep(session: LockSession): void {
+    const ms = ANTE_TO_STEP_TIMEOUT_MS[session.ante];
+    session.stepDeadlineTick = this.tickCount + Math.ceil(ms / (DT * 1000));
+  }
+
+  /** Server-authoritative per-step clock, run every tick for every run (so a solo
+   * offline run, an online run, and a headless run all enforce it identically).
+   * When the active step's deadline passes it counts as a failed try; the client
+   * never reports a timeout. */
+  private tickLockpickTimeout(run: DelveRun): void {
+    const s = run.lockpick;
+    if (!s || s.state !== 'IN_PROGRESS') return;
+    if (this.tickCount >= s.stepDeadlineTick) this.lockpickStepTimeout(run, s);
+  }
+
+  /** A step's clock expired: burn a try (board reset on retry, chest jams when
+   * tries run out), mirroring a slip. lockpickBurnTry re-arms the clock on retry. */
+  private lockpickStepTimeout(run: DelveRun, session: LockSession): void {
+    const result = this.lockpickBurnTry(session);
+    const spec = session.pages[session.pageIndex];
+    this.emit({
+      type: 'lockpickStep',
+      sessionId: session.sessionId,
+      col: session.col,
+      row: session.row,
+      page: session.pageIndex + 1,
+      pageCount: session.pages.length,
+      tries: session.triesLeft,
+      triesTotal: session.triesTotal,
+      result,
+      visible: visibleCells(spec, session.col, spec.tier.visibilityWindow),
+      pid: session.ownerId,
+    });
+    if (result === 'fail') this.lockpickFail(run, session);
   }
 
   /** Submit one pick action on the player's active attempt. Abort ends it
@@ -16778,6 +16834,9 @@ export class Sim {
         session.row = spec.startRow;
         result = 'pageCleared';
       }
+      // A correct move re-arms the per-step clock (a terminal success ends the
+      // session right after, so the fresh deadline is simply never reached).
+      this.armLockpickStep(session);
     }
 
     this.emit({
@@ -16811,35 +16870,8 @@ export class Sim {
     session.pageIndex = 0;
     session.col = 0;
     session.row = session.pages[0].startRow;
+    this.armLockpickStep(session); // fresh board, fresh per-step clock
     return 'retry';
-  }
-
-  /** Client-reported per-page timeout: counts as a failed try. */
-  lockpickTimeout(pid?: number, sessionId?: string): void {
-    const r = this.resolve(pid);
-    if (!r) return;
-    const run = this.delveRunForPlayer(r.meta.entityId);
-    const session = run?.lockpick ?? null;
-    if (!run || !session || session.ownerId !== r.meta.entityId) return;
-    if (sessionId !== undefined && session.sessionId !== sessionId) return;
-    if (session.state !== 'IN_PROGRESS') return;
-
-    const result = this.lockpickBurnTry(session);
-    const spec = session.pages[session.pageIndex];
-    this.emit({
-      type: 'lockpickStep',
-      sessionId: session.sessionId,
-      col: session.col,
-      row: session.row,
-      page: session.pageIndex + 1,
-      pageCount: session.pages.length,
-      tries: session.triesLeft,
-      triesTotal: session.triesTotal,
-      result,
-      visible: visibleCells(spec, session.col, spec.tier.visibilityWindow),
-      pid: r.meta.entityId,
-    });
-    if (result === 'fail') this.lockpickFail(run, session);
   }
 
   lockpickAbort(pid?: number, sessionId?: string): void {
@@ -16974,6 +17006,7 @@ export class Sim {
       lootTier: s.lootTier,
       allowed: spec.tier.allowedActions.slice(),
       visible: visibleCells(spec, s.col, spec.tier.visibilityWindow),
+      stepTimeoutMs: ANTE_TO_STEP_TIMEOUT_MS[s.ante],
     };
   }
 

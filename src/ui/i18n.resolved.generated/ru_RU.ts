@@ -1780,6 +1780,7 @@ export const ru_RU: EnTranslations = {
     "triesOf": "Попытки {tries}/{total}",
     "triesOfAria": "Осталось попыток: {tries} из {total}",
     "ward": "Сувальда {col} / {total}",
+    "depthKeys": "Hotkeys set pick depth (Q/W/E/A/Z), not the ward number.",
     "withdraw": "Отступить (Esc)",
     "action": {
       "hardSet": "Сильный нажим",
@@ -6256,6 +6257,9 @@ export const ru_RU: EnTranslations = {
     "corpseName": "{name} (труп)",
     "dungeonExitName": "Выход из {name}",
     "dungeonPartyWarning": "{name} рассчитано на полную группу из {count} игроков. Продвигайтесь осторожно.",
-    "dungeonInstanceBusy": "Все копии {name} заняты. Попробуйте еще раз чуть позже."
+    "dungeonInstanceBusy": "Все копии {name} заняты. Попробуйте еще раз чуть позже.",
+    "delveLockedChestInteract": "Press F to pick the lock",
+    "delveRewardChestInteract": "Press F to claim spoils",
+    "delveSurfaceExitInteract": "Press F to climb"
   }
 };

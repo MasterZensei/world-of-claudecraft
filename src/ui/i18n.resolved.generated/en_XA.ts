@@ -1780,6 +1780,7 @@ export const en_XA: EnTranslations = {
     "triesOf": "[Ţŕíéš {tries}/{total}]",
     "triesOfAria": "[{tries} óƒ {total} ţŕíéš ļéƒţ]",
     "ward": "[Ŵáŕð {col} / {total}]",
+    "depthKeys": "[Ĥóţķéýš šéţ þíçķ ðéþţĥ (Ɋ/Ŵ/É/Á/Ž), ñóţ ţĥé ŵáŕð ñúɱƀéŕ.]",
     "withdraw": "[Ŵíţĥðŕáŵ (Éšç)]",
     "action": {
       "hardSet": "[Ĥáŕð Šéţ]",
@@ -6256,6 +6257,9 @@ export const en_XA: EnTranslations = {
     "corpseName": "[{name} (çóŕþšé)]",
     "dungeonExitName": "[{name} Éẋíţ]",
     "dungeonPartyWarning": "[{name} íš ɱéáñţ ƒóŕ á ƒúļļ þáŕţý óƒ {count}. Ţŕéáð çáŕéƒúļļý.]",
-    "dungeonInstanceBusy": "[Áļļ íñšţáñçéš óƒ {name} áŕé ƀúšý. Ţŕý áĝáíñ šóóñ.]"
+    "dungeonInstanceBusy": "[Áļļ íñšţáñçéš óƒ {name} áŕé ƀúšý. Ţŕý áĝáíñ šóóñ.]",
+    "delveLockedChestInteract": "[Þŕéšš Ƒ ţó þíçķ ţĥé ļóçķ]",
+    "delveRewardChestInteract": "[Þŕéšš Ƒ ţó çļáíɱ šþóíļš]",
+    "delveSurfaceExitInteract": "[Þŕéšš Ƒ ţó çļíɱƀ]"
   }
 };

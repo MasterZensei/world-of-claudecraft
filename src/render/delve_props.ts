@@ -547,6 +547,7 @@ function buildProceduralLockedChest(entityId: number): { group: THREE.Group; hei
 // ---------------------------------------------------------------------------
 function buildSurfaceExit(): { group: THREE.Group; height: number } {
   const group = new THREE.Group();
+  group.rotation.y = Math.PI; // face the player as they enter (steps ascend toward them)
 
   const stairMat = stoneMat(0x7a7470);
   const walledMat = stoneMat(0x5e5a56);
