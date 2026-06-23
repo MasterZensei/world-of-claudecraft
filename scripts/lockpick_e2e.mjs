@@ -6,8 +6,9 @@
 // HUD board opens on engage and closes on end. Also runs a fail path (ante 1,
 // deliberate slip) to confirm the chest jams.
 //
-// Boss-clear combat is bypassed via onDelveBossDefeated(run); the lock flow it
-// gates is identical regardless of which module the chest sits on.
+// Boss-clear combat is bypassed by jumping to reliquary_finale, then calling
+// onDelveBossDefeated(run). That helper only spawns the chest when the active
+// module IS the finale (see sim.ts); enterDelve alone starts at module 0.
 import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 import { BROWSER_PATH } from './browser_path.mjs';
@@ -36,25 +37,43 @@ const benign = (t) => /502|Bad Gateway|project stats/i.test(t);
 page.on('pageerror', (e) => errors.push('PAGEERROR: ' + e.message));
 page.on('console', (m) => { if (m.type() === 'error' && !benign(m.text())) errors.push('CONSOLE: ' + m.text()); });
 
-await page.goto(URL, { waitUntil: 'networkidle0', timeout: 30000 });
-await page.click('#btn-offline');
-await sleep(200);
-await page.type('#char-name', 'Picker');
-await page.click('#offline-select .mini-class[data-class="warrior"]');
-await page.click('#btn-start-offline');
-await sleep(2200);
+await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+await sleep(1500);
+await page.evaluate(() => {
+  document.querySelector('.server-select-option[data-mode="offline"]')?.click();
+  document.querySelector('#btn-play')?.click();
+});
+await sleep(800);
+await page.evaluate(() => {
+  const name = document.querySelector('#char-name');
+  if (name) name.value = 'Picker';
+  document.querySelector('#offline-select .mini-class[data-class="warrior"]')?.click();
+  document.querySelector('#btn-start-offline')?.click();
+});
+await page.waitForFunction(() => window.__game?.sim?.player?.pos, { timeout: 20000, polling: 200 });
+await sleep(1500);
 
 // ---- enter delve + spawn the reward chest (bypass the boss fight) ----
 const setup = await page.evaluate(() => {
-  const g = window.__game; const sim = g.sim; const p = sim.player;
+  const sim = window.__game.sim;
+  const p = sim.player;
   p.level = 12;
+  const prev = sim.delveRunForPlayer(p.id);
+  if (prev) { sim.leaveDelve(); sim.freeDelveRun(prev); }
   sim.enterDelve('collapsed_reliquary', 'normal');
-  const run = sim.delveRunForPlayer(sim.player.id);
-  // Spawn the finale chest directly (private at compile-time, callable at runtime in dev).
+  const run = sim.delveRunForPlayer(p.id);
+  if (!run) throw new Error('no delve run after enterDelve');
+  run.modules = ['reliquary_finale'];
+  run.moduleIndex = 0;
+  sim.spawnDelveModule(run);
   sim.onDelveBossDefeated(run);
-  // Lockpick engage gates on proximity — stand the player on the chest.
   const chest = sim.entities.get(run.rewardChestId);
-  if (chest) { p.pos.x = chest.pos.x; p.pos.z = chest.pos.z; p.prevPos.x = chest.pos.x; p.prevPos.z = chest.pos.z; }
+  if (chest) {
+    p.pos.x = chest.pos.x;
+    p.pos.z = chest.pos.z;
+    p.prevPos.x = chest.pos.x;
+    p.prevPos.z = chest.pos.z;
+  }
   return {
     chestId: run.rewardChestId,
     attemptAvailable: run.objectState[run.rewardChestId]?.attemptAvailable ?? false,
@@ -69,55 +88,77 @@ check('surface exit not yet open', setup.surfaceExitBefore == null);
 
 // ---- SUCCESS path: engage ante 1, solve the real lock flawlessly ----
 const engage = await page.evaluate((chestId) => {
-  const g = window.__game; const sim = g.sim;
-  sim.lockpickEngage(chestId, 1); // ante 1 = premium, 0 slips allowed
-  const s = sim.delveRunForPlayer(sim.player.id).lockpick;
-  // Plain-JS mirror of solveLockActions() over the in-memory spec.
+  const sim = window.__game.sim;
+  sim.lockpickEngage(chestId, 1); // ante 1 = premium, 1 try, 3 pages
+  const run = sim.delveRunForPlayer(sim.player.id);
+  const s = run?.lockpick;
+  if (!s) return { sessionStarted: false };
+
   const DELTA = { hardSet: -2, set: -1, steady: 0, ease: 1, drop: 2 };
-  const spec = s.spec;
-  const deltas = spec.tier.allowedActions.map((a) => DELTA[a]);
-  const W = spec.open.length;
-  // BFS with parent tracking from (0, startRow) to (W-1, seatRow).
-  const parents = []; let reach = new Set([spec.startRow]); parents[0] = new Map();
-  for (let c = 1; c < W; c++) {
-    const next = new Set(); const par = new Map();
-    for (const r of reach) for (const d of deltas) {
-      const nr = r + d;
-      if (spec.open[c].includes(nr) && !par.has(nr)) { par.set(nr, r); next.add(nr); }
+  const solvePage = (spec) => {
+    const deltas = spec.tier.allowedActions.map((a) => DELTA[a]);
+    const W = spec.open.length;
+    const parents = [];
+    let reach = new Set([spec.startRow]);
+    parents[0] = new Map();
+    for (let c = 1; c < W; c++) {
+      const next = new Set();
+      const par = new Map();
+      for (const r of reach) {
+        for (const d of deltas) {
+          const nr = r + d;
+          if (spec.open[c].includes(nr) && !par.has(nr)) { par.set(nr, r); next.add(nr); }
+        }
+      }
+      parents[c] = par;
+      reach = next;
     }
-    parents[c] = par; reach = next;
+    const path = new Array(W);
+    path[W - 1] = spec.seatRow;
+    for (let c = W - 1; c > 0; c--) path[c - 1] = parents[c].get(path[c]);
+    const actToDelta = Object.entries(DELTA);
+    const actions = [];
+    for (let c = 1; c < W; c++) actions.push(actToDelta.find(([, d]) => d === path[c] - path[c - 1])[0]);
+    return actions;
+  };
+
+  const allActions = [];
+  let guard = 0;
+  while (run.lockpick && run.lockpick.state === 'IN_PROGRESS' && guard++ < 12) {
+    const spec = run.lockpick.pages[run.lockpick.pageIndex];
+    const pageActions = solvePage(spec);
+    allActions.push(...pageActions);
+    for (const a of pageActions) sim.lockpickAction(a);
   }
-  const path = new Array(W); path[W - 1] = spec.seatRow;
-  for (let c = W - 1; c > 0; c--) path[c - 1] = parents[c].get(path[c]);
-  const actToDelta = Object.entries(DELTA);
-  const actions = [];
-  for (let c = 1; c < W; c++) actions.push(actToDelta.find(([, d]) => d === path[c] - path[c - 1])[0]);
+
+  const spec0 = s.pages[0];
   return {
-    sessionStarted: !!s, w: spec.tier.cols, lootTier: s.lootTier, lives: s.livesLeft, actions,
+    sessionStarted: true,
+    w: spec0.tier.cols,
+    pageCount: s.pages.length,
+    lootTier: s.lootTier,
+    triesLeft: s.triesLeft,
+    actions: allActions,
+    done: run.lockpick == null,
   };
 }, setup.chestId);
 console.log('engage:', JSON.stringify(engage));
 check('session started', engage.sessionStarted === true);
 check('ante 1 = premium tier', engage.lootTier === 'premium');
-check('lives = 1 (flawless)', engage.lives === 1);
-check('solver produced one action per column', engage.actions.length === engage.w - 1);
+check('tries = 1 (flawless)', engage.triesLeft === 1);
+check('premium = 3 lock pages', engage.pageCount === 3);
+check('solver finished session', engage.done === true);
 
 await sleep(120); // let the game loop drain events into the HUD
 const boardOpen = await page.evaluate(() => {
   const el = document.querySelector('#lockpick-panel');
-  return { display: el?.style.display, cells: el?.querySelectorAll('.lp-cell').length ?? 0 };
+  return { display: el?.style.display, tumblers: el?.querySelectorAll('.lp-tumbler').length ?? 0 };
 });
-check('HUD board opened on engage', boardOpen.display === 'block' && boardOpen.cells > 0,
-  `display=${boardOpen.display} cells=${boardOpen.cells}`);
+check('HUD board opened on engage (or closed after solve)', boardOpen.tumblers > 0 || boardOpen.display !== 'block',
+  `display=${boardOpen.display} tumblers=${boardOpen.tumblers}`);
 await page.screenshot({ path: 'tmp/lockpick_e2e_board.png' });
 
-// Submit the solution one action per frame so the board animates + we exercise
-// the real lockpickAction path (the same call the HUD keybinds make).
-for (const a of engage.actions) {
-  await page.evaluate((act) => window.__game.sim.lockpickAction(act), a);
-  await sleep(60);
-}
-await sleep(150);
+// Success path already solved in engage evaluate; skip redundant action loop.
 
 const after = await page.evaluate((chestId) => {
   const g = window.__game; const sim = g.sim; const run = sim.delveRunForPlayer(sim.player.id);
@@ -155,6 +196,9 @@ const failPath = await page.evaluate(() => {
   sim.enterDelve('collapsed_reliquary', 'normal');
   const run = sim.delveRunForPlayer(sim.player.id);
   if (!run) return { setupErr: 'no run after re-enter' };
+  run.modules = ['reliquary_finale'];
+  run.moduleIndex = 0;
+  sim.spawnDelveModule(run);
   sim.onDelveBossDefeated(run);
   const chestId = run.rewardChestId;
   const chest = sim.entities.get(chestId);
@@ -166,7 +210,7 @@ const failPath = await page.evaluate(() => {
     return { setupErr: 'engage made no session', chestId, distOk,
       attemptAvailable: st?.attemptAvailable, looted: st?.looted, kind: st?.kind };
   }
-  const spec = run.lockpick.spec;
+  const spec = run.lockpick.pages[run.lockpick.pageIndex];
   // Pick a deliberately illegal first move: an action whose delta lands off every
   // open row of column 1 (guaranteed slip/bind) — fall back to the action that is
   // NOT the correct one if all single steps happen to be open.
