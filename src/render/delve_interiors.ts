@@ -1,9 +1,19 @@
-// Delve module interior placement, v1 reuses the crypt KayKit kit.
+// Delve module interior placement: reuses the crypt KayKit kit but builds each
+// module's OWN delve layout and a per-module ember-themed dressing variant.
 import { DELVE_MODULES } from '../sim/data';
-import { type DelveModuleId } from '../sim/delve_layout';
-import { DungeonInteriors } from './dungeon';
+import { DELVE_MODULE_LAYOUTS, type DelveModuleId } from '../sim/delve_layout';
+import { DungeonInteriors, type DungeonInteriorVariant } from './dungeon';
 
-/** Build one delve module at a world origin (v1: crypt KayKit kit + delve layout). */
+// Each reliquary module dresses the shared crypt kit differently (ossuary
+// shelves, handbell alcoves, defaced saint colonnade, the boss bell-chamber).
+const DELVE_MODULE_VARIANT: Record<DelveModuleId, DungeonInteriorVariant> = {
+  reliquary_sunken_ossuary: 'delve_ossuary',
+  reliquary_bell_niche: 'delve_bell',
+  reliquary_saintless_hall: 'delve_hall',
+  reliquary_finale: 'delve_finale',
+};
+
+/** Build one delve module at a world origin (crypt KayKit kit + that module's delve layout). */
 export function buildDelveModule(
   dungeons: DungeonInteriors,
   moduleId: DelveModuleId,
@@ -12,11 +22,12 @@ export function buildDelveModule(
 ): Promise<void> {
   const mod = DELVE_MODULES[moduleId];
   const interior = mod?.interior ?? 'crypt';
-  // Delve origins sit at x≈4800 (past all overworld dungeon + arena bands).
-  // buildInterior derives layout and variant from interior+ox; at x≈4800 the
-  // crypt kit resolves to 'crypt' variant (blue-flame torches). Per-module
-  // reliquary dressing (ossuary / bell niche / saintless hall / finale) and the
-  // 'delve' ember-red torch variant require dungeon.ts to support those args;
-  // adapt this call once buildInterior exposes the extended signature.
-  return dungeons.buildInterior(interior, ox, oz);
+  // Pass the module's own layout so visible geometry matches the collision set
+  // sim/colliders.ts derives from the SAME layout. Falling back to the interior
+  // default (CRYPT_LAYOUT) was the source of the drifting walls/floor and the
+  // out-of-map gaps between modules. The 'delve' variant gives ember-red torches
+  // with per-module reliquary dressing.
+  const layout = DELVE_MODULE_LAYOUTS[moduleId];
+  const variant = DELVE_MODULE_VARIANT[moduleId] ?? 'delve_ossuary';
+  return dungeons.buildInterior(interior, ox, oz, { layout, variant });
 }

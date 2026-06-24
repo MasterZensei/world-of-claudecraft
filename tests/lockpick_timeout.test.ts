@@ -96,6 +96,19 @@ describe('lockpick per-step clock is enforced by the sim tick (server-authoritat
     expect(run.objectState[chestId].attemptAvailable).toBe(false); // chest jammed
   });
 
+  it('a jammed lockpick opens the surface exit so the player is never stranded', () => {
+    const sim = makeSim(7);
+    const { run, chestId } = enterFinale(sim);
+    sim.lockpickEngage(chestId, 1); // premium ante: a single try
+    expect(run.surfaceExitId).toBeNull(); // not open until the pick resolves
+    idle(sim, budgetTicks(sim) + 2); // let the try burn -> chest jams
+    expect(run.objectState[chestId].attemptAvailable).toBe(false);
+    // The boss is dead and the chest is lost, but the way out must still open.
+    expect(run.surfaceExitId).not.toBeNull();
+    expect(run.objectState[run.surfaceExitId!].kind).toBe('surface_exit');
+    expect(run.objectState[run.surfaceExitId!].open).toBe(true);
+  });
+
   it('survives idling right up to (but not past) the deadline', () => {
     const sim = makeSim(7);
     const { run, chestId } = enterFinale(sim);

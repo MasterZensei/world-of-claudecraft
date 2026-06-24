@@ -90,6 +90,8 @@ import {
   ARENA_SPAWN_B,
   ARENA_SPAWNS_A_2v2,
   ARENA_SPAWNS_B_2v2,
+  DUNGEON_WALL_X,
+  DUNGEON_WALL_HW,
 } from './dungeon_layout';
 import {
   createGroundObject,
@@ -15444,14 +15446,43 @@ export class Sim {
   ): { x: number; z: number } {
     const run = (isDelvePos(nx) || isDelvePos(e.pos.x)) ? this.delveRunForEntity(e) : undefined;
     const res = resolveMovement(this.cfg.seed, fromX, fromZ, nx, nz, r, ignoreFences, run?.modules);
-    return run ? this.clampDelveDoors(run, res.x, res.z, r) : res;
+    if (!run) return res;
+    const clamped = this.clampDelveModuleBounds(run, res.x, res.z, r);
+    return this.clampDelveDoors(run, clamped.x, clamped.z, r);
   }
 
   // Point resolution for mob wander / blocked checks, with the same delve layering.
   private resolveMovePoint(nx: number, nz: number, r: number, e: Entity): { x: number; z: number } {
     const run = (isDelvePos(nx) || isDelvePos(e.pos.x)) ? this.delveRunForEntity(e) : undefined;
     const res = resolvePosition(this.cfg.seed, nx, nz, r, false, run?.modules);
-    return run ? this.clampDelveDoors(run, res.x, res.z, r) : res;
+    if (!run) return res;
+    const clamped = this.clampDelveModuleBounds(run, res.x, res.z, r);
+    return this.clampDelveDoors(run, clamped.x, clamped.z, r);
+  }
+
+  // Confine an entity to the active module's interior box. Module-to-module
+  // travel is teleport-only (advanceDelveModule), so the 16u inter-module gap is
+  // never meant to be walkable: without this clamp the gap is an unsealed dead
+  // zone (no side walls) the player can slip into and walk out of the map, and
+  // it lets a freshly-transitioned player backtrack south into the prior room.
+  // Bounds come straight from the active module's own layout so they always
+  // match the room the player is actually standing in.
+  private clampDelveModuleBounds(run: DelveRun, x: number, z: number, r: number): { x: number; z: number } {
+    const moduleId = run.modules[run.moduleIndex] as DelveModuleId;
+    const layout = DELVE_MODULE_LAYOUTS[moduleId];
+    if (!layout) return { x, z };
+    const wallX = layout.wallX ?? DUNGEON_WALL_X;
+    const halfX = wallX - DUNGEON_WALL_HW - r; // inner wall face minus body radius
+    const zBase = this.delveModuleZOffset(run);
+    const localX = x - run.origin.x;
+    const localZ = z - (run.origin.z + zBase);
+    const clampedX = Math.max(-halfX, Math.min(halfX, localX));
+    // Front/back end walls are DUNGEON_WALL_HW thick at zMin/zMax; keep the body
+    // inside their inner faces.
+    const minZ = layout.zMin + DUNGEON_WALL_HW + r;
+    const maxZ = layout.zMax - DUNGEON_WALL_HW - r;
+    const clampedZ = Math.max(minZ, Math.min(maxZ, localZ));
+    return { x: clampedX + run.origin.x, z: clampedZ + run.origin.z + zBase };
   }
 
   // Closed portcullis doors block the full walkable aisle until all plates fire;
@@ -15854,8 +15885,9 @@ export class Sim {
     const layout = DELVE_MODULE_LAYOUTS[moduleId];
     const zBase = this.delveModuleZOffset(run);
     const dais = layout?.dais ?? { x: 0, z: 52 };
-    // Centre aisle, south of the dais, clear of the north sealed passage at zMax-6.
-    const chestLocalZ = dais.z - 9;
+    // Centre aisle, toward the entrance (south) edge of the dais and facing the
+    // approaching player, clear of the north surface-exit stairs at dais.z+6.
+    const chestLocalZ = dais.z - 14;
     const chestPos = this.groundPos(run.origin.x, run.origin.z + zBase + chestLocalZ);
     // Drop any stale module_exit (same z as dais / north passage) before placing the chest.
     for (const id of [...run.objectIds]) {
@@ -15865,8 +15897,8 @@ export class Sim {
       delete run.objectState[id];
     }
     const chest = this.createDelveObject(run, 'locked_chest', chestPos);
-    chest.facing = 0;
-    chest.prevFacing = 0;
+    chest.facing = Math.PI; // face south, toward the player entering from the aisle
+    chest.prevFacing = Math.PI;
     run.rewardChestId = chest.id;
     run.objectState[chest.id].attemptAvailable = true;
     if (!run.partyKey) return;
@@ -16862,6 +16894,10 @@ export class Sim {
         this.emit({ type: 'log', text: 'The last pick snaps. The lock jams. The chest is lost unless you clear the delve again.', color: '#f88', pid });
       }
     }
+    // The boss is already dead and the chest is now jammed: open the surface exit
+    // so a failed pick can never strand the party in a cleared delve. (Success
+    // opens it via lockpickSuccess; this mirrors that for the failure path.)
+    this.openDelveSurfaceExit(run);
     run.lockpick = null;
   }
 

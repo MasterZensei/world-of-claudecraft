@@ -36,11 +36,26 @@ const FLOOR_CELL = 4; // kit floor tiles are 4x4 at MODULE_SCALE 1
 const FLOOR_Y = -0.05; // tile tops sit 0.05 above origin; sink so tops land at y=0
 const PILLAR_XZ_SCALE = 1.3; // 1.5u kit pillar -> ~1.95u footprint (collider r=1)
 
-export type DungeonInteriorVariant = 'crypt' | 'bastion' | 'sanctum' | 'temple' | 'arena' | 'nythraxis';
+export type DungeonInteriorVariant =
+  | 'crypt' | 'bastion' | 'sanctum' | 'temple' | 'arena' | 'nythraxis'
+  // Collapsed Reliquary delve sub-themes (share the ember crypt-stone base, see
+  // isDelveVariant; differ only in wall-side props, clutter, and the dais).
+  | 'delve_ossuary' | 'delve_bell' | 'delve_hall' | 'delve_finale';
+
+/** True for any Collapsed Reliquary delve module variant. */
+export function isDelveVariant(variant: DungeonInteriorVariant): boolean {
+  return variant === 'delve_ossuary' || variant === 'delve_bell'
+    || variant === 'delve_hall' || variant === 'delve_finale';
+}
 type Variant = DungeonInteriorVariant;
 
 export function dungeonDaisHasRaisedPlatform(variant: DungeonInteriorVariant): boolean {
-  return variant !== 'arena' && variant !== 'nythraxis';
+  // Flat fighting floors: the arena, the Nythraxis raid, and the delve trash
+  // rooms (their "dais" marker is only the exit threshold). The delve finale
+  // keeps a raised boss stage for Deacon Varric.
+  if (variant === 'arena' || variant === 'nythraxis') return false;
+  if (variant === 'delve_ossuary' || variant === 'delve_bell' || variant === 'delve_hall') return false;
+  return true;
 }
 
 interface TorchColors {
@@ -58,6 +73,12 @@ const TORCH_COLORS: Record<Variant, TorchColors> = {
   // the Ashen Coliseum burns warm — amber braziers ringing the fighting sands
   arena: { flame: 0xffb24a, emissive: 0xcc5a14, light: 0xff9a3c },
   nythraxis: { flame: 0x8f5cff, emissive: 0x4b1c9a, light: 0x7b4dff },
+  // delve reliquaries burn with grave-ember red: warm coals over cold stone
+  delve_ossuary: { flame: 0xff7a3c, emissive: 0xcc3a14, light: 0xff6a3c },
+  delve_bell: { flame: 0xff7a3c, emissive: 0xcc3a14, light: 0xff6a3c },
+  delve_hall: { flame: 0xff7a3c, emissive: 0xcc3a14, light: 0xff6a3c },
+  // the bell-buried boss chamber burns hotter: brighter ember over the arena
+  delve_finale: { flame: 0xffa24a, emissive: 0xe04a18, light: 0xff7a3c },
 };
 
 // The Drowned Temple is flooded — a translucent, self-animating water sheet
@@ -408,13 +429,23 @@ export class DungeonInteriors {
     private fireLights: THREE.PointLight[],
   ) {}
 
-  async buildInterior(interior: string, ox: number, oz: number): Promise<void> {
+  async buildInterior(
+    interior: string,
+    ox: number,
+    oz: number,
+    opts?: { layout?: DungeonLayout; variant?: Variant },
+  ): Promise<void> {
     await ensureDungeonAssets();
-    const layout = interior === 'sanctum' ? SANCTUM_LAYOUT
-      : interior === 'temple' ? TEMPLE_LAYOUT
-        : interior === 'arena' ? ARENA_LAYOUT
-          : interior === 'nythraxis' ? NYTHRAXIS_LAYOUT : CRYPT_LAYOUT;
-    const variant = this.variantFor(interior, ox);
+    // Delve modules pass an explicit per-module layout so render geometry matches
+    // the SAME layout sim/colliders.ts derives collision from (what you see is
+    // what you collide with). Without it, every module fell back to CRYPT_LAYOUT
+    // while collision used the real delve footprint, drifting walls and floor.
+    const layout = opts?.layout
+      ?? (interior === 'sanctum' ? SANCTUM_LAYOUT
+        : interior === 'temple' ? TEMPLE_LAYOUT
+          : interior === 'arena' ? ARENA_LAYOUT
+            : interior === 'nythraxis' ? NYTHRAXIS_LAYOUT : CRYPT_LAYOUT);
+    const variant = opts?.variant ?? this.variantFor(interior, ox);
     const group = new THREE.Group();
     const p = new Placements();
     const arenaWalls = variant === 'arena' ? this.pendingArenaWalls(layout, ox, oz) : undefined;
@@ -681,6 +712,13 @@ export class DungeonInteriors {
         ['floor_dirt_large_rocky', 4], ['grate', 9], ['quad', 25],
       ], t);
     }
+    if (isDelveVariant(variant)) {
+      // collapsed reliquary: grave-dust over cracked flags, more dirt and rubble
+      return pickKind([
+        ['floor_tile_large', 54], ['floor_tile_large_rocks', 10], ['floor_dirt_large', 10],
+        ['floor_dirt_large_rocky', 8], ['quad', 18],
+      ], t);
+    }
     return pickKind([
       ['floor_tile_large', 70], ['floor_tile_large_rocks', 6], ['floor_dirt_large', 6],
       ['floor_dirt_large_rocky', 5], ['quad', 13],
@@ -716,7 +754,9 @@ export class DungeonInteriors {
   // 4u tile grid covering the room (x -24..24, z just past both end walls)
   private placeFloor(p: Placements, layout: DungeonLayout, variant: Variant): void {
     const quarter = Math.PI / 2;
-    const floorHalfX = layout.floorHalfX ?? 22;
+    // Default the floor to the inner wall face so wider rooms (delve |x|=25)
+    // are not left with a bare strip between the aisle floor and the side walls.
+    const floorHalfX = layout.floorHalfX ?? ((layout.wallX ?? DUNGEON_WALL_X) - 1);
     for (let z = layout.zMin - 2; z <= layout.zMax + 2; z += FLOOR_CELL) {
       for (let x = -floorHalfX; x <= floorHalfX; x += FLOOR_CELL) {
         let kind = this.floorKind(variant, hash2(x * 1.31, z));
@@ -760,6 +800,12 @@ export class DungeonInteriors {
         ['wall', 38], ['wall_pillar', 20], ['wall_cracked', 18], ['wall_arched', 12], ['wall_archedwindow_gated', 12],
       ], t);
     }
+    if (isDelveVariant(variant)) {
+      // long-sealed reliquary: heavily cracked masonry, the odd gated arch
+      return pickKind([
+        ['wall', 40], ['wall_pillar', 20], ['wall_cracked', 26], ['wall_arched', 9], ['wall_archedwindow_gated', 5],
+      ], t);
+    }
     return pickKind([
       ['wall', 50], ['wall_pillar', 22], ['wall_cracked', 14], ['wall_arched', 9], ['wall_archedwindow_gated', 5],
     ], t);
@@ -775,6 +821,10 @@ export class DungeonInteriors {
     if (variant === 'temple') {
       // pale temple hangings, the odd faded-blue choir banner
       return pickKind([['banner_white', 5], ['banner_thin_white', 4], ['banner_blue', 2]], t);
+    }
+    if (isDelveVariant(variant)) {
+      // tattered funereal hangings, mostly thin and faded
+      return pickKind([['banner_thin_white', 7], ['banner_white', 3]], t);
     }
     return pickKind([['banner_thin_white', 6], ['banner_white', 4]], t);
   }
@@ -817,7 +867,8 @@ export class DungeonInteriors {
   }
 
   private placePillarsAndTorches(group: THREE.Group, p: Placements, layout: DungeonLayout, variant: Variant): void {
-    const kind = variant === 'sanctum' || variant === 'temple' ? 'pillar_decorated' : 'pillar';
+    const kind = variant === 'sanctum' || variant === 'temple' || variant === 'delve_hall'
+      ? 'pillar_decorated' : 'pillar';
     const colors = TORCH_COLORS[variant];
     for (const pt of layout.pillars) {
       const faceAisle = pt.x < 0 ? Math.PI / 2 : -Math.PI / 2;
@@ -896,6 +947,22 @@ export class DungeonInteriors {
         if (hash2(t.z * 1.3, t.x) > 0.5) p.add('skull', t.x, 0, t.z - 1.6, hash2(t.x, t.z) * Math.PI * 2, 1.2);
         continue;
       }
+      if (variant === 'delve_ossuary') {
+        // burial shelves: stacked coffins with bone spill at their feet
+        p.add(r < 0.5 ? 'coffin' : 'coffin_decorated', t.x, 0, t.z, 0, [1.15, 1.35, 1.45]);
+        const sx = t.x < 0 ? 1 : -1;
+        p.add('ribcage', t.x + sx * 1.5, 0.4, t.z - 1.4, hash2(t.x, t.z) * Math.PI * 2, 1.5);
+        if (r > 0.45) p.add('skull', t.x + sx * 1.7, 0, t.z + TOMB_HD + 0.4, hash2(t.z, t.x) * Math.PI * 2, 1.25);
+        continue;
+      }
+      if (variant === 'delve_hall') {
+        // defaced saint statues set in wall niches: toppled markers, broken plaques
+        const face = t.x < 0 ? -Math.PI / 2 : Math.PI / 2;
+        p.add(r < 0.5 ? 'gravemarker_A' : 'gravestone', t.x, 0, t.z, face, 1.7);
+        p.add('plaque_candles', t.x, 0, t.z + (r < 0.5 ? 1.8 : -1.8), face, 1.4);
+        continue;
+      }
+      // crypt / delve_finale fallback: plain and decorated coffins
       const kind = r < 0.55 ? 'coffin' : 'coffin_decorated';
       p.add(kind, t.x, 0, t.z, 0, [1.1, 1.3, 1.4]);
       if (hash2(t.z * 1.9, t.x) > 0.55) {
@@ -909,6 +976,27 @@ export class DungeonInteriors {
   // (cap flush at |x|=6 so the visual never intrudes into the 10u passage),
   // plus a ritual arch spanning the centre passage.
   private placeStubs(p: Placements, stubs: WallStub[], variant: Variant): void {
+    if (variant === 'delve_bell') {
+      // Bell Niche: each stub is a solid pier (hw x hd OBB) flush against the
+      // side wall, dividing the deep handbell alcoves. Render the aisle-facing
+      // face so the visible pier matches the collider; the mass behind it sits
+      // against the side wall and is never seen from the aisle.
+      for (const s of stubs) {
+        const sign = s.x < 0 ? -1 : 1;
+        // aisle-facing edge is toward the centre (|x| = hw - ... ), i.e. s.x moved
+        // back toward x=0 by hw. The mass fills from here to the side wall.
+        const innerX = s.x - sign * s.hw; // collider aisle face (|x| = 5)
+        // Place the slab centreline 1u outside each collider face (same 1u wall
+        // half-thickness the side walls use) so the visible surface sits exactly
+        // on the collider and the player stands flush instead of clipping in.
+        p.add('wall', innerX + sign, 0, s.z, sign < 0 ? Math.PI / 2 : -Math.PI / 2, [s.hd / 2, MODULE_SCALE, MODULE_SCALE]);
+        // end faces closing the pier sides out to the side wall (length 2*hw along x)
+        for (const ez of [s.z - s.hd + 1, s.z + s.hd - 1]) {
+          p.add('wall', s.x, 0, ez, 0, [s.hw / 2, MODULE_SCALE, MODULE_SCALE]);
+        }
+      }
+      return;
+    }
     const archZ = new Set<number>();
     for (const s of stubs) {
       const sign = s.x < 0 ? -1 : 1;
@@ -957,6 +1045,7 @@ export class DungeonInteriors {
       if (variant === 'bastion') p.add('candle_triple', x, 0.6, z, hash2(x, z) * Math.PI, 1.3);
       else if (variant === 'sanctum') p.add(i % 2 ? 'skull_candle' : 'candle_triple', x, 0.6, z, hash2(x, z) * Math.PI, 1.4);
       else if (variant === 'temple') p.add(i % 2 ? 'candle_triple' : 'shrine_candles', x, 0.6, z, hash2(x, z) * Math.PI, 1.3);
+      else if (variant === 'delve_finale') p.add(i % 2 ? 'skull_candle' : 'candle_triple', x, 0.6, z, hash2(x, z) * Math.PI, 1.4);
       else p.add(i % 2 ? 'skull' : 'candle_lit', x, 0.6, z, hash2(x, z) * Math.PI, 1.3);
     }
     if (variant === 'bastion') {
@@ -971,6 +1060,14 @@ export class DungeonInteriors {
       p.add('coin_stack_medium', d.x - 2.0, 0.6, d.z + d.r - 3.4, -0.7, 1.5);
       p.add('skull_candle', d.x, 0.68, d.z, 0, 1.6); // the moon-idol at the altar's heart
     }
+    if (variant === 'delve_finale') {
+      // Deacon Varric's bell-chamber: low ribcage trophies flanking the south
+      // (entrance-facing) edge of the stage. The reward chest is a gameplay
+      // object the sim places centre-south, and the surface-exit stairs sit at
+      // the north edge: keep both clear, so no idol, hoard, or back-corner chest.
+      p.add('ribcage', d.x - 5.2, 0, d.z - d.r + 2.6, 0.6, 1.6);
+      p.add('skull_candle', d.x + 5.2, 0, d.z - d.r + 2.8, -0.5, 1.4);
+    }
   }
 
   // Bone piles / debris strewn along the aisle (legacy deterministic spots)
@@ -983,6 +1080,11 @@ export class DungeonInteriors {
       const z = 12 + i * (dense ? 10 : 9.5);
       if (variant === 'sanctum' && ((z > 60 && z < 74) || (z > 110 && z < 120))) continue; // waist walls
       if (variant === 'temple' && z > 60 && z < 72) continue; // single waist arch
+      // Delve clutter must stay locked to the per-module collider sets in
+      // delve_layout.ts (same sine formula): the Bell Niche skips the two spots
+      // that land inside its alcove piers; the Finale clears its north fighting ring.
+      if (variant === 'delve_bell' && (i === 2 || i === 5)) continue;
+      if (variant === 'delve_finale' && i > 3) continue;
       if (z > layout.zMax - 4) continue;
       const r = hash2(x, z);
       if (variant === 'bastion') {
@@ -1022,9 +1124,60 @@ export class DungeonInteriors {
       ? [[-19, 4], [19, 48], [-19, 95], [18, 150]]
       : variant === 'temple'
         ? [[-19, -10], [19, 24], [-19, 88], [18, 124]]
-        : [[-19, -13], [19, 6], [-18, 70], [19, 108]];
+        : isDelveVariant(variant)
+          ? [[-19, -8], [19, 18], [-19, 58], [18, 84]] // within the 110u delve room
+          : [[-19, -13], [19, 6], [-18, 70], [19, 108]];
     for (const [x, z] of rubble) {
       p.add('rubble_half', x < 0 ? -22 : 22, 0, z, x < 0 ? 0 : Math.PI, 1.1);
+    }
+
+    if (isDelveVariant(variant)) {
+      const edge = (layout.wallX ?? DUNGEON_WALL_X) - 1.6;
+      if (variant === 'delve_ossuary') {
+        // ossuary shelves: rows of graves and bone reliquaries hugging the walls
+        for (let z = layout.zMin + 22; z < layout.zMax - 10; z += 17) {
+          for (const side of [-1, 1]) {
+            const r = hash2(side * 5.1, z);
+            const kind = r < 0.4 ? 'grave_B' : r < 0.7 ? 'gravestone' : 'gravemarker_A';
+            p.add(kind, side * edge, 0, z, side < 0 ? Math.PI / 2 : -Math.PI / 2, 1.5);
+            if (r > 0.5) p.add('skull', side * (edge - 1.4), 0, z + 2.2, r * 6, 1.2);
+          }
+        }
+        p.add('shrine_candles', -edge, 0, layout.zMin + 4, Math.PI / 4, 1.5);
+        p.add('shrine', edge, 0, layout.zMax - 5, -Math.PI * 0.75, 1.5);
+        return;
+      }
+      if (variant === 'delve_bell') {
+        // choir plaques and candles lining the handbell alcoves
+        for (const z of [18, 47, 76]) {
+          p.add('plaque_candles', -edge, 0, z, Math.PI / 2, 1.45);
+          p.add('plaque_candles', edge, 0, z, -Math.PI / 2, 1.45);
+        }
+        p.add('gravestone', -3.4, 0, layout.dais.z + 4, Math.PI, 1.7);
+        p.add('gravestone', 3.4, 0, layout.dais.z + 4, Math.PI, 1.7);
+        return;
+      }
+      if (variant === 'delve_hall') {
+        // defaced colonnade: votive candles at the column bases, shrines at the ends
+        for (const pt of layout.pillars) {
+          if (hash2(pt.x, pt.z * 1.3) < 0.5) continue;
+          const dir = pt.x < 0 ? 1 : -1;
+          p.add('candle_triple', pt.x + dir * 1.9, 0, pt.z + 1.7, hash2(pt.z, pt.x) * Math.PI, 1.4);
+        }
+        p.add('shrine_candles', -edge, 0, layout.zMin + 5, Math.PI / 2, 1.5);
+        p.add('shrine', edge, 0, layout.zMax - 6, -Math.PI / 2, 1.5);
+        return;
+      }
+      // delve_finale: bell-chamber trophies and the boss's reliquary hoard south
+      for (let z = layout.zMin + 14; z < layout.dais.z - 16; z += 20) {
+        for (const side of [-1, 1]) {
+          const r = hash2(side * 9.2, z);
+          p.add(r < 0.5 ? 'ribcage' : 'gravestone', side * edge, 0, z, side < 0 ? Math.PI / 2 : -Math.PI / 2, 1.6);
+        }
+      }
+      p.add('shrine_candles', -edge, 0, layout.dais.z - 4, Math.PI / 2, 1.5);
+      p.add('shrine_candles', edge, 0, layout.dais.z - 4, -Math.PI / 2, 1.5);
+      return;
     }
 
     const wallEdge = (layout.wallX ?? DUNGEON_WALL_X) - 1.6; // just proud of the wall face

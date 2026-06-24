@@ -589,7 +589,9 @@ describe('delve reward chest + surface exit flow', () => {
     const zBase = (sim as any).delveModuleZOffset(run);
     const chest = sim.entities.get(run.rewardChestId!)!;
     const localZ = chest.pos.z - run.origin.z - zBase;
-    expect(localZ).toBe(layout.dais.z - 9);
+    // Sits toward the entrance (south) edge of the dais, facing the player.
+    expect(localZ).toBe(layout.dais.z - 14);
+    expect(chest.facing).toBe(Math.PI);
     expect(run.objectIds.some((id) => run.objectState[id]?.kind === 'module_exit')).toBe(false);
     expect(Math.hypot(chest.pos.x - run.origin.x, localZ - (layout.zMax - 6))).toBeGreaterThan(4);
   });
@@ -1058,3 +1060,60 @@ describe('Tessa percent-of-health heal + rank cap', () => {
   });
 });
 
+
+describe('delve module containment (no backtrack / no out-of-map escape)', () => {
+  const R = 0.5;
+
+  function activeModuleBounds(sim: Sim) {
+    const run = sim.delveRunForPlayer(sim.playerId)!;
+    const moduleId = run.modules[run.moduleIndex];
+    const layout = DELVE_MODULE_LAYOUTS[moduleId as keyof typeof DELVE_MODULE_LAYOUTS];
+    const zBase = delveModuleZOffset(run.modules, run.moduleIndex);
+    const wallX = layout.wallX ?? 23;
+    return {
+      run,
+      layout,
+      ox: run.origin.x,
+      oz: run.origin.z + zBase,
+      halfX: wallX - 1, // DUNGEON_WALL_HW
+    };
+  }
+
+  it('cannot walk sideways out through the side walls (no out-of-map escape)', () => {
+    const sim = makeSim('warrior');
+    enterReliquary(sim);
+    const b = activeModuleBounds(sim);
+    const p = sim.player;
+    // March hard into the east wall and well past it.
+    const res = (sim as any).resolveMove(p.pos.x, p.pos.z, b.ox + 200, p.pos.z, R, p);
+    expect(res.x).toBeLessThanOrEqual(b.ox + b.halfX - R + 1e-6);
+    expect(res.x).toBeGreaterThanOrEqual(b.ox - b.halfX + R - 1e-6);
+  });
+
+  it('cannot walk south out of the entrance room into the inter-module gap', () => {
+    const sim = makeSim('warrior');
+    enterReliquary(sim);
+    const b = activeModuleBounds(sim);
+    const p = sim.player;
+    // Drive far south (toward the previous-room / gap void).
+    const res = (sim as any).resolveMove(p.pos.x, p.pos.z, p.pos.x, b.oz - 300, R, p);
+    expect(res.z).toBeGreaterThanOrEqual(b.oz + b.layout.zMin + 1 + R - 1e-6);
+  });
+
+  it('after transitioning forward, cannot backtrack south into the previous room', () => {
+    const sim = makeSim('warrior');
+    enterReliquary(sim);
+    const run = sim.delveRunForPlayer(sim.playerId)!;
+    // Force-open and advance one module (transition is teleport-based).
+    expect(run.modules.length).toBeGreaterThan(1);
+    run.exitPortalOpen = true;
+    (sim as any).advanceDelveModule(run);
+    expect(run.moduleIndex).toBe(1);
+    const b = activeModuleBounds(sim);
+    const p = sim.player;
+    // The player is now in module 1; walking south must not re-enter module 0
+    // or the gap between them.
+    const res = (sim as any).resolveMove(p.pos.x, p.pos.z, p.pos.x, b.oz - 300, R, p);
+    expect(res.z).toBeGreaterThanOrEqual(b.oz + b.layout.zMin + 1 + R - 1e-6);
+  });
+});
