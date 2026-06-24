@@ -61,6 +61,7 @@ import {
   DUNGEON_LIST,
   DUNGEON_X_THRESHOLD,
   dungeonAt,
+  delveAt,
   isDelvePos,
   ITEMS,
   MOBS,
@@ -3851,14 +3852,23 @@ export class Hud {
         bossEngaged || inNythraxisArena || now - this.lastNythraxisCombatEventAt < 10000;
       const hub = currentZone.hub;
       const inHub = !inDungeon && Math.hypot(p.pos.x - hub.x, p.pos.z - hub.z) < hub.radius + 10;
+      // Delves sit past the dungeon x-threshold (so inDungeon is already true) but
+      // dungeonAt() returns null for them, so feed the delve id as the instance id:
+      // delves use the dungeon theme (dungeonMusicZoneForDungeon falls back to
+      // dungeon_hollow_crypt) and get the same fresh-phrasing reset on entry that
+      // real dungeons do, instead of relying on the accidental null fallback.
+      const inDelveBand = isDelvePos(p.pos.x);
+      const instanceId = inDelveBand
+        ? (delveAt(p.pos.x)?.id ?? 'collapsed_reliquary')
+        : (dungeon?.id ?? null);
       const zone = musicZoneForLocation(
         currentZone.id,
         currentZone.biome,
         inHub,
         inDungeon || inNythraxisArena,
-        dungeon?.id ?? null,
+        instanceId,
       );
-      const musicDungeonId = inDungeon || inNythraxisArena ? (dungeon?.id ?? null) : null;
+      const musicDungeonId = inDungeon || inNythraxisArena ? instanceId : null;
       if (shouldResetMusicForDungeonEntry(this.lastMusicDungeonId, musicDungeonId)) {
         music.resetForDungeonEntry(musicDungeonId);
       }
