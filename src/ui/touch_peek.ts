@@ -13,6 +13,17 @@ export const TOOLTIP_PEEK_MS = 950;
 
 export type TooltipTriggerKind = 'touch' | 'mouse' | 'focus';
 
+/**
+ * Whether a focus-triggered tooltip should show. Some touch browsers (Android
+ * Chrome) focus a button on tap, so on the touch UI an unguarded focus tooltip
+ * pops over the control row (the action bar) on EVERY press. There, only real
+ * keyboard focus (`:focus-visible`, e.g. an external keyboard) may show it;
+ * the desktop UI keeps the tooltip on any focus.
+ */
+export function shouldShowFocusTooltip(touchUi: boolean, keyboardFocus: boolean): boolean {
+  return !touchUi || keyboardFocus;
+}
+
 export class TouchPeekGuard {
   private peeked = false;
 

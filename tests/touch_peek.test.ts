@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { TouchPeekGuard, TOOLTIP_PEEK_MS } from '../src/ui/touch_peek';
+import { describe, expect, it } from 'vitest';
+import { shouldShowFocusTooltip, TOOLTIP_PEEK_MS, TouchPeekGuard } from '../src/ui/touch_peek';
 
 describe('TouchPeekGuard', () => {
   it('a quick tap (no peek) activates the control', () => {
@@ -54,5 +54,20 @@ describe('TouchPeekGuard', () => {
   it('exposes a sane default hold threshold', () => {
     expect(TOOLTIP_PEEK_MS).toBeGreaterThan(300);
     expect(TOOLTIP_PEEK_MS).toBeLessThan(2000);
+  });
+});
+
+describe('shouldShowFocusTooltip', () => {
+  it('suppresses the tooltip for tap focus on the touch UI (it would cover the action bar)', () => {
+    expect(shouldShowFocusTooltip(true, false)).toBe(false);
+  });
+
+  it('keeps the tooltip for keyboard focus on the touch UI (external keyboard, a11y)', () => {
+    expect(shouldShowFocusTooltip(true, true)).toBe(true);
+  });
+
+  it('keeps the tooltip for any focus on the desktop UI', () => {
+    expect(shouldShowFocusTooltip(false, false)).toBe(true);
+    expect(shouldShowFocusTooltip(false, true)).toBe(true);
   });
 });

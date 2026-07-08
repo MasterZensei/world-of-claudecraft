@@ -322,7 +322,7 @@ import { SwingTimerPainter } from './swing_timer_painter';
 import { localizeTalentTitle, roleLabel, tTalent } from './talent_i18n';
 import { TalentsWindow } from './talents_window';
 import type { PresetId, ThemeKnob, ThemeState } from './theme';
-import { TOOLTIP_PEEK_MS, TouchPeekGuard } from './touch_peek';
+import { shouldShowFocusTooltip, TOOLTIP_PEEK_MS, TouchPeekGuard } from './touch_peek';
 import { TutorialOverlay } from './tutorial';
 import { svgIcon } from './ui_icons';
 import { getUiScale } from './ui_scale';
@@ -3550,6 +3550,13 @@ export class Hud {
       const rect = el.getBoundingClientRect();
       showAt(rect.right, rect.top + rect.height / 2, 'focus');
     };
+    const keyboardFocus = () => {
+      try {
+        return el.matches(':focus-visible');
+      } catch {
+        return true; // selector unsupported: keep the accessible default
+      }
+    };
     el.addEventListener('mouseenter', () => {
       if (mobile()) return;
       const rect = el.getBoundingClientRect();
@@ -3568,7 +3575,12 @@ export class Hud {
       clearTouchTimer();
       this.tooltipEl.style.display = 'none';
     });
-    el.addEventListener('focusin', showNearElement);
+    el.addEventListener('focusin', () => {
+      // Tap focus on the touch UI must not pop the tooltip (it lands right on
+      // top of the action bar row); keyboard focus (:focus-visible) still does.
+      if (!shouldShowFocusTooltip(mobile(), keyboardFocus())) return;
+      showNearElement();
+    });
     el.addEventListener('focusout', () => {
       clearTouchTimer();
       this.tooltipEl.style.display = 'none';
@@ -3579,9 +3591,13 @@ export class Hud {
       // A fresh press: drop any stale peek and dismiss a lingering tooltip.
       this.peekGuard.press();
       this.tooltipEl.style.display = 'none';
-      const x = e.clientX,
-        y = e.clientY;
-      touchTimer = window.setTimeout(() => showAt(x, y, 'touch'), TOOLTIP_PEEK_MS);
+      const x = e.clientX;
+      touchTimer = window.setTimeout(() => {
+        // Anchor the peek to the control's top edge, not the finger: painted at
+        // the touch point, the box bottom lands inside the action bar row and
+        // covers the neighboring slots.
+        showAt(x, el.getBoundingClientRect().top, 'touch');
+      }, TOOLTIP_PEEK_MS);
     });
     el.addEventListener('pointerup', clearTouchTimer);
     el.addEventListener('pointercancel', clearTouchTimer);
