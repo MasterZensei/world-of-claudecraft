@@ -748,6 +748,149 @@ describe('MobileControls pointer lifecycle', () => {
     ]);
   });
 
+  it('recovers swipe rotation after a pinch finger lifts off the canvas (stale-pointer regression)', () => {
+    const { canvas, windowTarget } = installMobileControlDom();
+    const deltas: Array<{ dx: number; dy: number }> = [];
+    const zooms: number[] = [];
+    const input = {
+      setTouchMove: () => {},
+      clearTouchMove: () => {},
+      setTouchLook: () => {},
+      setTouchLookVector: () => {},
+      applyTouchLookDelta: (dx: number, dy: number) => {
+        deltas.push({ dx, dy });
+      },
+      zoomBy: (delta: number) => {
+        zooms.push(delta);
+      },
+    } as unknown as Input;
+
+    new MobileControls(input, mobileCallbacks()).start();
+
+    // two-finger pinch on the game view
+    canvas.dispatchEvent(
+      pointerEvent('pointerdown', {
+        pointerId: 41,
+        pointerType: 'touch',
+        clientX: 100,
+        clientY: 200,
+      }),
+    );
+    canvas.dispatchEvent(
+      pointerEvent('pointerdown', {
+        pointerId: 42,
+        pointerType: 'touch',
+        clientX: 200,
+        clientY: 200,
+      }),
+    );
+    // first finger lifts over the canvas itself
+    canvas.dispatchEvent(
+      pointerEvent('pointerup', {
+        pointerId: 41,
+        pointerType: 'touch',
+        clientX: 100,
+        clientY: 200,
+      }),
+    );
+    // second finger drifted over a HUD overlay before lifting: its pointerup
+    // targets the overlay, so the canvas never sees it, only the window does
+    // (bubbled). The pinch bookkeeping must not keep this finger forever.
+    windowTarget.dispatchEvent(
+      pointerEvent('pointerup', {
+        pointerId: 42,
+        pointerType: 'touch',
+        clientX: 200,
+        clientY: 200,
+      }),
+    );
+
+    // a later one-finger swipe must rotate the camera again, not zoom
+    canvas.dispatchEvent(
+      pointerEvent('pointerdown', {
+        pointerId: 43,
+        pointerType: 'touch',
+        clientX: 120,
+        clientY: 300,
+      }),
+    );
+    canvas.dispatchEvent(
+      pointerEvent('pointermove', {
+        pointerId: 43,
+        pointerType: 'touch',
+        clientX: 150,
+        clientY: 300,
+      }),
+    );
+
+    expect(deltas).toEqual([{ dx: 30, dy: 0 }]);
+    expect(zooms).toEqual([]);
+  });
+
+  it('releases pinch tracking when the app is backgrounded mid-pinch', () => {
+    const { canvas } = installMobileControlDom();
+    const deltas: Array<{ dx: number; dy: number }> = [];
+    const zooms: number[] = [];
+    const input = {
+      setTouchMove: () => {},
+      clearTouchMove: () => {},
+      setTouchLook: () => {},
+      setTouchLookVector: () => {},
+      applyTouchLookDelta: (dx: number, dy: number) => {
+        deltas.push({ dx, dy });
+      },
+      zoomBy: (delta: number) => {
+        zooms.push(delta);
+      },
+    } as unknown as Input;
+
+    new MobileControls(input, mobileCallbacks()).start();
+
+    // pinch in progress when the OS backgrounds the tab: no pointerup ever arrives
+    canvas.dispatchEvent(
+      pointerEvent('pointerdown', {
+        pointerId: 51,
+        pointerType: 'touch',
+        clientX: 100,
+        clientY: 200,
+      }),
+    );
+    canvas.dispatchEvent(
+      pointerEvent('pointerdown', {
+        pointerId: 52,
+        pointerType: 'touch',
+        clientX: 200,
+        clientY: 200,
+      }),
+    );
+    (document as unknown as { visibilityState: DocumentVisibilityState }).visibilityState =
+      'hidden';
+    (document as unknown as EventTarget).dispatchEvent(new Event('visibilitychange'));
+    (document as unknown as { visibilityState: DocumentVisibilityState }).visibilityState =
+      'visible';
+
+    // back in the foreground, a one-finger swipe must rotate the camera again
+    canvas.dispatchEvent(
+      pointerEvent('pointerdown', {
+        pointerId: 53,
+        pointerType: 'touch',
+        clientX: 120,
+        clientY: 300,
+      }),
+    );
+    canvas.dispatchEvent(
+      pointerEvent('pointermove', {
+        pointerId: 53,
+        pointerType: 'touch',
+        clientX: 150,
+        clientY: 300,
+      }),
+    );
+
+    expect(deltas).toEqual([{ dx: 30, dy: 0 }]);
+    expect(zooms).toEqual([]);
+  });
+
   it('cancels canvas swipe rotation when a second finger starts pinch zoom', () => {
     const { canvas } = installMobileControlDom();
     const deltas: Array<{ dx: number; dy: number }> = [];

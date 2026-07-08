@@ -311,22 +311,34 @@ export class MobileControls {
       this.onMoveMove(e);
       this.onCameraMove(e);
     });
+    // Window-level fallbacks: the pinch's second finger is never pointer-captured
+    // (only the first, swipe-look finger is), so when it lifts over one of the HUD
+    // overlays stacked on the canvas its pointerup targets the overlay and the
+    // canvas listeners never fire. Without these, that finger stays in
+    // pinchPointers forever and every later one-finger touch reads as a pinch:
+    // camera rotation dies while "zoom" keeps working off the stale point.
     window.addEventListener('pointerup', (e) => {
       this.onMoveEnd(e);
       this.onCameraEnd(e);
+      this.onPinchEnd(e);
+      this.onSwipeLookEnd(e);
     });
     window.addEventListener('pointercancel', (e) => {
       this.onMoveEnd(e);
       this.onCameraEnd(e);
+      this.onPinchEnd(e);
+      this.onSwipeLookEnd(e);
     });
     window.addEventListener('blur', () => {
       this.releaseMove();
       this.releaseCamera();
+      this.releasePinch();
     });
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') {
         this.releaseMove();
         this.releaseCamera();
+        this.releasePinch();
       }
     });
 
